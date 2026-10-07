@@ -1,33 +1,26 @@
-# Compiled class file
-*.class
+# =========================================================================
+# InvoiceMate - Comprehensive .gitignore
+# Java 21 / Spring Boot 3 / Web Frontend / Database & Future AI Services
+# =========================================================================
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
-# Maven target directory
+# Maven Build Target & Classes
 target/
 backend/target/
+*.class
 
-# IDE files
+# Embedded Database Files (H2 local db & locks)
+data/
+backend/data/
+*.mv.db
+*.trace.db
+*.lock.db
+
+# User Uploads & Media (Logos, Receipts, Generated PDFs)
+uploads/
+backend/uploads/
+*.pdf
+
+# IDEs & Editor Configuration
 .idea/
 *.iml
 *.iws
@@ -36,16 +29,62 @@ backend/target/
 .settings/
 .project
 .classpath
+*.sublime-project
+*.sublime-workspace
 
-# OS files
+# Operating System Files
 .DS_Store
 Thumbs.db
 desktop.ini
+$RECYCLE.BIN/
 
-# Environment variables
+# Environment Variables & Secrets (CRITICAL FOR FUTURE AI & API KEYS)
 .env
-.env.local
+.env.*
+!.env.example
+*.env
+api_keys.json
+credentials.json
+client_secret*.json
+*.pem
+*.key
 
-# Temp files
+# Future AI & Python Service Dependencies (Gemini, OpenAI, LangChain, etc.)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+*.onnx
+*.safetensors
+*.bin
+*.pt
+*.pth
+models/
+embeddings_cache/
+.cache/
+
+# Logs & Debugging Crash Dumps
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# Package Archives
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary & Swap Files
 *.tmp
 *.bak
+*.swp
+*.swo
