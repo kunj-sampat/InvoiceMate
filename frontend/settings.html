@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item active"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Account</span> &rsaquo; <span class="current">Settings &amp; Branding</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h2>Settings &amp; Branding</h2>
+                        <p>Configure business details, upload official logos, and manage invoicing defaults.</p>
+                    </div>
+                </div>
+
+                <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <!-- Business Profile Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Business Profile</h3>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="set-biz-name">Company / Business Name</label>
+                                <input type="text" id="set-biz-name" placeholder="Acme Technologies Pvt Ltd">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-biz-email">Business Email</label>
+                                <input type="email" id="set-biz-email" placeholder="billing@acme.com">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="set-biz-phone">WhatsApp / Phone</label>
+                                <input type="text" id="set-biz-phone" placeholder="+91 98765 43210">
+                            </div>
+                            <div class="form-group">
+                                <label for="logo-url-input">Logo URL (Optional)</label>
+                                <input type="text" id="logo-url-input" placeholder="https://...">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="set-biz-address">Registered Business Address</label>
+                            <textarea id="set-biz-address" rows="3" placeholder="Suite 401, Tech Park, Bangalore, KA, India"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button id="save-profile-btn" class="btn btn-primary">Save Profile</button>
+                        </div>
+                    </div>
+
+                    <!-- Business Logo & Branding Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Business Logo &amp; Branding</h3>
+                        </div>
+                        <p style="font-size: 13.5px; color: #64748b; margin-top: -8px; margin-bottom: 20px;">
+                            Upload your official business logo. It will automatically render on all invoice &amp; estimate templates (Modern, Business, Classic, Minimal).
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                            <div id="logo-preview-box" style="width: 130px; height: 90px; border: 2px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #f8fafc; overflow: hidden;">
+                                <img id="logo-preview-img" src="" alt="No logo" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;">
+                                <span id="logo-placeholder" style="font-size: 12px; color: #94a3b8; text-align: center; padding: 6px;">No logo uploaded</span>
+                            </div>
+                            <div style="flex: 1; min-width: 240px;">
+                                <label for="logo-upload" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px;">Choose Image File (PNG, JPG, SVG)</label>
+                                <input type="file" id="logo-upload" accept="image/*" style="font-size: 13px;">
+                                <div style="display: flex; gap: 10px; margin-top: 14px;">
+                                    <button type="button" id="upload-logo-btn" class="btn btn-secondary btn-sm">Upload Logo</button>
+                                    <button type="button" id="remove-logo-btn" class="btn btn-secondary btn-sm" style="color: #dc2626; display: none;">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Settings Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Invoice &amp; Estimate Configuration</h3>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="set-prefix">Invoice Prefix</label>
+                                <input type="text" id="set-prefix" value="INV-">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-next-num">Next Invoice Number</label>
+                                <input type="number" id="set-next-num" value="1001">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="set-default-gst">Default GST Rate (%)</label>
+                                <input type="number" id="set-default-gst" value="18">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-payment-terms">Default Payment Terms (Days)</label>
+                                <input type="number" id="set-payment-terms" value="30">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="set-heading">Default Invoice Heading</label>
+                            <input type="text" id="set-heading" value="TAX INVOICE">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="set-instructions">Payment Instructions (Bank, UPI, QR Details)</label>
+                            <textarea id="set-instructions" rows="3" placeholder="Bank: HDFC Bank | A/C: 1234567890 | IFSC: HDFC0001234 | UPI: acme@hdfcbank"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="set-default-notes">Default Notes &amp; Terms</label>
+                            <textarea id="set-default-notes" rows="3" placeholder="Goods once sold will not be taken back. Interest @ 18% p.a. charged after due date."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="set-footer">Invoice Footer Text</label>
+                            <input type="text" id="set-footer" placeholder="Thank you for choosing Acme Technologies!">
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button id="save-invoice-settings-btn" class="btn btn-primary">Save Invoice Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Appearance &amp; Accent</h3>
+                        </div>
+                        
+                        <div class="form-row" style="align-items: center;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="set-accent">Brand Accent Color</label>
+                                <input type="color" id="set-accent" value="#205646" style="width: 100px; height: 40px; padding: 2px; cursor: pointer;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Default Theme Mode</label>
+                                <div style="display: flex; gap: 16px; margin-top: 8px;">
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13.5px;">
+                                        <input type="radio" name="theme-pref" value="light" checked> Light Invoza
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13.5px;">
+                                        <input type="radio" name="theme-pref" value="dark"> Dark Ambient
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                            <button id="save-appearance-btn" class="btn btn-primary">Save Appearance</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

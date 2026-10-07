@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Detail - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/invoices.css">
+    <link rel="stylesheet" href="css/invoice-templates.css">
+    <link rel="stylesheet" href="css/print.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item active"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <a href="invoices.html">Invoices</a> &rsaquo; <span class="current" id="page-title">Invoice #Loading</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h2>Invoice Overview</h2>
+                        <p>Detailed breakdown, dispatch controls, live status, and transaction history.</p>
+                    </div>
+                    <div class="action-links" style="flex-wrap: wrap;">
+                        <button id="whatsapp-share-btn" class="btn btn-sm" style="background:#25d366; color:#ffffff; border:none; font-weight:600; display:inline-flex; align-items:center; gap:6px;">&#128172; WhatsApp</button>
+                        <button id="whatsapp-remind-btn" class="btn btn-secondary btn-sm" style="color:#059669; border-color:#059669; font-weight:600; display:none; align-items:center; gap:6px;">&#128276; Send Reminder</button>
+                        <a href="#" id="edit-invoice-btn" class="btn btn-secondary btn-sm">Edit</a>
+                        <button id="duplicate-invoice-btn" class="btn btn-secondary btn-sm">Duplicate</button>
+                        <button id="print-invoice-btn" class="btn btn-secondary btn-sm">Print</button>
+                        <button id="download-pdf-btn" class="btn btn-secondary btn-sm">Download PDF</button>
+                        <button id="delete-invoice-btn" class="btn btn-secondary btn-sm" style="color: var(--color-danger); border-color: var(--color-danger);">Delete</button>
+                    </div>
+                </div>
+
+                <div class="invoice-detail-layout">
+                    <!-- Invoice Template Render -->
+                    <div class="invoice-detail-main">
+                        <div class="invoice-preview" id="invoice-preview">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Sidebar Controls & Summaries -->
+                    <div class="invoice-detail-sidebar">
+                        <!-- Payment Summary -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Payment Summary</h3>
+                            </div>
+                            <div class="totals-section" style="margin-top: 8px; border-top: none; padding-top: 0;">
+                                <div class="total-row">
+                                    <span>Total Amount</span>
+                                    <span id="summary-total">&#8377;0.00</span>
+                                </div>
+                                <div class="total-row">
+                                    <span>Amount Paid</span>
+                                    <span id="summary-paid" style="color: var(--color-success);">&#8377;0.00</span>
+                                </div>
+                                <div class="total-row grand-total">
+                                    <span>Remaining Balance</span>
+                                    <span id="summary-remaining">&#8377;0.00</span>
+                                </div>
+                            </div>
+                            <button id="record-payment-btn" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Record Payment</button>
+                        </div>
+
+                        <!-- Payment History -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Payment History</h3>
+                            </div>
+                            <div id="payments-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Activity Timeline -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Activity Timeline</h3>
+                            </div>
+                            <ul class="timeline-list" id="activity-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Smart Reminders -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>WhatsApp Reminder</h3>
+                            </div>
+                            <button id="reminder-btn" class="btn btn-secondary btn-sm" style="margin-bottom: 12px; width: 100%;">Generate Friendly Reminder</button>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <textarea id="reminder-text" readonly style="min-height: 120px; font-size: 13px;"></textarea>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button id="copy-reminder-btn" class="btn btn-secondary btn-sm" style="flex: 1;">Copy</button>
+                                <button id="copy-whatsapp-btn" class="btn btn-primary btn-sm" style="flex: 1; background-color: #25D366; border-color: #25D366;">WhatsApp</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Record Payment</h3>
+                <button class="modal-close" id="close-payment-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="payment-amount">Amount Received (&#8377;)</label>
+                <input type="number" id="payment-amount" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="payment-date">Date</label>
+                <input type="date" id="payment-date">
+            </div>
+            <div class="form-group">
+                <label for="payment-method">Payment Method</label>
+                <select id="payment-method">
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="UPI">UPI / QR Code</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="payment-notes">Notes / Transaction Reference</label>
+                <textarea id="payment-notes" placeholder="UTR number, transaction ID, bank reference..."></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button id="cancel-payment-btn" class="btn btn-secondary">Cancel</button>
+                <button id="save-payment-btn" class="btn btn-primary">Save Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/invoice-detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+
+    <!-- 3D Pearlescent Background Sphere -->
+    <div class="auth-bg-sphere"></div>
+
+    <!-- Floating Frosted Glass Container -->
+    <div class="auth-glass-container" style="max-width: 470px;">
+        
+        <div class="auth-header">
+            <h1 class="auth-header-title">Create your account</h1>
+            <p class="auth-header-sub">Start managing invoicing and estimates professionally.</p>
+        </div>
+
+        <!-- Social Quick Setup -->
+        <div class="auth-social-row">
+            <button type="button" class="btn-social-pill" onclick="fillQuickSignup()">
+                <span class="social-icon">&#127760;</span>
+                <span>Sign up with Google</span>
+            </button>
+            <button type="button" class="btn-social-pill" onclick="fillQuickSignup()">
+                <span class="social-icon">&#63743;</span>
+                <span>Sign up with Apple</span>
+            </button>
+        </div>
+
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="error-msg" class="auth-error-banner"></div>
+
+        <!-- Form -->
+        <form id="register-form">
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="full-name">Full Name *</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="text" id="full-name" class="auth-input-pill" placeholder="e.g. Alex Morgan" required autocomplete="name">
+                </div>
+            </div>
+
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="business-name">Company / Business Name *</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="text" id="business-name" class="auth-input-pill" placeholder="e.g. Morgan Studios Pvt Ltd" required>
+                </div>
+            </div>
+
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="email">Work Email *</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="email" id="email" class="auth-input-pill" placeholder="alex@morganstudios.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="password">Password *</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="password" id="password" class="auth-input-pill" placeholder="Min. 6 characters" required autocomplete="new-password">
+                    <button type="button" class="auth-eye-btn" id="toggle-password" title="Show/hide password">&#128065;</button>
+                </div>
+            </div>
+
+            <div class="auth-options-row" style="margin-bottom: 20px;">
+                <label class="auth-checkbox-label">
+                    <input type="checkbox" id="terms-agree" required checked>
+                    <span>I agree to the Terms of Service &amp; Privacy Policy</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-pill-submit" id="submit-btn">
+                <span>Create Account</span>
+                <span class="btn-pill-arrow-notch">&rsaquo;</span>
+            </button>
+        </form>
+
+        <div class="auth-bottom-switch">
+            Already have an account? <a href="login.html">Log In</a>
+        </div>
+
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+        // Password toggle
+        const toggleBtn = document.getElementById('toggle-password');
+        const passInput = document.getElementById('password');
+        if (toggleBtn && passInput) {
+            toggleBtn.addEventListener('click', () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                toggleBtn.innerHTML = isPass ? '&#128064;' : '&#128065;';
+            });
+        }
+
+        function fillQuickSignup() {
+            const rand = Math.floor(100 + Math.random() * 900);
+            document.getElementById('full-name').value = 'Jordan Miller';
+            document.getElementById('business-name').value = 'Miller Design Studio';
+            document.getElementById('email').value = `jordan${rand}@millerstudio.com`;
+            document.getElementById('password').value = 'securepass123';
+            if (typeof showToast === 'function') showToast('Quick details prefilled! Click Create Account.', 'info');
+        }
+
+        // Handle Register Submission
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('full-name').value.trim();
+            const businessName = document.getElementById('business-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
+            const submitBtn = document.getElementById('submit-btn');
+
+            errorDiv.style.display = 'none';
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.querySelector('span:first-child').textContent = 'Creating account...';
+
+            try {
+                const res = await apiRequest('POST', '/api/auth/register', {
+                    fullName,
+                    businessName,
+                    email,
+                    password
+                });
+
+                if (res && res.token) {
+                    localStorage.setItem('token', res.token);
+                    localStorage.setItem('userName', res.fullName || fullName);
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('businessName', businessName);
+
+                    if (typeof showToast === 'function') showToast('Account created successfully! Welcome to InvoiceMate.', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
+                } else {
+                    throw new Error('Registration failed. Please try again.');
+                }
+            } catch (err) {
+                errorDiv.textContent = err.message || 'Registration failed. Email may already be in use.';
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span:first-child').textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>

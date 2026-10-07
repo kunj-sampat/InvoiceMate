@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimates - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/invoices.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item active"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span class="current">Estimates</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h1>Estimates &amp; Quotes</h1>
+                        <p>Create quotes and proposals that can convert into invoices with 1 click.</p>
+                    </div>
+                    <a href="create-estimate.html" class="btn btn-primary">+ New Estimate</a>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="label">Total Estimates</div>
+                        <div class="value" id="est-total-count">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Accepted</div>
+                        <div class="value" id="est-accepted-count" style="color:#059669;">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Pending</div>
+                        <div class="value" id="est-pending-count" style="color:#d97706;">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Total Value</div>
+                        <div class="value" id="est-total-value">&#8377;0.00</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <div class="form-group" style="flex:2;">
+                        <label for="estimate-search">Search Estimates</label>
+                        <input type="text" id="estimate-search" placeholder="Search by estimate # or client...">
+                    </div>
+                    <div class="form-group">
+                        <label for="estimate-status-filter">Status</label>
+                        <select id="estimate-status-filter">
+                            <option value="">All Statuses</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="SENT">Sent</option>
+                            <option value="ACCEPTED">Accepted</option>
+                            <option value="DECLINED">Declined</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button id="apply-estimate-filters" class="btn btn-secondary">Filter</button>
+                    </div>
+                </div>
+
+                <!-- Estimates Table -->
+                <div class="invoza-card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estimate #</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Valid Until</th>
+                                    <th style="text-align: right;">Amount (&#8377;)</th>
+                                    <th style="text-align: center;">Status</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estimates-body">
+                                <tr><td colspan="7" style="text-align:center; padding: 32px; color: #94a3b8;">Loading estimates...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/estimates.js"></script>
+</body>
+</html>

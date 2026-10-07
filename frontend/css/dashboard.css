@@ -1,0 +1,1159 @@
+/* ==========================================================================
+   INVOZA DASHBOARD THEME (Matching Reference media_1791314076484.png)
+   Atmospheric frosted glass canvas, 4 stat cards with SVG visuals,
+   dual-spline chart, AI prompt maker, Quick Action, and Honeycomb Lifecycle.
+   ========================================================================== */
+
+/* Atmospheric Backdrop */
+body.invoza-theme {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(191, 219, 254, 0.45) 0%, rgba(219, 234, 254, 0.25) 35%, transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(167, 243, 208, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(187, 247, 208, 0.25) 0%, transparent 50%),
+    linear-gradient(180deg, #dbeafe 0%, #e2e8f0 40%, #f0fdf4 80%, #dcfce7 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+body.invoza-theme.dark {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.4) 0%, transparent 70%),
+    linear-gradient(180deg, #090d16 0%, #0f172a 50%, #0b1324 100%);
+  color: #f1f5f9;
+}
+
+/* Floating Frosted Glass Window Container */
+.invoza-app-window {
+  max-width: 1540px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 25px 60px -15px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(226, 232, 240, 0.6);
+  display: flex;
+  min-height: calc(100vh - 32px);
+  overflow: hidden;
+  position: relative;
+}
+
+body.invoza-theme.dark .invoza-app-window {
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(51, 65, 85, 0.6);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+.invoza-sidebar {
+  width: 250px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px 20px 18px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+body.invoza-theme.dark .invoza-sidebar {
+  background: #0d1526;
+  border-right-color: #1e293b;
+}
+
+.invoza-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-left: 6px;
+}
+
+.invoza-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.invoza-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .invoza-brand-name { color: #f8fafc; }
+
+/* Sidebar Search Box */
+.invoza-search-box {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.invoza-search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 34px 9px 34px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+body.invoza-theme.dark .invoza-search-box input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.invoza-search-box input:focus {
+  border-color: #205646;
+  box-shadow: 0 0 0 3px rgba(32, 86, 70, 0.12);
+}
+
+.invoza-search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.invoza-search-kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 10px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+body.invoza-theme.dark .invoza-search-kbd {
+  background: #334155;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+/* Navigation Menu */
+.invoza-nav-group {
+  margin-bottom: 20px;
+}
+
+.invoza-nav-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0 0 8px 8px;
+}
+
+.invoza-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.invoza-nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.invoza-nav-item a:hover {
+  background: #edf2f7;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .invoza-nav-item a { color: #94a3b8; }
+body.invoza-theme.dark .invoza-nav-item a:hover { background: #1e293b; color: #f8fafc; }
+
+/* Active Menu Item (Solid black/charcoal pill from screenshot) */
+.invoza-nav-item.active a {
+  background: #111827;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+body.invoza-theme.dark .invoza-nav-item.active a {
+  background: #205646;
+  color: #ffffff !important;
+}
+
+.invoza-nav-icon {
+  font-size: 15px;
+  width: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.85;
+}
+
+.invoza-nav-item.active .invoza-nav-icon { opacity: 1; color: #ffffff; }
+
+/* Sidebar User Footer */
+.invoza-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.invoza-theme.dark .invoza-sidebar-footer { border-top-color: #1e293b; }
+
+.invoza-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.invoza-user-pill:hover { background: #e2e8f0; }
+body.invoza-theme.dark .invoza-user-pill:hover { background: #1e293b; }
+
+.invoza-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #205646 0%, #10b981 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.invoza-user-meta { flex: 1; min-width: 0; }
+.invoza-user-meta .name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.invoza-theme.dark .invoza-user-meta .name { color: #f8fafc; }
+.invoza-user-meta .sub { font-size: 11px; color: #94a3b8; }
+
+.invoza-btn-signout {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.invoza-btn-signout:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+/* ==========================================================================
+   MAIN WORKSPACE AREA
+   ========================================================================== */
+.invoza-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fbfcfd;
+  overflow-y: auto;
+  max-height: calc(100vh - 32px);
+}
+
+body.invoza-theme.dark .invoza-main-area {
+  background: #0f172a;
+}
+
+/* Top Breadcrumb + Icon Buttons Header */
+.invoza-top-header {
+  padding: 20px 32px 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.invoza-breadcrumb {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invoza-breadcrumb .current {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+body.invoza-theme.dark .invoza-breadcrumb .current { color: #f8fafc; }
+
+.invoza-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invoza-circle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+body.invoza-theme.dark .invoza-circle-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.invoza-circle-btn:hover {
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.invoza-notification-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.invoza-top-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   WELCOME ROW & TOOLBAR
+   ========================================================================== */
+.invoza-welcome-row {
+  padding: 0 32px 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.invoza-welcome-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .invoza-welcome-title { color: #f8fafc; }
+
+.invoza-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invoza-pill-select {
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+body.invoza-theme.dark .invoza-pill-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.invoza-date-pill {
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.invoza-theme.dark .invoza-date-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* Deep Forest Green "Export CSV" Button */
+.btn-export-csv {
+  padding: 8px 18px;
+  border-radius: 10px;
+  background: #205646;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(32, 86, 70, 0.25);
+}
+
+.btn-export-csv:hover {
+  background: #184336;
+  box-shadow: 0 6px 16px rgba(32, 86, 70, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   4 TOP STAT CARDS
+   ========================================================================== */
+.invoza-stats-grid {
+  padding: 0 32px 22px 32px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.invoza-stat-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 18px;
+  padding: 18px 20px 14px 20px;
+  box-shadow: 0 4px 16px -3px rgba(15, 23, 42, 0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.invoza-theme.dark .invoza-stat-card {
+  background: #162032;
+  border-color: #1e293b;
+  box-shadow: 0 4px 16px -3px rgba(0, 0, 0, 0.3);
+}
+
+.invoza-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+}
+
+.invoza-stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.invoza-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.invoza-card-dots {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.invoza-card-dots:hover { color: #334155; }
+
+.invoza-stat-mid {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.invoza-stat-value {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+body.invoza-theme.dark .invoza-stat-value { color: #f8fafc; }
+
+/* Visual Mini Graphics Container */
+.invoza-stat-graphic {
+  width: 72px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.invoza-stat-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+body.invoza-theme.dark .invoza-stat-bottom { border-top-color: #1e293b; }
+
+.invoza-info-icon {
+  color: #cbd5e1;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.invoza-trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trend-badge-green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+body.invoza-theme.dark .trend-badge-green {
+  background: rgba(5, 150, 105, 0.2);
+  color: #34d399;
+}
+
+/* ==========================================================================
+   MAIN DASHBOARD GRID LAYOUT (Left 73% / Right 27%)
+   ========================================================================== */
+.invoza-content-grid {
+  padding: 0 32px 32px 32px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.invoza-left-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Upper Two Cards: Revenue Overview + AI Invoice Maker */
+.invoza-upper-dual {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 20px;
+}
+
+/* 1. Revenue Overview Card */
+.invoza-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 18px -3px rgba(15, 23, 42, 0.04);
+}
+
+body.invoza-theme.dark .invoza-card {
+  background: #162032;
+  border-color: #1e293b;
+  box-shadow: 0 4px 18px -3px rgba(0, 0, 0, 0.3);
+}
+
+.invoza-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.invoza-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .invoza-card-title { color: #f8fafc; }
+
+.invoza-rev-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.invoza-rev-amount {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invoza-rev-amount .big-num {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .invoza-rev-amount .big-num { color: #f8fafc; }
+
+.invoza-rev-amount .growth {
+  font-size: 12px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.invoza-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.dot-subscription { background: #e06d53; }
+.dot-invoice { background: #205646; }
+
+/* Spline Canvas Container with Interactive Tooltip */
+.invoza-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  margin-bottom: 8px;
+}
+
+.invoza-chart-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.chart-tooltip-floating {
+  position: absolute;
+  top: 25px;
+  left: 60%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 10;
+  min-width: 130px;
+}
+
+body.invoza-theme.dark .chart-tooltip-floating {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.chart-tooltip-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 3px;
+}
+
+body.invoza-theme.dark .chart-tooltip-title { color: #f8fafc; border-bottom-color: #334155; }
+
+.chart-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* 2. AI Invoice Maker Card */
+.invoza-ai-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.invoza-ai-tabs {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 14px;
+}
+
+body.invoza-theme.dark .invoza-ai-tabs { background: #0f172a; }
+
+.invoza-ai-tab {
+  flex: 1;
+  text-align: center;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.invoza-ai-tab.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+body.invoza-theme.dark .invoza-ai-tab.active {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.invoza-ai-textarea {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 110px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  color: #1e293b;
+  resize: none;
+  font-family: inherit;
+  outline: none;
+  background: #fbfcfd;
+  transition: border-color 0.15s ease;
+}
+
+body.invoza-theme.dark .invoza-ai-textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.invoza-ai-textarea:focus {
+  border-color: #205646;
+  background: #ffffff;
+}
+
+.invoza-ai-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.invoza-word-counter {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.btn-ai-generate {
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: #205646;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s ease;
+  box-shadow: 0 3px 10px rgba(32, 86, 70, 0.2);
+}
+
+.btn-ai-generate:hover {
+  background: #184336;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   RECENT INVOICE TABLE (Lower area of Left Stack)
+   ========================================================================== */
+.invoza-table-card {
+  padding: 20px 22px;
+}
+
+.invoza-table-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.invoza-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.invoza-recent-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoza-recent-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+body.invoza-theme.dark .invoza-recent-table th {
+  border-bottom-color: #1e293b;
+  color: #94a3b8;
+}
+
+.invoza-recent-table th .sort-icon {
+  color: #cbd5e1;
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+.invoza-recent-table td {
+  padding: 13px 14px;
+  font-size: 13px;
+  color: #1e293b;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+}
+
+body.invoza-theme.dark .invoza-recent-table td {
+  border-bottom-color: #1a2436;
+  color: #f1f5f9;
+}
+
+.invoza-recent-table tr:hover td {
+  background: #f8fafc;
+}
+
+body.invoza-theme.dark .invoza-recent-table tr:hover td {
+  background: #1a2538;
+}
+
+.invoza-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  cursor: pointer;
+  accent-color: #205646;
+}
+
+.invoza-client-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.invoza-client-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Status Badges */
+.status-pill-pending {
+  display: inline-flex;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.status-pill-success {
+  display: inline-flex;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #059669;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.status-pill-danger {
+  display: inline-flex;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.status-pill-draft {
+  display: inline-flex;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   RIGHT COLUMN (Quick Action + Invoice Lifecycle Honeycomb)
+   ========================================================================== */
+.invoza-right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Quick Action Card */
+.invoza-qa-card {
+  padding: 20px 22px;
+}
+
+.invoza-qa-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.invoza-qa-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 6px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-decoration: none;
+  color: #1e293b;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+body.invoza-theme.dark .invoza-qa-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.invoza-qa-btn:hover {
+  background: #ffffff;
+  border-color: #205646;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+body.invoza-theme.dark .invoza-qa-btn:hover {
+  background: #1e293b;
+  border-color: #10b981;
+}
+
+.invoza-qa-icon {
+  font-size: 18px;
+}
+
+/* Invoice Lifecycle Card with Honeycomb */
+.invoza-lifecycle-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  flex: 1;
+}
+
+.invoza-honeycomb-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.invoza-honeycomb-svg {
+  width: 250px;
+  height: 250px;
+  display: block;
+}
+
+.invoza-lifecycle-legend {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+body.invoza-theme.dark .invoza-lifecycle-legend { border-top-color: #1e293b; }
+
+.lifecycle-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.lifecycle-legend-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.lifecycle-legend-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+body.invoza-theme.dark .lifecycle-legend-value { color: #f8fafc; }
+
+.lifecycle-trend-up {
+  color: #059669;
+  font-size: 11px;
+}
+
+.lifecycle-trend-down {
+  color: #ef4444;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .invoza-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoza-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .invoza-app-window {
+    flex-direction: column;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  .invoza-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .invoza-upper-dual {
+    grid-template-columns: 1fr;
+  }
+  .invoza-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

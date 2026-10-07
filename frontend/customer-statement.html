@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Statement - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <style>
+        .statement-header-card {
+            background: linear-gradient(135deg, #111827 0%, #205646 100%);
+            color: #ffffff;
+            padding: 30px 34px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(32, 86, 70, 0.2);
+        }
+        .statement-header-card h2 { margin: 0 0 4px; font-size: 24px; font-weight: 800; }
+        .statement-header-card p  { margin: 2px 0; opacity: 0.85; font-size: 13.5px; }
+
+        .stmt-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stmt-stat-card {
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 18px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 16px -3px rgba(15, 23, 42, 0.04);
+        }
+
+        .stmt-stat-card .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .stmt-stat-card .amount {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .balance-negative { color: #dc2626; font-weight: 700; }
+        .balance-zero     { color: #059669; font-weight: 700; }
+        .balance-positive { color: #d97706; font-weight: 700; }
+
+        @media print {
+            body { background: #fff !important; padding: 0 !important; }
+            .invoza-sidebar, .invoza-top-header, .filter-bar, .no-print, .btn { display: none !important; }
+            .invoza-app-window { border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+            .invoza-page-content { padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar no-print">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item active"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header no-print">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span class="current">Customer Statement</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header no-print">
+                    <div>
+                        <h1>Customer Statement</h1>
+                        <p>Generate transaction ledgers, running balances, and share via WhatsApp or PDF.</p>
+                    </div>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar no-print">
+                    <div class="form-group" style="flex:2; margin:0;">
+                        <label for="customer-select">Select Client</label>
+                        <select id="customer-select">
+                            <option value="">Select a client...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="from-date">From Date</label>
+                        <input type="date" id="from-date">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="to-date">To Date</label>
+                        <input type="date" id="to-date">
+                    </div>
+                    <div style="display:flex; align-items:flex-end; gap:8px;">
+                        <button class="btn btn-primary" onclick="loadStatement()">Generate</button>
+                        <button class="btn btn-secondary" onclick="window.print()">Print / PDF</button>
+                        <button class="btn btn-secondary" id="share-wa-stmt-btn" onclick="shareStatementWhatsApp()" style="background:#25d366; color:#fff; border-color:#25d366;">
+                            &#128242; WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statement Output View -->
+                <div id="statement-output" style="display:none;">
+                    <div class="statement-header-card">
+                        <div>
+                            <h2 id="stmt-customer-name">Client Name</h2>
+                            <p id="stmt-customer-email"></p>
+                            <p id="stmt-customer-phone"></p>
+                            <p id="stmt-customer-address"></p>
+                            <div style="font-size:13px; opacity:0.8; margin-top:8px;" id="stmt-period"></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:12px; letter-spacing:1px; opacity:0.75;">ACCOUNT STATEMENT</div>
+                            <div style="font-size:12px; opacity:0.6; margin-top:4px;" id="stmt-generated"></div>
+                        </div>
+                    </div>
+
+                    <div class="stmt-summary-grid">
+                        <div class="stmt-stat-card">
+                            <div class="label">Total Invoiced</div>
+                            <div class="amount" id="stmt-total-invoiced" style="color:#0f172a;">&#8377;0.00</div>
+                        </div>
+                        <div class="stmt-stat-card">
+                            <div class="label">Total Paid</div>
+                            <div class="amount" id="stmt-total-paid" style="color:#059669;">&#8377;0.00</div>
+                        </div>
+                        <div class="stmt-stat-card">
+                            <div class="label">Balance Due</div>
+                            <div class="amount" id="stmt-balance-due" style="color:#d97706;">&#8377;0.00</div>
+                        </div>
+                    </div>
+
+                    <div class="invoza-card" style="padding:0; overflow:hidden;">
+                        <div style="padding:18px 24px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0; font-size:15px; font-weight:700;">Transaction Ledger</h3>
+                            <span id="stmt-entry-count" style="font-size:12.5px; color:#64748b;"></span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Reference</th>
+                                        <th>Description</th>
+                                        <th style="text-align:right;">Debit (&#8377;)</th>
+                                        <th style="text-align:right;">Credit (&#8377;)</th>
+                                        <th style="text-align:right;">Balance (&#8377;)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="statement-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="statement-empty" style="text-align:center; padding:60px 20px; color:#64748b;">
+                    <div style="font-size:48px; margin-bottom:14px;">&#128203;</div>
+                    <h3 style="font-size:18px; font-weight:700; color:#0f172a; margin-bottom:6px;">Generate Client Ledger</h3>
+                    <p style="font-size:13.5px;">Select a client and date range above, then click Generate.</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/customer-statement.js"></script>
+</body>
+</html>

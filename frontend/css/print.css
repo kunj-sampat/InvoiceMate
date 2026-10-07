@@ -1,0 +1,49 @@
+@media print {
+  body {
+    background-color: #fff;
+    color: #000;
+  }
+
+  .sidebar,
+  .top-header,
+  .btn,
+  button,
+  .create-form-section,
+  .invoice-detail-sidebar,
+  .filter-bar,
+  .page-header,
+  .toast-container,
+  #sidebar-toggle {
+    display: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .content-area {
+    padding: 0;
+    margin-top: 0;
+  }
+
+  #invoice-preview-container,
+  .invoice-detail-main {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .invoice-preview {
+    max-width: 100%;
+  }
+
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+}

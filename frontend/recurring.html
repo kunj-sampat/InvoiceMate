@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recurring Invoices - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item active"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span class="current">Recurring Invoices</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h1>Recurring Invoices &amp; Retainers</h1>
+                        <p>Automate regular client billing, monthly maintenance contracts, and subscriptions.</p>
+                    </div>
+                    <button id="add-recurring-btn" class="btn btn-primary">+ New Schedule</button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="label">Active Retainers</div>
+                        <div class="value" id="rec-active-count">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Monthly Recurring Revenue</div>
+                        <div class="value" id="rec-mrr-val" style="color: #059669;">&#8377;0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Due This Month</div>
+                        <div class="value" id="rec-due-month" style="color: #d97706;">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Total Schedules</div>
+                        <div class="value" id="rec-total-count">0</div>
+                    </div>
+                </div>
+
+                <!-- Recurring Invoices Table -->
+                <div class="invoza-card" style="padding: 0; overflow: hidden;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Schedule Title &bull; Customer</th>
+                                    <th>Frequency</th>
+                                    <th>Next Issue Date</th>
+                                    <th>Last Issued</th>
+                                    <th style="text-align: right;">Cycle Amount</th>
+                                    <th style="text-align: center;">Status</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recurring-body">
+                                <tr><td colspan="7" style="text-align:center; padding: 32px; color: #94a3b8;">Loading recurring schedules...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Recurring Profile Modal -->
+    <div id="recurring-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 620px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Recurring Billing Schedule</h3>
+                <button class="modal-close" id="close-recurring-modal">&times;</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rec-cust-select">Customer *</label>
+                    <select id="rec-cust-select" required>
+                        <option value="">Select a customer...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-profile-name">Schedule Title *</label>
+                    <input type="text" id="rec-profile-name" placeholder="e.g. Monthly Retainer" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rec-frequency">Billing Frequency</label>
+                    <select id="rec-frequency">
+                        <option value="MONTHLY">Monthly</option>
+                        <option value="WEEKLY">Weekly</option>
+                        <option value="QUARTERLY">Quarterly</option>
+                        <option value="YEARLY">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-start-date">First Issue Date</label>
+                    <input type="date" id="rec-start-date" required>
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 14px 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 8px;">Line Item</label>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                        <label for="rec-item-name">Service Description</label>
+                        <input type="text" id="rec-item-name" placeholder="e.g. Cloud Infrastructure Maintenance" required>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="rec-item-price">Rate (&#8377;)</label>
+                        <input type="number" id="rec-item-price" min="0" step="0.01" placeholder="15000" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rec-gst-rate">GST Rate (%)</label>
+                    <select id="rec-gst-rate">
+                        <option value="0">0%</option>
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18" selected>18%</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rec-template">Invoice Template</label>
+                    <select id="rec-template">
+                        <option value="modern">Modern (Royal Blue)</option>
+                        <option value="business">Business (Navy &amp; Lime)</option>
+                        <option value="minimal">Minimal (Swiss Grid)</option>
+                        <option value="classic">Classic (Executive Ledger)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="rec-notes">Payment Notes</label>
+                <input type="text" id="rec-notes" placeholder="e.g. Auto-generated monthly retainer.">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button type="button" id="cancel-recurring-btn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="save-recurring-btn" class="btn btn-primary">Start Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/recurring.js"></script>
+</body>
+</html>

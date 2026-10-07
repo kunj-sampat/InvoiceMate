@@ -1,0 +1,88 @@
+@media (max-width: 1024px) {
+  .content-area {
+    padding: 24px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .create-invoice-layout,
+  .invoice-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #invoice-preview-container {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+  }
+
+  .top-header {
+    left: 0;
+    padding: 0 16px;
+  }
+
+  #sidebar-toggle {
+    display: block;
+  }
+
+  .dashboard-row {
+    flex-direction: column;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .inv-meta {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .inv-details table {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-area {
+    padding: 16px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

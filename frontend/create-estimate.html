@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Estimate - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/invoices.css">
+    <link rel="stylesheet" href="css/invoice-templates.css">
+    <link rel="stylesheet" href="css/print.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item active"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <a href="estimates.html">Estimates</a> &rsaquo; <span class="current">New Estimate</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h2>Create Estimate / Proposal</h2>
+                        <p>Generate formal quotes and client proposals that easily convert into invoices.</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="saveEstimate(true)">Save Draft</button>
+                        <button class="btn btn-primary" onclick="saveEstimate(false)">Create Estimate</button>
+                    </div>
+                </div>
+
+                <div class="create-invoice-layout">
+                    <!-- Form Column -->
+                    <div class="create-form-section">
+
+                        <!-- Estimate Info Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Estimate Details</h3>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label for="est-biz-name">Your Company / Business Name (Sender) *</label>
+                                <input type="text" id="est-biz-name" placeholder="e.g. Acme Technologies Pvt Ltd or Studio Pixel">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Estimate Number</label>
+                                    <input type="text" id="estimate-number" placeholder="EST-001" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Template Style</label>
+                                    <select id="template-select">
+                                        <option value="modern">Modern (Royal Blue Tech)</option>
+                                        <option value="business">Business (Corporate Slate &amp; Lime)</option>
+                                        <option value="minimal">Minimal (Swiss Studio Clean)</option>
+                                        <option value="classic">Classic (Warm Ledger Serif)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Estimate Date</label>
+                                    <input type="date" id="estimate-date">
+                                </div>
+                                <div class="form-group">
+                                    <label>Valid Until</label>
+                                    <input type="date" id="valid-until">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Client / Customer</label>
+                                <select id="customer-select">
+                                    <option value="">Select customer...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Line Items Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Items &amp; Scope of Work</h3>
+                                <button class="btn btn-secondary btn-sm" onclick="addEstimateItem()">+ Add Item</button>
+                            </div>
+                            <div class="table-container items-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width:36%">Item / Service</th>
+                                            <th style="width:16%">HSN / SAC</th>
+                                            <th style="width:12%; text-align:center;">Qty</th>
+                                            <th style="width:16%; text-align:right;">Rate (&#8377;)</th>
+                                            <th style="width:15%; text-align:right;">Total</th>
+                                            <th style="width:5%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="estimate-items-body">
+                                        <!-- Items populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Summary & Notes Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Summary &amp; Discount</h3>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Discount (%)</label>
+                                    <input type="number" id="discount-percent" value="0" min="0" max="100" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label>GST Rate (%)</label>
+                                    <select id="gst-percent">
+                                        <option value="0">0% (Exempt)</option>
+                                        <option value="5">5%</option>
+                                        <option value="12">12%</option>
+                                        <option value="18" selected>18% (Standard Services)</option>
+                                        <option value="28">28%</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="totals-section">
+                                <div class="total-row">
+                                    <span>Subtotal</span>
+                                    <span id="subtotal-display">&#8377;0.00</span>
+                                </div>
+                                <div class="total-row">
+                                    <span>Discount</span>
+                                    <span id="discount-display">&#8377;0.00</span>
+                                </div>
+                                <div class="total-row">
+                                    <span>GST</span>
+                                    <span id="gst-display">&#8377;0.00</span>
+                                </div>
+                                <div class="total-row grand-total">
+                                    <span>Estimated Total</span>
+                                    <span id="grand-total-display">&#8377;0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 20px; margin-bottom: 0;">
+                                <label>Notes / Terms of Proposal</label>
+                                <textarea id="estimate-notes" rows="3" placeholder="This estimate is valid for 30 days. Payment terms: 50% advance, 50% on delivery."></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Live Preview Sticky Column -->
+                    <div class="preview-section">
+                        <div id="invoice-preview-container">
+                            <div class="invoice-preview template-modern" id="estimate-preview">
+                                <!-- Rendered dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/create-estimate.js"></script>
+</body>
+</html>

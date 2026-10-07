@@ -1,0 +1,327 @@
+/* ==========================================================================
+   INVOZASTYLE AUTH (Login & Register) - Matching Reference media_1791394383219.png
+   Frosted glass card with 3D ambient sphere backdrop, capsule inputs & pill submit
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.auth-page {
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  background: 
+    radial-gradient(circle at 75% 45%, rgba(203, 213, 225, 0.45) 0%, rgba(226, 232, 240, 0.15) 35%, transparent 60%),
+    radial-gradient(circle at 20% 80%, rgba(167, 243, 208, 0.3) 0%, transparent 45%),
+    radial-gradient(circle at 30% 20%, rgba(186, 230, 253, 0.35) 0%, transparent 50%),
+    linear-gradient(135deg, #eef2f6 0%, #e2e8f0 40%, #f1f5f9 70%, #dcfce7 100%);
+  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 3D Pearlescent Background Sphere Element (from reference design) */
+.auth-bg-sphere {
+  position: fixed;
+  right: calc(50% - 320px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #94a3b8 85%, #64748b 100%);
+  box-shadow: 
+    0 30px 80px rgba(100, 116, 139, 0.3),
+    inset -15px -15px 40px rgba(30, 41, 59, 0.4),
+    inset 15px 15px 30px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+/* Floating Frosted Glass Card */
+.auth-glass-container {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-radius: 34px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  padding: 44px 38px 36px 38px;
+  box-shadow: 
+    0 30px 80px -15px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.8);
+  position: relative;
+  z-index: 10;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Brand Header */
+.auth-header {
+  margin-bottom: 24px;
+}
+
+.auth-header-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: #0f172a;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+.auth-header-sub {
+  font-size: 13.5px;
+  color: #64748b;
+  font-weight: 450;
+}
+
+/* Social Login Pills */
+.auth-social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.btn-social-pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #1e293b;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+.btn-social-pill:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.social-icon {
+  font-size: 14px;
+}
+
+/* "or" Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.auth-divider span {
+  font-size: 12.5px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Capsule Form Fields */
+.auth-field-group {
+  margin-bottom: 18px;
+}
+
+.auth-field-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 7px;
+  padding-left: 6px;
+}
+
+.auth-input-pill-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.auth-input-pill {
+  width: 100%;
+  padding: 13px 22px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 13.5px;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+}
+
+.auth-input-pill:focus {
+  border-color: #205646;
+  box-shadow: 0 0 0 3.5px rgba(32, 86, 70, 0.12);
+}
+
+.auth-input-pill::placeholder {
+  color: #94a3b8;
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 16px;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.auth-eye-btn:hover {
+  color: #334155;
+}
+
+/* Remember & Forgot Password Row */
+.auth-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding: 0 4px;
+  font-size: 12.5px;
+}
+
+.auth-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #475569;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.auth-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #205646;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.auth-forgot-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.auth-forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Capsule Submit Button with Chevron Circle Notch */
+.btn-pill-submit {
+  width: 100%;
+  height: 52px;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 24px -4px rgba(17, 24, 39, 0.35);
+}
+
+.btn-pill-submit:hover {
+  background: #000000;
+  transform: translateY(-1.5px);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-pill-submit:active {
+  transform: translateY(0);
+}
+
+.btn-pill-arrow-notch {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.btn-pill-submit:hover .btn-pill-arrow-notch {
+  background: #374151;
+  transform: translateY(-50%) translateX(2px);
+}
+
+/* Bottom Switch Link */
+.auth-bottom-switch {
+  text-align: center;
+  margin-top: 26px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.auth-bottom-switch a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-bottom-switch a:hover {
+  text-decoration: underline;
+}
+
+/* Error message banner */
+.auth-error-banner {
+  display: none;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}

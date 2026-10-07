@@ -1,0 +1,829 @@
+/* ==========================================================================
+   INVOICEMATE — 4 ELEGANT, SPACIOUS & PROFESSIONAL INVOICE TEMPLATES
+   Rock-solid layouts with generous padding, zero overlapping, and HSN/SAC support.
+   1. template-business : Corporate Navy & Lime Accent
+   2. template-modern   : Royal Blue Wave & Clean Tech Flow
+   3. template-minimal  : Swiss Monochrome Architectural Grid
+   4. template-classic  : Warm Parchment & Executive Serif Ledger
+   ========================================================================== */
+
+.invoice-preview {
+  width: 100%;
+  min-height: 860px;
+  background: #ffffff;
+  color: #1e293b;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  line-height: 1.6;
+  font-size: 13.5px;
+  overflow: visible;
+  word-break: break-word;
+}
+
+.invoice-preview * {
+  box-sizing: border-box;
+}
+
+/* Universal Brand Logo Style across templates */
+.inv-brand-logo {
+  max-height: 56px;
+  max-width: 190px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ==========================================================================
+   1. BUSINESS TEMPLATE (Corporate Navy & Lime Accent)
+   ========================================================================== */
+.template-business {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffffff;
+  padding: 0;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-business .biz-top-accent {
+  height: 6px;
+  background: linear-gradient(90deg, #84cc16 0%, #65a30d 50%, #1e293b 100%);
+}
+
+.template-business .biz-header-card {
+  background: #1e293b;
+  color: #ffffff;
+  padding: 32px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.template-business .biz-brand-col {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.template-business .biz-logo-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  border: 2px solid #84cc16;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 24px;
+  color: #84cc16;
+  flex-shrink: 0;
+}
+
+.template-business .biz-company-title h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+}
+
+.template-business .biz-company-title p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.template-business .biz-doc-col {
+  text-align: right;
+  min-width: 200px;
+}
+
+.template-business .biz-doc-col h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #84cc16;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.template-business .biz-meta-pill {
+  font-size: 13px;
+  color: #cbd5e1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 3px;
+}
+
+.template-business .biz-meta-pill strong {
+  color: #ffffff;
+}
+
+.template-business .biz-body {
+  padding: 36px 40px 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-business .biz-parties-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.template-business .biz-party-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+
+.template-business .biz-party-box h4 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #65a30d;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.template-business .biz-party-box h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.template-business .biz-party-box p {
+  margin: 3px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Items Table */
+.template-business .biz-table-wrap {
+  margin-bottom: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.template-business .biz-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.template-business .biz-table thead th {
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.template-business .biz-table thead th.col-num {
+  width: 50px;
+  text-align: center;
+  background: #84cc16;
+  color: #1e293b;
+}
+
+.template-business .biz-table thead th.col-hsn {
+  width: 110px;
+  text-align: center;
+}
+
+.template-business .biz-table thead th.col-rate,
+.template-business .biz-table thead th.col-qty,
+.template-business .biz-table thead th.col-amt {
+  text-align: right;
+  width: 110px;
+}
+
+.template-business .biz-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.template-business .biz-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.template-business .biz-table tbody td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.template-business .biz-table tbody td.col-center {
+  text-align: center;
+}
+
+.template-business .biz-table tbody td.col-right {
+  text-align: right;
+}
+
+.template-business .biz-table tbody td.hsn-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Totals and Terms */
+.template-business .biz-summary-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  margin-top: auto;
+  margin-bottom: 24px;
+}
+
+.template-business .biz-terms-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+
+.template-business .biz-terms-card h4 {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #65a30d;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.template-business .biz-terms-card p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.template-business .biz-totals-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-business .biz-tot-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.template-business .biz-tot-row strong {
+  color: #0f172a;
+}
+
+.template-business .biz-tot-row.grand {
+  background: #84cc16;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 14px 18px;
+  border-bottom: none;
+}
+
+.template-business .biz-tot-row.grand span:last-child {
+  font-size: 18px;
+}
+
+.template-business .biz-footer {
+  background: #1e293b;
+  color: #94a3b8;
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  border-top: 1px solid #334155;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.template-business .biz-footer strong {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   2. MODERN TEMPLATE (Royal Blue Header & Clean Flow)
+   ========================================================================== */
+.template-modern {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #ffffff;
+  padding: 40px;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-modern .mod-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 28px;
+  border-bottom: 2px solid #2563eb;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.template-modern .mod-brand h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e3a8a;
+  letter-spacing: -0.5px;
+}
+
+.template-modern .mod-brand p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.template-modern .mod-title-col {
+  text-align: right;
+}
+
+.template-modern .mod-title-col h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+  font-weight: 900;
+  color: #2563eb;
+  letter-spacing: 1px;
+}
+
+.template-modern .mod-title-col p {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.template-modern .mod-meta-banner {
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.template-modern .mod-meta-cell h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #2563eb;
+}
+
+.template-modern .mod-meta-cell h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.template-modern .mod-meta-cell p {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Modern Items Table */
+.template-modern .mod-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+}
+
+.template-modern .mod-table thead th {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.template-modern .mod-table thead th.col-num {
+  width: 50px;
+  text-align: center;
+}
+
+.template-modern .mod-table thead th.col-hsn {
+  width: 110px;
+  text-align: center;
+}
+
+.template-modern .mod-table thead th.col-right {
+  text-align: right;
+  width: 110px;
+}
+
+.template-modern .mod-table tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.template-modern .mod-table tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.template-modern .mod-table tbody td.col-center {
+  text-align: center;
+}
+
+.template-modern .mod-table tbody td.col-right {
+  text-align: right;
+}
+
+.template-modern .mod-table tbody td.hsn-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Modern Bottom */
+.template-modern .mod-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  margin-top: auto;
+  margin-bottom: 24px;
+}
+
+.template-modern .mod-notes-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+
+.template-modern .mod-notes-card h4 {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2563eb;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.template-modern .mod-notes-card p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.template-modern .mod-totals-wrap {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-modern .mod-tot-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  color: #475569;
+  border-bottom: 1px solid #f0f7ff;
+}
+
+.template-modern .mod-tot-line.grand {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 14px 18px;
+  border-bottom: none;
+}
+
+.template-modern .mod-footer {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   3. MINIMAL TEMPLATE (Swiss Architectural Grid)
+   ========================================================================== */
+.template-minimal {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: #ffffff;
+  padding: 48px;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-minimal .min-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #111827;
+  margin-bottom: 32px;
+}
+
+.template-minimal .min-doc-title {
+  font-size: 38px;
+  font-weight: 200;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  color: #111827;
+  margin: 0;
+}
+
+.template-minimal .min-biz h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.template-minimal .min-biz p {
+  margin: 2px 0;
+  font-size: 12.5px;
+  color: #6b7280;
+}
+
+.template-minimal .min-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 32px;
+}
+
+.template-minimal .min-meta-item label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.template-minimal .min-meta-item div {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.template-minimal .min-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+}
+
+.template-minimal .min-table thead th {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+  border-bottom: 1px solid #111827;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.template-minimal .min-table tbody td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13.5px;
+  color: #374151;
+}
+
+.template-minimal .min-table tbody td.hsn-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.template-minimal .min-totals-split {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: auto;
+  gap: 40px;
+  padding-top: 16px;
+}
+
+.template-minimal .min-notes {
+  flex: 1;
+  font-size: 12.5px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.template-minimal .min-totals-table {
+  width: 280px;
+}
+
+.template-minimal .min-tot-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13.5px;
+  color: #6b7280;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.template-minimal .min-tot-row.grand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  border-top: 2px solid #111827;
+  border-bottom: none;
+  padding-top: 14px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   4. CLASSIC TEMPLATE (Warm Parchment & Serif Ledger)
+   ========================================================================== */
+.template-classic {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #fdfbf7;
+  padding: 44px;
+  color: #3d2e0e;
+  border: 2px solid #d4c9a0;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-classic .cls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #b45309;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+}
+
+.template-classic .cls-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #7c2d12;
+  font-weight: 700;
+}
+
+.template-classic .cls-header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #78350f;
+}
+
+.template-classic .cls-stamp {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #ffffff;
+  background: #9a3412;
+  padding: 8px 20px;
+  text-transform: uppercase;
+}
+
+.template-classic .cls-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.template-classic .cls-meta-box {
+  background: #fefcf3;
+  border: 1px solid #ede2c4;
+  padding: 16px 20px;
+  border-radius: 4px;
+}
+
+.template-classic .cls-meta-box h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9a3412;
+}
+
+.template-classic .cls-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+
+.template-classic .cls-table thead th {
+  background: #f5edd8;
+  color: #7c2d12;
+  border-bottom: 2px solid #b45309;
+  padding: 12px 14px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.template-classic .cls-table tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #ede2c4;
+  font-size: 13.5px;
+  color: #3d2e0e;
+}
+
+.template-classic .cls-table tbody tr:nth-child(even) td {
+  background: #faf5e8;
+}
+
+.template-classic .cls-table tbody td.hsn-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #78350f;
+  text-align: center;
+}
+
+.template-classic .cls-bottom-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 30px;
+  margin-top: auto;
+}
+
+.template-classic .cls-notes-box {
+  font-size: 12.5px;
+  color: #78350f;
+  font-style: italic;
+  padding: 14px 18px;
+  background: #fefcf3;
+  border: 1px solid #ede2c4;
+  border-radius: 4px;
+}
+
+.template-classic .cls-totals-box {
+  border: 1px solid #ede2c4;
+  background: #fefcf3;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.template-classic .cls-tot-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  color: #78350f;
+  border-bottom: 1px solid #ede2c4;
+}
+
+.template-classic .cls-tot-line.grand {
+  background: #f5edd8;
+  color: #7c2d12;
+  font-size: 16px;
+  font-weight: 700;
+  border-top: 2px solid #b45309;
+  border-bottom: none;
+  padding: 12px 16px;
+}

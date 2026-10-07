@@ -1,0 +1,675 @@
+/* ==========================================================================
+   INVOICEMATE UNIFIED INVOZA DESIGN SYSTEM (css/layout.css)
+   Applied across all pages: Floating frosted glass container, integrated sidebar,
+   clean top breadcrumb header, deep forest green accents, modern cards and tables.
+   ========================================================================== */
+
+/* Atmospheric Meadow & Sky Backdrop */
+body.invoza-theme {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(191, 219, 254, 0.45) 0%, rgba(219, 234, 254, 0.25) 35%, transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(167, 243, 208, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(187, 247, 208, 0.25) 0%, transparent 50%),
+    linear-gradient(180deg, #dbeafe 0%, #e2e8f0 40%, #f0fdf4 80%, #dcfce7 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+/* Floating Frosted Glass Window Container */
+.invoza-app-window {
+  max-width: 1540px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 25px 60px -15px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(226, 232, 240, 0.6);
+  display: flex;
+  min-height: calc(100vh - 32px);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+.invoza-sidebar {
+  width: 250px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px 20px 18px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.invoza-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-left: 6px;
+  text-decoration: none;
+}
+
+.invoza-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.invoza-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+}
+
+/* Sidebar Search Box */
+.invoza-search-box {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.invoza-search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 34px 9px 34px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.invoza-search-box input:focus {
+  border-color: #205646;
+  box-shadow: 0 0 0 3px rgba(32, 86, 70, 0.12);
+}
+
+.invoza-search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.invoza-search-kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 10px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+/* Navigation Menu */
+.invoza-nav-group {
+  margin-bottom: 20px;
+}
+
+.invoza-nav-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0 0 8px 8px;
+}
+
+.invoza-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.invoza-nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.invoza-nav-item a:hover {
+  background: #edf2f7;
+  color: #0f172a;
+}
+
+/* Active Menu Item (Solid black/charcoal pill from Invoza) */
+.invoza-nav-item.active a {
+  background: #111827;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.invoza-nav-icon {
+  font-size: 15px;
+  width: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.85;
+}
+
+.invoza-nav-item.active .invoza-nav-icon {
+  opacity: 1;
+  color: #ffffff;
+}
+
+/* Sidebar User Footer */
+.invoza-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.invoza-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.invoza-user-pill:hover {
+  background: #e2e8f0;
+}
+
+.invoza-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #205646 0%, #10b981 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.invoza-user-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoza-user-meta .name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.invoza-user-meta .sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.invoza-btn-signout {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.invoza-btn-signout:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+/* ==========================================================================
+   MAIN WORKSPACE AREA & TOP HEADER
+   ========================================================================== */
+.invoza-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fbfcfd;
+  overflow-y: auto;
+  max-height: calc(100vh - 32px);
+}
+
+.invoza-top-header {
+  padding: 20px 32px 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.invoza-breadcrumb {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invoza-breadcrumb a {
+  color: #64748b;
+  text-decoration: none;
+}
+
+.invoza-breadcrumb a:hover {
+  color: #0f172a;
+}
+
+.invoza-breadcrumb .current {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.invoza-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invoza-circle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.invoza-circle-btn:hover {
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.invoza-notification-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+/* Page Content Wrapper */
+.invoza-page-content {
+  padding: 0 32px 32px 32px;
+  flex: 1;
+}
+
+/* Page Header */
+.invoza-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.invoza-page-header h1,
+.invoza-page-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+  margin: 0;
+}
+
+.invoza-page-header p {
+  margin: 4px 0 0 0;
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   CARDS, BUTTONS & FORMS (INVOZA STYLE)
+   ========================================================================== */
+.invoza-card, .card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 18px -3px rgba(15, 23, 42, 0.04);
+  margin-bottom: 20px;
+}
+
+.invoza-card-header, .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.invoza-card-header h3, .card-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Primary Button (Invoza Forest Green) */
+.btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-decoration: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.btn-primary {
+  background: #205646;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(32, 86, 70, 0.22);
+}
+
+.btn-primary:hover {
+  background: #184336;
+  box-shadow: 0 6px 16px rgba(32, 86, 70, 0.32);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-success {
+  background: #059669;
+  color: #ffffff;
+}
+
+.btn-sm {
+  padding: 5px 11px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-bar .form-group {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13.5px;
+  background-color: #ffffff;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #205646;
+  box-shadow: 0 0 0 3px rgba(32, 86, 70, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row > * {
+  flex: 1;
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 11px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  white-space: nowrap;
+}
+
+td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 13px;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Status Badges */
+.badge,
+.status-pill-pending,
+.status-pill-success,
+.status-pill-danger,
+.status-pill-draft {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.badge-success, .status-pill-success { background: #d1fae5; color: #059669; }
+.badge-warning, .status-pill-pending { background: #fef3c7; color: #d97706; }
+.badge-danger,  .status-pill-danger  { background: #fee2e2; color: #dc2626; }
+.badge-secondary,.status-pill-draft  { background: #f1f5f9; color: #64748b; }
+.badge-info    { background: #e0f2fe; color: #0284c7; }
+
+/* Summary Grid */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px -3px rgba(15, 23, 42, 0.04);
+}
+
+.summary-card .label {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.summary-card .value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-left: 4px solid;
+  min-width: 280px;
+  max-width: 380px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-success { background: #f0fdf4; border-color: #10b981; color: #065f46; }
+.toast-error   { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+.toast-info    { background: #f0f9ff; border-color: #0ea5e9; color: #075985; }
+.toast-warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .invoza-app-window {
+    flex-direction: column;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  .invoza-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoza-top-header, .invoza-page-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

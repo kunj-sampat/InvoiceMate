@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item active"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span class="current">Clients</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h1>Clients &amp; Customers</h1>
+                        <p>Manage customer profiles, statements, and billing histories.</p>
+                    </div>
+                    <button id="add-customer-btn" class="btn btn-primary">+ Add Client</button>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="customer-search">Search Clients</label>
+                        <input type="text" id="customer-search" placeholder="Search by name, email, or phone...">
+                    </div>
+                </div>
+
+                <div class="invoza-card" id="customers-list-view">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Email</th>
+                                    <th>Phone / WhatsApp</th>
+                                    <th style="text-align: right;">Total Billed</th>
+                                    <th style="text-align: right;">Outstanding</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-body">
+                                <tr><td colspan="6" style="text-align:center; padding: 32px; color: #94a3b8;">Loading clients...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Customer Detail View -->
+                <div id="customer-detail" style="display: none;">
+                    <button id="back-to-customers-btn" class="btn btn-secondary btn-sm" style="margin-bottom: 20px;">&larr; Back to Clients</button>
+                    
+                    <div style="display: grid; grid-template-columns: 340px 1fr; gap: 20px;">
+                        <div class="invoza-card" id="cust-detail-info">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="invoza-card">
+                            <h3 style="margin-top: 0; font-size: 16px; font-weight: 700;">Invoice History</h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Invoice</th>
+                                            <th>Date</th>
+                                            <th style="text-align: right;">Amount</th>
+                                            <th style="text-align: center;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customer-invoices-body">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Customer Modal -->
+    <div id="customer-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="customer-modal-title">Add Client</h3>
+                <button class="modal-close" id="close-customer-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="modal-cust-name">Client Name *</label>
+                <input type="text" id="modal-cust-name" placeholder="e.g. Acme Corp or Harper Reed" required>
+            </div>
+            <div class="form-group">
+                <label for="modal-cust-email">Email Address</label>
+                <input type="email" id="modal-cust-email" placeholder="contact@client.com">
+            </div>
+            <div class="form-group">
+                <label for="modal-cust-phone">WhatsApp / Phone</label>
+                <input type="text" id="modal-cust-phone" placeholder="e.g. +91 98765 43210">
+            </div>
+            <div class="form-group">
+                <label for="modal-cust-address">Billing Address</label>
+                <textarea id="modal-cust-address" rows="3" placeholder="Street, City, State, PIN"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button id="cancel-customer-btn" class="btn btn-secondary">Cancel</button>
+                <button id="save-customer-btn" class="btn btn-primary">Save Client</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/customers.js"></script>
+</body>
+</html>

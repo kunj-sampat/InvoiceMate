@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports &amp; GST - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .report-nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        .report-tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .report-tab-btn:hover {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+        .report-tab-btn.active {
+            background: #205646;
+            color: #ffffff;
+            border-color: #205646;
+        }
+        .quarter-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .quarter-btn {
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .quarter-btn:hover {
+            border-color: #205646;
+        }
+        .quarter-btn.active {
+            background: #205646;
+            color: #ffffff;
+            border-color: #205646;
+        }
+        @media print {
+            .invoza-sidebar, .invoza-top-header, .report-nav-tabs, .filter-bar, .no-print, button {
+                display: none !important;
+            }
+            .invoza-app-window { box-shadow: none; border: none; max-width: 100%; }
+            .invoza-main-area { max-height: none; overflow: visible; }
+            .invoza-page-content { padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item active"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Insights</span> &rsaquo; <span class="current">GST &amp; Reports</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h2>Reports &amp; Tax Compliance</h2>
+                        <p>Track business performance, sales analytics, and quarterly GSTR-1 summaries.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="print-report-btn" class="btn btn-secondary">Print Report</button>
+                    </div>
+                </div>
+
+                <!-- Tab Switcher -->
+                <div class="report-nav-tabs">
+                    <button class="report-tab-btn active" id="tab-btn-gst">GST Quarterly Summary (GSTR-1)</button>
+                    <button class="report-tab-btn" id="tab-btn-sales">Sales Overview &amp; Analytics</button>
+                </div>
+
+                <!-- ==========================================
+                     TAB 1: GST QUARTERLY SUMMARY (GSTR-1)
+                     ========================================== -->
+                <div id="tab-content-gst">
+                    <!-- Quarter & Year Filter Card -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                            <div>
+                                <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 8px;">Select Quarter</label>
+                                <div class="quarter-pills">
+                                    <button class="quarter-btn active" data-quarter="Q1">Q1 (Apr - Jun)</button>
+                                    <button class="quarter-btn" data-quarter="Q2">Q2 (Jul - Sep)</button>
+                                    <button class="quarter-btn" data-quarter="Q3">Q3 (Oct - Dec)</button>
+                                    <button class="quarter-btn" data-quarter="Q4">Q4 (Jan - Mar)</button>
+                                    <button class="quarter-btn" data-quarter="ALL">Full FY</button>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div>
+                                    <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Financial Year</label>
+                                    <select id="gst-year-select" style="padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 13.5px; background: var(--color-bg); color: var(--color-text);">
+                                        <option value="2026">FY 2026-27</option>
+                                        <option value="2025">FY 2025-26</option>
+                                        <option value="2024">FY 2024-25</option>
+                                    </select>
+                                </div>
+                                <div style="margin-top: 22px;">
+                                    <button id="export-gst-csv-btn" class="btn btn-secondary btn-sm">&#128196; Export GSTR CSV</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px; font-size: 13px; color: var(--color-text-secondary);" id="gst-period-label">
+                            Showing filing data for 01 Apr 2026 to 30 Jun 2026
+                        </div>
+                    </div>
+
+                    <!-- GST Summary Cards -->
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="label">Taxable Turnover</div>
+                            <div class="value" id="gst-taxable-val">&#8377;0.00</div>
+                            <div class="sub-value" id="gst-invoice-count">0 filed invoices</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">Total GST Collected</div>
+                            <div class="value" id="gst-total-tax">&#8377;0.00</div>
+                            <div class="sub-value"><span class="trend-up">Total Output Tax</span></div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">Central GST (CGST)</div>
+                            <div class="value" id="gst-cgst-val">&#8377;0.00</div>
+                            <div class="sub-value">50% of intra-state tax</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">State GST (SGST)</div>
+                            <div class="value" id="gst-sgst-val">&#8377;0.00</div>
+                            <div class="sub-value">50% of intra-state tax</div>
+                        </div>
+                    </div>
+
+                    <!-- Rate-Wise Slab Breakdown -->
+                    <div class="card" style="margin-bottom: 24px; padding: 0; overflow: hidden;">
+                        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Rate-Wise GST Slabs (GSTR-1 Section 12)</h3>
+                            <span style="font-size: 12px; color: var(--color-text-tertiary);">Summary of Outward Supplies</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>GST Rate Slab</th>
+                                        <th>Invoices</th>
+                                        <th style="text-align: right;">Taxable Amount</th>
+                                        <th style="text-align: right;">CGST</th>
+                                        <th style="text-align: right;">SGST</th>
+                                        <th style="text-align: right;">Total Tax</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gst-slabs-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quarterly Invoice Details -->
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border);">
+                            <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Quarterly B2B / B2C Invoices Register</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>GST %</th>
+                                        <th style="text-align: right;">Taxable Value</th>
+                                        <th style="text-align: right;">Total GST</th>
+                                        <th style="text-align: right;">Grand Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gst-invoices-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     TAB 2: SALES OVERVIEW
+                     ========================================== -->
+                <div id="tab-content-sales" style="display: none;">
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h3 style="margin-top: 0; margin-bottom: 16px;">Sales Filters</h3>
+                        <div class="form-row" style="align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="report-from">Date From</label>
+                                <input type="date" id="report-from">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="report-to">Date To</label>
+                                <input type="date" id="report-to">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="report-customer">Customer</label>
+                                <select id="report-customer">
+                                    <option value="">All Customers</option>
+                                </select>
+                            </div>
+                            <button id="generate-report-btn" class="btn btn-primary" style="height: 38px;">Filter</button>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="summary-card">
+                            <div class="label">Total Invoices</div>
+                            <div class="value" id="report-invoices">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">Total Revenue</div>
+                            <div class="value" id="report-revenue">&#8377;0.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">Total Paid</div>
+                            <div class="value" id="report-paid">&#8377;0.00</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">Outstanding</div>
+                            <div class="value" id="report-outstanding">&#8377;0.00</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border);">
+                            <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Sales Invoices</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-invoices-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>

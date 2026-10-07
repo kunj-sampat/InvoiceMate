@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+
+    <!-- 3D Pearlescent Background Sphere (from reference image) -->
+    <div class="auth-bg-sphere"></div>
+
+    <!-- Floating Frosted Glass Container -->
+    <div class="auth-glass-container">
+        
+        <div class="auth-header">
+            <h1 class="auth-header-title">Welcome back<br>to InvoiceMate</h1>
+            <p class="auth-header-sub">Please enter your account details.</p>
+        </div>
+
+        <!-- Social Login Pills -->
+        <div class="auth-social-row">
+            <button type="button" class="btn-social-pill" onclick="fillDemoAccount()">
+                <span class="social-icon">&#127760;</span>
+                <span>Log in with Google</span>
+            </button>
+            <button type="button" class="btn-social-pill" onclick="fillDemoAccount()">
+                <span class="social-icon">&#63743;</span>
+                <span>Log in with Apple</span>
+            </button>
+        </div>
+
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="error-msg" class="auth-error-banner"></div>
+
+        <!-- Form -->
+        <form id="login-form">
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="email">Email</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="email" id="email" class="auth-input-pill" placeholder="harper@invoicemate.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="auth-field-group">
+                <label class="auth-field-label" for="password">Password</label>
+                <div class="auth-input-pill-wrap">
+                    <input type="password" id="password" class="auth-input-pill" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required autocomplete="current-password">
+                    <button type="button" class="auth-eye-btn" id="toggle-password" title="Show/hide password">&#128065;</button>
+                </div>
+            </div>
+
+            <div class="auth-options-row">
+                <label class="auth-checkbox-label">
+                    <input type="checkbox" id="remember-me" checked>
+                    <span>Remember for 30 days</span>
+                </label>
+                <a href="#" class="auth-forgot-link" onclick="alert('Please contact your administrator to reset your password.')">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-pill-submit" id="submit-btn">
+                <span>Log In</span>
+                <span class="btn-pill-arrow-notch">&rsaquo;</span>
+            </button>
+        </form>
+
+        <div class="auth-bottom-switch">
+            Don't have an account? <a href="register.html">Sign Up</a>
+        </div>
+
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+        // Password visibility toggle
+        const toggleBtn = document.getElementById('toggle-password');
+        const passInput = document.getElementById('password');
+        if (toggleBtn && passInput) {
+            toggleBtn.addEventListener('click', () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                toggleBtn.innerHTML = isPass ? '&#128064;' : '&#128065;';
+            });
+        }
+
+        // Demo account filler
+        function fillDemoAccount() {
+            document.getElementById('email').value = 'admin@invoicemate.com';
+            document.getElementById('password').value = 'admin123';
+            if (typeof showToast === 'function') showToast('Demo credentials filled! Click Log In.', 'info');
+        }
+
+        // Handle Login Submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
+            const submitBtn = document.getElementById('submit-btn');
+
+            errorDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.querySelector('span:first-child').textContent = 'Logging in...';
+
+            try {
+                const res = await apiRequest('POST', '/api/auth/login', { email, password });
+                if (res && res.token) {
+                    localStorage.setItem('token', res.token);
+                    localStorage.setItem('userName', res.fullName || res.name || email.split('@')[0]);
+                    localStorage.setItem('userEmail', email);
+                    if (res.businessName) localStorage.setItem('businessName', res.businessName);
+                    if (res.logoPath) localStorage.setItem('userLogo', res.logoPath);
+
+                    if (typeof showToast === 'function') showToast('Login successful! Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (err) {
+                errorDiv.textContent = err.message || 'Invalid email or password';
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span:first-child').textContent = 'Log In';
+            }
+        });
+    </script>
+</body>
+</html>

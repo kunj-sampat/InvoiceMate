@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog - InvoiceMate</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .cat-tag-prod { background: #e0f2fe; color: #0284c7; }
+        .cat-tag-serv { background: #f3e8ff; color: #7c3aed; }
+        .stock-pill-ok { background: #d1fae5; color: #059669; }
+        .stock-pill-low { background: #fef3c7; color: #d97706; }
+        .stock-pill-out { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <div class="invoza-brand-logo">&#10022;</div>
+                <div class="invoza-brand-name">InvoiceMate</div>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">&#128269;</span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item active"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span class="current">Product Catalog</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <div class="invoza-page-header">
+                    <div>
+                        <h1>Product &amp; Service Catalog</h1>
+                        <p>Manage inventory stock levels, HSN/SAC statutory codes, and unit rates.</p>
+                    </div>
+                    <button id="add-product-btn" class="btn btn-primary">+ Add Item</button>
+                </div>
+
+                <!-- Inventory Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="label">Total Catalog Items</div>
+                        <div class="value" id="cat-total-items">0</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:4px;" id="cat-split-sub">0 Products &bull; 0 Services</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Units In Stock</div>
+                        <div class="value" id="cat-total-units">0</div>
+                        <div style="font-size:12px; color:#059669; margin-top:4px;">Active physical stock</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Low / Out of Stock</div>
+                        <div class="value" id="cat-low-stock">0</div>
+                        <div style="font-size:12px; color:#d97706; margin-top:4px;" id="cat-low-sub">Needs restocking</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">Total Inventory Value</div>
+                        <div class="value" id="cat-stock-value">&#8377;0.00</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:4px;">Estimated retail value</div>
+                    </div>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                        <label for="product-search">Search Catalog</label>
+                        <input type="text" id="product-search" placeholder="Search by item name, SKU, or description...">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="filter-category">Category</label>
+                        <select id="filter-category">
+                            <option value="ALL">All Types</option>
+                            <option value="PRODUCT">Products (Inventory)</option>
+                            <option value="SERVICE">Services</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="filter-stock">Stock Status</label>
+                        <select id="filter-stock">
+                            <option value="ALL">All Stock Levels</option>
+                            <option value="IN_STOCK">In Stock</option>
+                            <option value="LOW_STOCK">Low Stock Alert</option>
+                            <option value="OUT_OF_STOCK">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Catalog Table Card -->
+                <div class="invoza-card" style="padding: 0; overflow: hidden;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item &amp; SKU</th>
+                                    <th>Category</th>
+                                    <th>HSN / SAC</th>
+                                    <th>Unit Rate</th>
+                                    <th>Stock Level</th>
+                                    <th>Status</th>
+                                    <th>Stock Value</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-body">
+                                <tr><td colspan="8" style="text-align:center; padding: 32px; color: #94a3b8;">Loading catalog items...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="product-modal-title">Add Catalog Item</h3>
+                <button class="modal-close" id="close-product-modal">&times;</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modal-prod-category">Item Type</label>
+                    <select id="modal-prod-category">
+                        <option value="PRODUCT">Physical Product (Track Stock)</option>
+                        <option value="SERVICE">Service (Unlimited)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modal-prod-sku">SKU / Item Code</label>
+                    <input type="text" id="modal-prod-sku" placeholder="e.g. PRD-001">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="modal-prod-name">Item / Service Name *</label>
+                <input type="text" id="modal-prod-name" placeholder="e.g. Wireless Mechanical Keyboard or Web Design" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modal-prod-hsn">HSN / SAC Code</label>
+                    <input type="text" id="modal-prod-hsn" list="hsn-suggestions" placeholder="e.g. 9983, 8471, 9987">
+                    <datalist id="hsn-suggestions">
+                        <option value="9983">9983 - IT, Consulting &amp; Software</option>
+                        <option value="9982">9982 - Legal &amp; Accounting Services</option>
+                        <option value="9987">9987 - Maintenance &amp; Repair</option>
+                        <option value="9954">9954 - Construction &amp; Civil Works</option>
+                        <option value="8471">8471 - Computer Systems &amp; Hardware</option>
+                        <option value="8517">8517 - Telecom &amp; Network Equipment</option>
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="modal-prod-gst">Default GST Rate (%)</label>
+                    <select id="modal-prod-gst">
+                        <option value="18">18% (Standard Services &amp; Electronics)</option>
+                        <option value="12">12% (Goods &amp; Equipment)</option>
+                        <option value="5">5% (Essential &amp; Transport)</option>
+                        <option value="28">28% (Luxury &amp; Specialized)</option>
+                        <option value="0">0% (Exempt)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="modal-prod-price">Unit Price (&#8377;) *</label>
+                    <input type="number" id="modal-prod-price" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="modal-prod-unit">Unit Measure</label>
+                    <select id="modal-prod-unit">
+                        <option value="pcs">Pieces (pcs)</option>
+                        <option value="hrs">Hours (hrs)</option>
+                        <option value="box">Box (box)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="project">Project</option>
+                        <option value="month">Monthly Retainer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="inventory-fields-row" class="form-row">
+                <div class="form-group">
+                    <label for="modal-prod-stock">Opening / Current Stock</label>
+                    <input type="number" id="modal-prod-stock" min="0" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="modal-prod-threshold">Low Stock Alert At</label>
+                    <input type="number" id="modal-prod-threshold" min="0" value="5">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="modal-prod-desc">Description</label>
+                <textarea id="modal-prod-desc" placeholder="Specifications, warranty, or service scope..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <button id="cancel-product-btn" class="btn btn-secondary">Cancel</button>
+                <button id="save-product-btn" class="btn btn-primary">Save Catalog Item</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/products.js"></script>
+</body>
+</html>
