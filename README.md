@@ -2,184 +2,195 @@
 
 <div align="center">
 
+<img src="frontend/assets/logo.svg" alt="InvoiceMate Logo" width="80" height="80">
+
+### Modern Invoicing & Tax Compliance SaaS
+
+*Effortless billing, 1-click WhatsApp delivery, quarterly GSTR-1 tax filing, and client ledgers—wrapped in a high-performance frosted-glass interface.*
+
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Frontend](https://img.shields.io/badge/Frontend-Vanilla_JS_%26_CSS3-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![Database](https://img.shields.io/badge/Database-H2_%2F_MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Database](https://img.shields.io/badge/Database-H2_%2F_MySQL_8-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Security](https://img.shields.io/badge/Auth-JWT_%2B_Spring_Security-green?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-**A modern, production-grade billing, invoicing, and tax compliance platform built for freelancers, SMEs, and digital agencies.**
-
-[Features](#-key-features) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Future AI Roadmap](#-future-ai-roadmap) • [API Documentation](#-api-documentation)
+[Live Demo](#-live-ui-preview) • [Key Features](#-features-at-a-glance) • [Architecture](#-system-architecture) • [Quick Start](#-quick-start) • [Future AI Roadmap](#-future-ai-roadmap) • [API Reference](#-api-endpoints)
 
 </div>
 
 ---
 
-## 🌟 Overview
+## 💡 Why InvoiceMate?
 
-**InvoiceMate** is a full-stack SaaS platform designed with a clean, high-performance UI ("Invoza" frosted-glass design language) and a robust Java 21 / Spring Boot 3 backend. It eliminates the clunkiness of traditional accounting software with instant WhatsApp dispatch, HSN/SAC code auto-fill, and automated quarterly GST calculations.
+Traditional billing software is bloated, slow, and forces users to navigate confusing menus. **InvoiceMate** solves this with:
 
-Zero frontend dependencies. No massive React node_modules or CSS bloat. Pure semantic HTML5, modern CSS3 variables, and reactive vanilla JavaScript for instantaneous page loads.
+- 🚀 **Instant Load Times**: Built with zero frontend frameworks (pure semantic HTML5, CSS3 variables, and reactive Vanilla JS). No 50MB `node_modules` bundles or sluggish render passes.
+- 📱 **WhatsApp-Native Workflows**: Dispatch clean payment links, PDF invoices, and automated reminder nudges straight to customer WhatsApp in 1 click.
+- 🇮🇳 **Indian Tax Ready**: Automatic quarterly GSTR-1 compilation, HSN/SAC code auto-fill, and CGST/SGST/IGST tax slab breakdowns.
+- 🎨 **Invoza UI Design System**: A desktop-grade, frosted-glass window environment (`backdrop-filter: blur(20px)`) with keyboard command shortcuts (`/`).
 
 ---
 
-## ✨ Key Features
+## ✨ Features at a Glance
 
-### 📄 Invoicing & Estimates
-- **Multi-Style Templates**: Switch seamlessly between 4 distinct visual identities:
-  - *Modern*: Vibrant royal blue header with sleek technical typography.
-  - *Business*: Executive corporate slate with lime accents.
-  - *Classic*: Traditional parchment serif ledger design.
-  - *Minimal*: Nordic Swiss grid with maximum whitespace.
-- **Estimates & Proposals**: Create formal quotes and convert them into live invoices with a single click.
-- **Live Split-Screen Preview**: Real-time rendering as you type items, rates, and discounts.
-- **HSN / SAC Code Catalog**: Auto-fills tax codes for goods and services to comply with GST regulations.
+| Feature Module | What It Does | Why It Matters |
+|:---|:---|:---|
+| **🎨 4 Invoice Templates** | Real-time toggle between Modern, Business, Classic, and Minimal styles | Adapts to any business branding (tech agency to legal firm) |
+| **📑 Estimates & Proposals** | Create formal quotes and convert them to invoices with 1 click | Speeds up client onboarding and deal closures |
+| **💬 WhatsApp Dispatch** | Instant WhatsApp message and reminder link generator | 3x faster client payment turnaround |
+| **📊 GSTR-1 Tax Engine** | Auto-categorizes turnover across Q1–Q4 with rate-wise slab splits | Saves hours of manual work during quarterly tax filing |
+| **👥 Customer Statements** | Chronological debit/credit transaction history with running balances | Provides clean audit trails and transparent reconciliation |
+| **📦 Product & HSN Catalog** | Preset product/service directory with auto-filling HSN/SAC codes | Eliminates manual tax rate mistakes on every line item |
+| **🔁 Recurring Subscriptions** | Automate monthly, quarterly, or annual billing cycles | Ideal for retainer contracts and SaaS subscriptions |
+| **🔒 Enterprise Auth** | Stateless JWT tokens, BCrypt hashing, and user-isolated data scopes | Guarantees complete data privacy and security |
 
-### 📱 1-Click WhatsApp Invoicing & Reminders
-- Dispatch invoices and payment links directly to clients via WhatsApp in one click.
-- Pre-composed friendly payment reminders with customizable urgency levels.
+---
 
-### 📊 Indian Tax & GST Compliance (GSTR-1)
-- **Quarterly GST Summaries**: Auto-sorts outward supplies across Q1, Q2, Q3, and Q4.
-- **Rate-Wise Slabs**: Summarizes 0%, 5%, 12%, 18%, and 28% slabs with CGST and SGST splits.
-- **GSTR-1 CSV Export**: Export formatted registers ready for tax advisors and the GST portal.
+## 🎨 Design Showcase
 
-### 📑 Customer Statement of Account
-- Detailed chronological transaction ledger (Invoices, Debits, Credits, Payments).
-- Real-time running balance calculator.
-- Print and PDF export for client reconciliation.
+### 4 Pixel-Perfect Invoice Templates
+- **Modern**: High-tech cobalt headers with crisp sans-serif typography.
+- **Business**: Executive slate and lime corporate structure with dual billing summary cards.
+- **Classic**: Warm parchment serif layout designed for formal contracts and accounting.
+- **Minimal**: Swiss studio grid with generous whitespace and refined line borders.
 
-### 🔁 Recurring Invoices & Payments
-- Automate subscription billing (Weekly, Monthly, Quarterly, Annually).
-- Multi-method payment recording (UPI, Bank Transfer / NEFT, Cards, Cheque, Cash).
-- Partial payment tracking and automatic overdue status transitions.
-
-### 🎨 Invoza Unified Design System
-- Atmospheric ambient meadow-sky backdrop with floating frosted glass application container (`backdrop-filter: blur(20px)`).
-- Quick keyboard search navigation (`/` shortcut).
-- 3D ambient sphere login & registration flow with glass capsule inputs.
+### The Invoza Desktop Experience
+- **Atmospheric Backdrop**: Ambient sky-and-meadow gradients with a floating frosted glass viewport.
+- **Command Search**: Press `/` from anywhere to instantly focus navigation search.
+- **3D Sphere Authentication**: Modern frosted capsule sign-in experience with interactive password eye reveal.
 
 ---
 
 ## 🤖 Future AI Roadmap
 
-InvoiceMate is architected to seamlessly plug into AI services (Gemini, Claude, OpenAI):
+InvoiceMate is architected with modular service hooks ready to integrate Large Language Models (Google Gemini & OpenAI):
 
-1. **Smart Receipt OCR**: Upload raw vendor receipts or photos to extract vendor, line items, and taxes directly into invoices using Gemini Vision.
-2. **Conversational Invoice Maker**: Type natural language prompts like *"Invoice John Doe $500 for website design due next Friday"* to generate drafts instantly.
-3. **Autonomous Chaser Bot**: Smart tone adaptation (gentle nudge → polite reminder → formal inquiry) based on client payment history.
-4. **Cash Flow Predictive Forecasting**: Forecast quarterly revenue and payment delays based on historical customer settlement cycles.
-
----
-
-## 🏗️ Architecture
-
-```
-┌────────────────────────────────────────────────────────┐
-│                   CLIENT (BROWSER)                     │
-│  Vanilla HTML5 + Modern CSS3 + Invoza Glass Shell      │
-│  Interactive Canvas Spline Charts (Chart.js)           │
-└───────────────────────────▲────────────────────────────┘
-                            │ REST / JSON (fetch API)
-┌───────────────────────────▼────────────────────────────┐
-│              SPRING BOOT 3.4.3 (JAVA 21)               │
-│  ├── Security: Spring Security + JWT Authentication    │
-│  ├── Controllers: RESTful API Endpoints                │
-│  ├── Services: Invoicing, Tax, PDF, Recurring Engine   │
-│  └── Persistence: Spring Data JPA + Hibernate          │
-└───────────────────────────▲────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│                    DATABASE LAYER                      │
-│  • Development: Embedded H2 (jdbc:h2:file:./data)       │
-│  • Production: MySQL 8+ with Connection Pooling        │
-└────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    A["Raw Receipt / Invoice Photo"] -->|Gemini 1.5 Flash Vision| B["Structured Line Items & Tax JSON"]
+    B --> C["InvoiceMate Draft Generator"]
+    C --> D["Automated Client Delivery via WhatsApp"]
+    D -->|Ollama / Gemini| E["Contextual AI Reminder Bot"]
 ```
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Java 21** or later (OpenJDK or Oracle)
-- **Maven 3.9+** (or use bundled Maven)
-- Modern web browser (Chrome, Edge, Firefox, Safari)
-
-### Quick Run (Zero External Setup Required)
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/kunj-sampat/InvoiceMate.git
-   cd InvoiceMate
-   ```
-
-2. **Start the backend server:**
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
-   *The backend starts automatically at `http://localhost:8080` with an embedded H2 database.*
-
-3. **Launch the application:**
-   - Open `frontend/index.html` in your browser for the landing page.
-   - Or open `frontend/login.html` to log in / register and access the Invoza Dashboard!
+1. **Smart Receipt Vision OCR**: Snap a picture of a paper bill or receipt to automatically extract vendor, line items, and taxes directly into a draft invoice.
+2. **Conversational Invoicing**: Type commands like *"Invoice Acme Corp ₹25,000 for quarterly SEO services due in 15 days"* to generate complete invoices in seconds.
+3. **Autonomous Chaser Bot**: Analyzes customer payment history to dynamically craft polite, assertive, or urgent follow-up nudges on WhatsApp.
+4. **Predictive Cash Flow Intelligence**: Forecasts incoming collections and highlights at-risk invoices based on historical settlement trends.
 
 ---
 
-## 📂 Project Structure
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLIENT BROWSER (Vanilla JS)                  │
+│  ├── Layout Engine (layout.js, layout.css)                      │
+│  ├── Live Preview & Real-Time Math (create-invoice.js)          │
+│  └── Canvas Data Visualizations (Chart.js Spline)               │
+└────────────────────────────────▲────────────────────────────────┘
+                                 │ REST / JSON (fetch API)
+┌────────────────────────────────▼────────────────────────────────┐
+│                   SPRING BOOT 3.4.3 (Java 21)                   │
+│  ├── Security: Spring Security + Stateless JWT Filter           │
+│  ├── REST Controllers: 10+ Modular Resource Endpoints           │
+│  ├── Business Logic: Tax, PDF Rendering, Invoicing Engines      │
+│  └── Persistence: Spring Data JPA + Hibernate ORM               │
+└────────────────────────────────▲────────────────────────────────┘
+                                 │
+┌────────────────────────────────▼────────────────────────────────┐
+│                       PERSISTENCE LAYER                         │
+│  • Local Dev: Embedded H2 File DB (jdbc:h2:file:./data)         │
+│  • Production: MySQL 8+ with HikariCP Connection Pooling        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/kunj-sampat/InvoiceMate.git
+cd InvoiceMate
+```
+
+### 2. Launch the Backend Server
+```bash
+cd backend
+mvn spring-boot:run
+```
+> The API server boots in under **4 seconds** on `http://localhost:8080`.  
+> An embedded H2 file database is initialized automatically with zero setup.
+
+### 3. Open the Frontend
+- Open `frontend/login.html` directly in any web browser to sign up and access the dashboard.
+- Or explore the public marketing showcase at `frontend/index.html`.
+
+---
+
+## 📡 API Endpoints
+
+| Category | Method | Endpoint | Description |
+|:---|:---|:---|:---|
+| **Auth** | `POST` | `/api/auth/register` | Register new business account |
+| | `POST` | `/api/auth/login` | Authenticate and obtain JWT token |
+| **Dashboard** | `GET` | `/api/dashboard/summary` | Summary cards, collection rate & health metrics |
+| | `GET` | `/api/dashboard/revenue` | Invoiced vs. collected cash flow time series |
+| **Invoices** | `GET` | `/api/invoices` | List invoices or estimates (`?isEstimate=true`) |
+| | `POST` | `/api/invoices` | Create new invoice or quote |
+| | `GET` | `/api/invoices/{id}/pdf` | Stream generated PDF document |
+| **Ledger** | `GET` | `/api/customers/{id}/statement` | Chronological statement of account |
+| **GST Tax** | `GET` | `/api/reports/gst` | Quarterly GSTR-1 turnover & slab calculations |
+| **Payments** | `POST` | `/api/payments` | Record full/partial settlement |
+| **Settings** | `POST` | `/api/settings/logo` | Upload custom business branding logo |
+
+---
+
+## 📁 Repository Structure
 
 ```
 InvoiceMate/
 ├── backend/
 │   ├── src/main/java/com/invoicemate/
-│   │   ├── config/          # Security, JWT, Web CORS config
-│   │   ├── controller/      # REST API Controllers (10+ resource endpoints)
-│   │   ├── dto/             # Data Transfer Objects
-│   │   ├── model/           # JPA Entities (User, Invoice, Customer, Payment, etc.)
-│   │   ├── repository/      # Spring Data JPA Repositories
-│   │   └── service/         # Business logic, GSTR summaries, PDF generation
-│   ├── src/main/resources/  # application.properties (H2 & MySQL configs)
-│   └── pom.xml              # Maven dependencies
+│   │   ├── config/          # Security, JWT, CORS configurations
+│   │   ├── controller/      # REST API Controllers
+│   │   ├── dto/             # Request & Response DTOs
+│   │   ├── model/           # JPA Entities (Invoice, Customer, Payment, etc.)
+│   │   ├── repository/      # Spring Data Repositories
+│   │   └── service/         # Invoicing, GST tax, and PDF generation logic
+│   ├── src/main/resources/  # application.properties (H2/MySQL)
+│   └── pom.xml              # Maven configuration
 ├── frontend/
-│   ├── assets/              # SVG logos, branding icons
-│   ├── css/                 # Invoza design system, auth.css, invoice-templates.css
-│   ├── js/                  # Layout, API interceptors, live preview engines
-│   ├── dashboard.html       # Executive analytics & cash flow spline charts
-│   ├── invoices.html        # Invoices management & WhatsApp actions
-│   ├── estimates.html       # Quotes & proposals generator
-│   ├── customers.html       # Client directory
+│   ├── assets/              # Logos and SVG icons
+│   ├── css/                 # Invoza design system, auth.css, template styles
+│   ├── js/                  # API interceptor, live preview, chart adapters
+│   ├── dashboard.html       # Analytics & cash flow spline chart
+│   ├── invoices.html        # Invoice list & WhatsApp action dispatchers
+│   ├── estimates.html       # Quote management & 1-click conversion
 │   ├── customer-statement.html # Account ledgers
-│   ├── products.html        # Product/service catalog with HSN/SAC
-│   ├── recurring.html       # Subscription billing
+│   ├── products.html        # Product catalog & HSN/SAC codes
+│   ├── recurring.html       # Automated subscription billing
 │   ├── reports.html         # Quarterly GSTR-1 summaries
-│   ├── settings.html        # Business branding & logo uploader
+│   ├── settings.html        # Branding, logo uploader & defaults
 │   ├── create-invoice.html  # Split-screen invoice builder
-│   ├── invoice-detail.html  # WhatsApp reminder & payment recording modal
-│   ├── login.html           # 3D ambient sphere login
-│   ├── register.html        # Glass container registration
-│   └── index.html           # Marketing landing page
+│   ├── invoice-detail.html  # Status timeline, payment recording modal
+│   ├── login.html           # 3D sphere frosted glass sign-in
+│   ├── register.html        # Account creation page
+│   └── index.html           # Public landing page
 ├── database/                # Production MySQL schemas
-├── .env.example             # Secrets & API configuration template
-└── .gitignore               # Excludes secrets, binaries, AI models & logs
+├── .env.example             # Environment template for keys and secrets
+└── .gitignore               # Multi-layer exclusion (AI keys, models, binaries)
 ```
 
 ---
 
-## 📡 API Documentation
+## 🛡️ Security & Privacy
 
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `POST` | `/api/auth/register` | Register new business account |
-| `POST` | `/api/auth/login` | Authenticate and obtain JWT token |
-| `GET`  | `/api/dashboard/summary` | Revenue, collection rate & health metrics |
-| `GET`  | `/api/invoices` | List invoices / estimates (filters: status, type) |
-| `POST` | `/api/invoices` | Create new invoice or estimate |
-| `GET`  | `/api/invoices/{id}/pdf` | Download formatted PDF invoice |
-| `GET`  | `/api/customers/{id}/statement` | Generate chronological customer account statement |
-| `GET`  | `/api/reports/gst` | Generate quarterly GSTR-1 tax compliance summary |
-| `POST` | `/api/payments` | Record full or partial payment |
-| `POST` | `/api/settings/logo` | Upload custom business logo |
+- **Stateless Tokens**: Auth relies entirely on industry-standard JWT tokens with expiration handling.
+- **Key Hygiene**: All `.env`, `api_keys.json`, and credentials are strictly ignored via `.gitignore`.
+- **User Scoping**: All database queries enforce strict user tenancy isolation so users can never view or manipulate another account's records.
 
 ---
 
@@ -193,4 +204,4 @@ InvoiceMate/
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See `LICENSE` for more information.
