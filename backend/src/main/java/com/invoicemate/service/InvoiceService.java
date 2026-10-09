@@ -102,9 +102,12 @@ public class InvoiceService {
         inv.setDraft(req.isDraft());
         inv.setEstimate(req.isEstimate());
 
-        // Update company name on user if provided in invoice request
+        // Update company name and UPI ID on user if provided in invoice request
         if (req.getBusinessName() != null && !req.getBusinessName().isBlank()) {
             user.setBusinessName(req.getBusinessName().trim());
+        }
+        if (req.getUpiId() != null && !req.getUpiId().isBlank()) {
+            user.setUpiId(req.getUpiId().trim());
         }
 
         // Generate number based on document type
@@ -142,10 +145,16 @@ public class InvoiceService {
         inv.setNotes(req.getNotes());
         inv.setDraft(req.isDraft());
         
-        if (req.getBusinessName() != null && !req.getBusinessName().isBlank()) {
+        if ((req.getBusinessName() != null && !req.getBusinessName().isBlank()) || 
+            (req.getUpiId() != null && !req.getUpiId().isBlank())) {
             User user = userRepository.findById(userId).orElse(null);
             if (user != null) {
-                user.setBusinessName(req.getBusinessName().trim());
+                if (req.getBusinessName() != null && !req.getBusinessName().isBlank()) {
+                    user.setBusinessName(req.getBusinessName().trim());
+                }
+                if (req.getUpiId() != null && !req.getUpiId().isBlank()) {
+                    user.setUpiId(req.getUpiId().trim());
+                }
                 userRepository.save(user);
             }
         }

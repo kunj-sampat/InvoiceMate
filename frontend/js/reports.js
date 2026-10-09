@@ -1,13 +1,16 @@
-// js/reports.js — Sales Analytics & GST Quarterly (GSTR-1) Reporting
+// js/reports.js — Sales Analytics & GST Tax Summary / CA Filing Preparation
 
 let currentGstData = null;
 let selectedQuarter = 'Q1';
+let selectedMode = 'QUARTER'; // 'QUARTER', 'MONTH', 'FY'
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
+  setupFilterModes();
   setupQuarterButtons();
 
-  document.getElementById('gst-year-select')?.addEventListener('change', loadGstQuarterly);
+  document.getElementById('gst-year-select')?.addEventListener('change', loadGstReport);
+  document.getElementById('gst-month-select')?.addEventListener('change', loadGstReport);
   document.getElementById('export-gst-csv-btn')?.addEventListener('click', exportGstCsv);
   document.getElementById('print-report-btn')?.addEventListener('click', () => window.print());
 
@@ -16,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCustomersForFilter();
 
   // Load GST report by default
-  loadGstQuarterly();
+  loadGstReport();
 });
 
 function setupTabs() {
@@ -43,6 +46,45 @@ function setupTabs() {
   }
 }
 
+function setupFilterModes() {
+  const btnQuarter = document.getElementById('mode-btn-quarter');
+  const btnMonth = document.getElementById('mode-btn-month');
+  const btnFy = document.getElementById('mode-btn-fy');
+
+  const controlQuarter = document.getElementById('period-control-quarter');
+  const controlMonth = document.getElementById('period-control-month');
+
+  function setMode(mode) {
+    selectedMode = mode;
+    [btnQuarter, btnMonth, btnFy].forEach(b => {
+      if (b) {
+        b.style.background = 'transparent';
+        b.style.color = '#64748b';
+        b.classList.remove('active');
+      }
+    });
+
+    let activeBtn = btnQuarter;
+    if (mode === 'MONTH') activeBtn = btnMonth;
+    if (mode === 'FY') activeBtn = btnFy;
+
+    if (activeBtn) {
+      activeBtn.style.background = '#205646';
+      activeBtn.style.color = '#ffffff';
+      activeBtn.classList.add('active');
+    }
+
+    if (controlQuarter) controlQuarter.style.display = mode === 'QUARTER' ? 'block' : 'none';
+    if (controlMonth) controlMonth.style.display = mode === 'MONTH' ? 'block' : 'none';
+
+    loadGstReport();
+  }
+
+  btnQuarter?.addEventListener('click', () => setMode('QUARTER'));
+  btnMonth?.addEventListener('click', () => setMode('MONTH'));
+  btnFy?.addEventListener('click', () => setMode('FY'));
+}
+
 function setupQuarterButtons() {
   const buttons = document.querySelectorAll('.quarter-btn');
   buttons.forEach(btn => {
@@ -50,14 +92,46 @@ function setupQuarterButtons() {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedQuarter = btn.getAttribute('data-quarter') || 'Q1';
-      loadGstQuarterly();
+      loadGstReport();
     });
   });
 }
 
-async function loadGstQuarterly() {
+// ==========================================================================
+// 1. GST REPORT (MONTH / QUARTER / FY)
+// ==========================================================================
+async function loadGstReport() {
   const year = document.getElementById('gst-year-select')?.value || 2026;
-  const url = `/api/reports/gst-quarterly?year=${encodeURIComponent(year)}&quarter=${encodeURIComponent(selectedQuarter)}`;
+  const month = document.getElementById('gst-month-select')?.value || 10;
+
+  const params = new URLSearchParams();
+  params.append('periodType', selectedMode);
+  params.append('year', year);
+  if (selectedMode === 'QUARTER') {
+    params.append('quarter', selectedQuarter);
+  } else if (selectedMode === 'MONTH') {
+    params.append('month', month);
+  } else {
+    params.append('quarter', 'ALL');
+  }
+
+  const url = `/api/reports/gst-report?${params.toString()}`;
+
+  const invBody = document.getElementById('gst-invoices-body');
+  if (invBody) {
+    invBody.innerHTML = `
+      <tr>
+        <td colspan="11" style="text-align: center; padding: 36px;">
+          <div style="display:inline-flex; align-items:center; gap:10px; color:#64748b; font-weight:600; font-size:13px;">
+            <div class="invoza-bar-loader">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <span>Calculating GST filing summary...</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
 
   try {
     const data = await apiRequest('GET', url);
@@ -78,6 +152,7 @@ async function loadGstQuarterly() {
     setEl('gst-total-tax', formatCurrency(data.totalGstAmount || 0));
     setEl('gst-cgst-val', formatCurrency(data.totalCgstAmount || 0));
     setEl('gst-sgst-val', formatCurrency(data.totalSgstAmount || 0));
+    setEl('gst-igst-val', formatCurrency(data.totalIgstAmount || 0));
     setEl('gst-invoice-count', `${data.totalInvoiceCount || 0} filed invoices`);
 
     // Slabs table
@@ -93,52 +168,84 @@ async function loadGstQuarterly() {
             <td style="text-align: right;">${formatCurrency(s.taxableAmount || 0)}</td>
             <td style="text-align: right; color: var(--color-text-secondary);">${formatCurrency(s.cgstAmount || 0)}</td>
             <td style="text-align: right; color: var(--color-text-secondary);">${formatCurrency(s.sgstAmount || 0)}</td>
-            <td style="text-align: right; font-weight: 700; color: var(--color-primary);">${formatCurrency(s.totalTaxAmount || 0)}</td>
+            <td style="text-align: right; color: var(--color-text-secondary);">${formatCurrency(s.igstAmount || 0)}</td>
+            <td style="text-align: right; font-weight: 700; color: #205646;">${formatCurrency(s.totalTaxAmount || 0)}</td>
           `;
           slabsBody.appendChild(tr);
         });
       } else {
-        slabsBody.innerHTML = '<tr><td colspan="6" class="text-center">No tax data for this quarter.</td></tr>';
+        slabsBody.innerHTML = '<tr><td colspan="7" class="text-center">No tax data for this period.</td></tr>';
       }
     }
 
     // Invoices list
     const invBody = document.getElementById('gst-invoices-body');
+    const tableCountEl = document.getElementById('gst-invoice-table-count');
+    if (tableCountEl) {
+      tableCountEl.textContent = `${(data.invoices || []).length} invoices`;
+    }
+
     if (invBody) {
       invBody.innerHTML = '';
       if (data.invoices && data.invoices.length > 0) {
         data.invoices.forEach(inv => {
           const tr = document.createElement('tr');
+          const gstinDisplay = (inv.customerGstin && inv.customerGstin !== 'N/A')
+            ? `<span style="font-family: monospace; font-size: 12px; background: #f8fafc; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">${inv.customerGstin}</span>`
+            : '<span style="color: #94a3b8; font-size: 12px;">N/A</span>';
+
           tr.innerHTML = `
-            <td><a href="invoice-detail.html?id=${inv.id}" style="font-weight:700; color:var(--color-primary);">${inv.invoiceNumber}</a></td>
-            <td>${formatDate(inv.invoiceDate)}</td>
-            <td>${inv.customerName || 'N/A'}</td>
-            <td><span class="badge badge-info">${inv.gstPercent}%</span></td>
+            <td><a href="invoice-detail.html?id=${inv.id}" style="font-weight:700; color:#205646; text-decoration: none;">${inv.invoiceNumber}</a></td>
+            <td style="color: #64748b;">${formatDate(inv.invoiceDate)}</td>
+            <td><strong>${inv.customerName || 'N/A'}</strong></td>
+            <td>${gstinDisplay}</td>
             <td style="text-align: right;">${formatCurrency(inv.taxableAmount)}</td>
-            <td style="text-align: right; color: var(--color-primary); font-weight:600;">${formatCurrency(inv.totalGst)}</td>
-            <td style="text-align: right; font-weight: 700;">${formatCurrency(inv.grandTotal)}</td>
-            <td><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
+            <td style="text-align: center;"><span class="badge badge-info" style="font-size: 11px;">${inv.gstPercent}%</span></td>
+            <td style="text-align: right; color: #64748b;">${formatCurrency(inv.cgstAmount)}</td>
+            <td style="text-align: right; color: #64748b;">${formatCurrency(inv.sgstAmount)}</td>
+            <td style="text-align: right; color: #64748b;">${formatCurrency(inv.igstAmount || 0)}</td>
+            <td style="text-align: right; font-weight: 700; color: #0f172a;">${formatCurrency(inv.grandTotal)}</td>
+            <td style="text-align: center;"><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
           `;
           invBody.appendChild(tr);
         });
       } else {
-        invBody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 32px; color: var(--color-text-tertiary);">No non-draft invoices in this quarter.</td></tr>';
+        invBody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding: 36px; color: var(--color-text-tertiary);">No outward supplies in this selected filing period.</td></tr>';
       }
     }
 
   } catch (error) {
-    if (typeof showToast === 'function') showToast('Failed to load GST quarterly report', 'error');
+    if (typeof showToast === 'function') showToast('Failed to load GST tax report', 'error');
   }
 }
 
+// Backward-compatible alias
+window.loadGstQuarterly = loadGstReport;
+
+// ==========================================================================
+// 2. EXPORT GST REPORT CSV (FORMATTED FOR CHARTERED ACCOUNTANT)
+// ==========================================================================
 function exportGstCsv() {
   if (!currentGstData || !currentGstData.invoices || currentGstData.invoices.length === 0) {
-    if (typeof showToast === 'function') showToast('No data to export for this quarter', 'warning');
+    if (typeof showToast === 'function') showToast('No data to export for this period', 'warning');
     return;
   }
 
   const rows = [
-    ['Invoice Number', 'Invoice Date', 'Customer Name', 'GST Rate (%)', 'Taxable Value (INR)', 'CGST (INR)', 'SGST (INR)', 'Total GST (INR)', 'Grand Total (INR)', 'Status']
+    [
+      'Invoice Number',
+      'Invoice Date',
+      'Customer Name',
+      'Customer GSTIN',
+      'Taxable Value (INR)',
+      'GST Rate (%)',
+      'CGST (INR)',
+      'SGST (INR)',
+      'IGST (INR)',
+      'Total GST (INR)',
+      'Grand Total (INR)',
+      'Filing Status'
+    ]
   ];
 
   currentGstData.invoices.forEach(i => {
@@ -146,12 +253,14 @@ function exportGstCsv() {
       `"${i.invoiceNumber}"`,
       `"${i.invoiceDate}"`,
       `"${(i.customerName || '').replace(/"/g, '""')}"`,
+      `"${i.customerGstin && i.customerGstin !== 'N/A' ? i.customerGstin : ''}"`,
+      (i.taxableAmount || 0).toFixed(2),
       i.gstPercent,
-      i.taxableAmount.toFixed(2),
-      i.cgstAmount.toFixed(2),
-      i.sgstAmount.toFixed(2),
-      i.totalGst.toFixed(2),
-      i.grandTotal.toFixed(2),
+      (i.cgstAmount || 0).toFixed(2),
+      (i.sgstAmount || 0).toFixed(2),
+      (i.igstAmount || 0).toFixed(2),
+      (i.totalGst || 0).toFixed(2),
+      (i.grandTotal || 0).toFixed(2),
       `"${i.status}"`
     ]);
   });
@@ -160,14 +269,22 @@ function exportGstCsv() {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement('a');
   link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `GSTR1_${currentGstData.year}_${currentGstData.quarter}.csv`);
+  
+  let filenamePeriod = `${currentGstData.year}_${currentGstData.periodType}`;
+  if (currentGstData.periodType === 'QUARTER') filenamePeriod += `_${currentGstData.quarter}`;
+  if (currentGstData.periodType === 'MONTH') filenamePeriod += `_Month${currentGstData.month}`;
+
+  link.setAttribute('download', `InvoiceMate_GST_Report_${filenamePeriod}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  if (typeof showToast === 'function') showToast('GSTR-1 CSV exported successfully', 'success');
+  if (typeof showToast === 'function') showToast('GST Report CSV exported successfully for CA review', 'success');
 }
 
+// ==========================================================================
+// 3. SALES OVERVIEW & ANALYTICS TAB
+// ==========================================================================
 async function loadCustomersForFilter() {
   try {
     const customers = await apiRequest('GET', '/api/customers');
@@ -213,16 +330,16 @@ async function loadSalesReport() {
         summary.invoices.forEach(inv => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td><a href="invoice-detail.html?id=${inv.id}" style="font-weight:700;">${inv.invoiceNumber}</a></td>
-            <td>${formatDate(inv.invoiceDate)}</td>
-            <td>${inv.customerName || 'N/A'}</td>
+            <td><a href="invoice-detail.html?id=${inv.id}" style="font-weight:700; color:#205646; text-decoration:none;">${inv.invoiceNumber}</a></td>
+            <td style="color:#64748b;">${formatDate(inv.invoiceDate)}</td>
+            <td><strong>${inv.customerName || 'N/A'}</strong></td>
             <td><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
-            <td style="text-align: right; font-weight:700;">${formatCurrency(inv.grandTotal)}</td>
+            <td style="text-align: right; font-weight:700; color:#0f172a;">${formatCurrency(inv.grandTotal)}</td>
           `;
           invTbody.appendChild(tr);
         });
       } else {
-        invTbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px;">No sales in this period.</td></tr>';
+        invTbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding:32px; color:var(--color-text-tertiary);">No sales in this period.</td></tr>';
       }
     }
   } catch (e) {

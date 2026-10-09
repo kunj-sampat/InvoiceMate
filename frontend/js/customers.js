@@ -88,6 +88,8 @@ function openCustomerModal(customer) {
   document.getElementById('modal-cust-email').value = customer ? (customer.email || '') : '';
   document.getElementById('modal-cust-phone').value = customer ? (customer.phone || '') : '';
   document.getElementById('modal-cust-address').value = customer ? (customer.address || '') : '';
+  const gstinInput = document.getElementById('modal-cust-gstin');
+  if (gstinInput) gstinInput.value = customer ? (customer.gstin || '') : '';
 
   const modal = document.getElementById('customer-modal');
   if (modal) modal.style.display = 'flex';
@@ -108,13 +110,14 @@ async function saveCustomer() {
   const email = document.getElementById('modal-cust-email').value;
   const phone = document.getElementById('modal-cust-phone').value;
   const address = document.getElementById('modal-cust-address').value;
+  const gstin = document.getElementById('modal-cust-gstin')?.value || '';
 
   if (!name) {
     if(typeof showToast === 'function') showToast('Name is required', 'error');
     return;
   }
 
-  const payload = { name, email, phone, address };
+  const payload = { name, email, phone, address, gstin };
 
   try {
     if (editingCustomerId) {
@@ -134,7 +137,13 @@ async function saveCustomer() {
 
 async function deleteCustomer(id, event) {
   event.stopPropagation();
-  if (!confirm('Are you sure you want to delete this customer?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Delete Customer?',
+    message: 'Are you sure you want to delete this customer? Their invoices and past records will remain accessible.',
+    confirmText: 'Delete Customer',
+    isDanger: true
+  });
+  if (!ok) return;
   try {
     await apiRequest('DELETE', `/api/customers/${id}`);
     if(typeof showToast === 'function') showToast('Customer deleted', 'success');

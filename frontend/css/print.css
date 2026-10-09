@@ -1,49 +1,83 @@
 @media print {
   body {
-    background-color: #fff;
-    color: #000;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .sidebar,
+  .invoza-sidebar,
   .top-header,
+  .invoza-top-header,
+  .invoza-header-tools,
   .btn,
   button,
+  .action-links,
   .create-form-section,
   .invoice-detail-sidebar,
   .filter-bar,
   .page-header,
+  .invoza-page-header,
   .toast-container,
-  #sidebar-toggle {
+  #sidebar-toggle,
+  .modal-overlay,
+  .invoza-confirm-overlay,
+  .no-print {
     display: none !important;
   }
 
-  .main-wrapper {
-    margin-left: 0;
-    padding: 0;
+  .main-wrapper,
+  .invoza-main-area {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 
-  .content-area {
-    padding: 0;
-    margin-top: 0;
+  .invoza-app-window {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  .content-area,
+  .invoza-page-content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .invoice-detail-layout {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
   }
 
   #invoice-preview-container,
   .invoice-detail-main {
-    box-shadow: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    max-height: none;
-    overflow: visible;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .invoice-preview {
-    max-width: 100%;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 10mm !important;
   }
 
   @page {
-    margin: 1.5cm;
-    size: A4;
+    margin: 0;
+    size: A4 portrait;
   }
 }

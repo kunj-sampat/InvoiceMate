@@ -291,7 +291,13 @@ async function saveProduct() {
 }
 
 async function deleteProduct(id) {
-  if (!confirm('Are you sure you want to delete this item from your catalog?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Delete Catalog Item?',
+    message: 'Are you sure you want to delete this product/service from your catalog?',
+    confirmText: 'Delete Item',
+    isDanger: true
+  });
+  if (!ok) return;
   try {
     await apiRequest('DELETE', `/api/products/${id}`);
     if (typeof showToast === 'function') showToast('Item deleted', 'success');

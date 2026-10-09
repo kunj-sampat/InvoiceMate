@@ -15,6 +15,7 @@ public class InvoiceRequest {
     private boolean isDraft;
     private boolean isEstimate = false;
     private String businessName;
+    private String upiId;
 
     public InvoiceRequest() {}
 
@@ -40,4 +41,6 @@ public class InvoiceRequest {
     public void setEstimate(boolean estimate) { isEstimate = estimate; }
     public String getBusinessName() { return businessName; }
     public void setBusinessName(String businessName) { this.businessName = businessName; }
+    public String getUpiId() { return upiId; }
+    public void setUpiId(String upiId) { this.upiId = upiId; }
 }

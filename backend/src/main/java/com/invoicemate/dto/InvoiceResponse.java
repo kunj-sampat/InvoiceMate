@@ -39,6 +39,7 @@ public class InvoiceResponse {
     private String businessPhone;
     private String businessEmail;
     private String logoUrl;
+    private String upiId;
 
     private List<InvoiceItem> items;
     private List<PaymentResponse> payments;
@@ -56,6 +57,7 @@ public class InvoiceResponse {
             res.setBusinessEmail((user.getBusinessEmail() != null && !user.getBusinessEmail().isBlank())
                     ? user.getBusinessEmail() : user.getEmail());
             res.setLogoUrl(user.getLogoPath());
+            res.setUpiId(user.getUpiId());
         }
         return res;
     }
@@ -157,4 +159,6 @@ public class InvoiceResponse {
     public void setBusinessEmail(String businessEmail) { this.businessEmail = businessEmail; }
     public String getLogoUrl() { return logoUrl; }
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
+    public String getUpiId() { return upiId; }
+    public void setUpiId(String upiId) { this.upiId = upiId; }
 }

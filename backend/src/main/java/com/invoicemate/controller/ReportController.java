@@ -41,8 +41,19 @@ public class ReportController {
 
     @GetMapping("/gst-quarterly")
     public com.invoicemate.dto.GstQuarterlyResponse getGstQuarterly(
+            @RequestParam(required = false) String periodType,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String quarter) {
-        return reportService.getGstQuarterlyReport(getUserId(), year, quarter);
+            @RequestParam(required = false) String quarter,
+            @RequestParam(required = false) Integer month) {
+        return reportService.getGstReport(getUserId(), periodType, year, quarter, month);
+    }
+
+    @GetMapping("/gst-report")
+    public com.invoicemate.dto.GstQuarterlyResponse getGstReport(
+            @RequestParam(required = false) String periodType,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String quarter,
+            @RequestParam(required = false) Integer month) {
+        return reportService.getGstReport(getUserId(), periodType, year, quarter, month);
     }
 }

@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('cancel-recurring-btn')?.addEventListener('click', closeRecurringModal);
   document.getElementById('close-recurring-modal')?.addEventListener('click', closeRecurringModal);
   document.getElementById('save-recurring-btn')?.addEventListener('click', saveRecurringSchedule);
+  document.getElementById('rec-add-item-btn')?.addEventListener('click', () => addRecurringItemRow());
+
+  document.getElementById('rec-gst-rate')?.addEventListener('change', recalculateCycleTotals);
+  document.getElementById('rec-discount')?.addEventListener('input', recalculateCycleTotals);
 
   // Default start date to today
   const startInput = document.getElementById('rec-start-date');
@@ -53,10 +57,11 @@ function updateRecurringSummary() {
     if ((r.status || 'ACTIVE').toUpperCase() === 'ACTIVE') {
       const g = Number(r.grandTotal || 0);
       const freq = (r.frequency || 'MONTHLY').toUpperCase();
-      if (freq === 'WEEKLY') mrr += g * 4.33;
+      if (freq === 'DAILY') mrr += g * 30.0;
+      else if (freq === 'WEEKLY') mrr += g * 4.33;
       else if (freq === 'QUARTERLY') mrr += g / 3.0;
       else if (freq === 'YEARLY') mrr += g / 12.0;
-      else mrr += g; // Monthly
+      else mrr += g; // Monthly default
     }
   });
 
@@ -108,16 +113,16 @@ function renderRecurringTable() {
       <td>
         <div style="color: var(--color-text-secondary);">${r.lastIssuedDate ? formatDate(r.lastIssuedDate) : '&mdash; Never'}</div>
       </td>
-      <td style="font-weight: 800; color: var(--color-text);">
+      <td style="font-weight: 800; color: var(--color-text); text-align: right;">
         ${formatCurrency(r.grandTotal)}
       </td>
-      <td>
+      <td style="text-align: center;">
         <span class="badge ${isActive ? 'badge-success' : 'badge-warning'}">
           ${isActive ? 'Active' : 'Paused'}
         </span>
       </td>
-      <td>
-        <div style="display:flex; gap:6px; align-items:center;">
+      <td style="text-align: center;">
+        <div style="display:flex; gap:6px; align-items:center; justify-content: center;">
           <button class="btn btn-sm btn-primary" onclick="generateNow(${r.id})" title="Generate real invoice now">&#9889; Issue Now</button>
           <button class="btn btn-sm btn-secondary" onclick="toggleStatus(${r.id})">
             ${isActive ? 'Pause' : 'Resume'}
@@ -130,11 +135,101 @@ function renderRecurringTable() {
   });
 }
 
+function addRecurringItemRow(name = '', qty = 1, price = '') {
+  const container = document.getElementById('rec-items-list');
+  if (!container) return;
+
+  const row = document.createElement('div');
+  row.className = 'rec-item-row';
+  row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+  row.innerHTML = `
+    <input type="text" class="rec-item-desc" placeholder="Service description / product..." value="${escapeHtml(name)}" style="flex: 3; padding: 7px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px;" required>
+    <input type="number" class="rec-item-qty" min="1" step="1" value="${qty}" placeholder="Qty" style="width: 65px; padding: 7px 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center;" required>
+    <input type="number" class="rec-item-rate" min="0" step="0.01" value="${price}" placeholder="Rate (₹)" style="width: 110px; padding: 7px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: right;" required>
+    <span class="rec-item-row-total" style="width: 85px; text-align: right; font-weight: 700; color: #1e293b; font-size: 13px;">&#8377;0.00</span>
+    <button type="button" class="rec-remove-item" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 16px; line-height: 1; border-radius: 6px;" title="Remove Item">&times;</button>
+  `;
+
+  const descInput = row.querySelector('.rec-item-desc');
+  const qtyInput = row.querySelector('.rec-item-qty');
+  const rateInput = row.querySelector('.rec-item-rate');
+  const totalSpan = row.querySelector('.rec-item-row-total');
+  const removeBtn = row.querySelector('.rec-remove-item');
+
+  function updateRowTotal() {
+    const q = Math.max(1, Number(qtyInput.value) || 1);
+    const p = Math.max(0, Number(rateInput.value) || 0);
+    const lineTotal = q * p;
+    totalSpan.textContent = formatCurrency(lineTotal);
+    recalculateCycleTotals();
+  }
+
+  qtyInput.addEventListener('input', updateRowTotal);
+  rateInput.addEventListener('input', updateRowTotal);
+
+  removeBtn.addEventListener('click', () => {
+    const allRows = container.querySelectorAll('.rec-item-row');
+    if (allRows.length <= 1) {
+      if (typeof showToast === 'function') showToast('At least one item is required', 'warning');
+      return;
+    }
+    row.remove();
+    recalculateCycleTotals();
+  });
+
+  container.appendChild(row);
+  updateRowTotal();
+}
+
+function recalculateCycleTotals() {
+  const container = document.getElementById('rec-items-list');
+  if (!container) return;
+
+  const rows = container.querySelectorAll('.rec-item-row');
+  let subtotal = 0.0;
+
+  rows.forEach(row => {
+    const q = Math.max(1, Number(row.querySelector('.rec-item-qty')?.value) || 1);
+    const p = Math.max(0, Number(row.querySelector('.rec-item-rate')?.value) || 0);
+    subtotal += q * p;
+  });
+
+  const discountPercent = Math.max(0, Math.min(100, Number(document.getElementById('rec-discount')?.value) || 0));
+  const gstPercent = Number(document.getElementById('rec-gst-rate')?.value) || 0;
+
+  const discountAmt = subtotal * (discountPercent / 100.0);
+  const taxable = Math.max(0, subtotal - discountAmt);
+  const gstAmt = taxable * (gstPercent / 100.0);
+  const grandTotal = taxable + gstAmt;
+
+  const subtotalDisp = document.getElementById('rec-subtotal-disp');
+  const discountDisp = document.getElementById('rec-discount-disp');
+  const grandTotalDisp = document.getElementById('rec-cycle-total-display');
+
+  if (subtotalDisp) subtotalDisp.textContent = `Subtotal: ${formatCurrency(subtotal)}`;
+  if (discountDisp) {
+    discountDisp.textContent = discountPercent > 0 ? `(-${discountPercent}% : -${formatCurrency(discountAmt)})` : '';
+  }
+  if (grandTotalDisp) {
+    grandTotalDisp.textContent = `Cycle Total: ${formatCurrency(grandTotal)}`;
+  }
+}
+
 function openRecurringModal() {
   document.getElementById('rec-profile-name').value = '';
-  document.getElementById('rec-item-name').value = '';
-  document.getElementById('rec-item-price').value = '';
   document.getElementById('rec-notes').value = '';
+  document.getElementById('rec-discount').value = '0';
+  document.getElementById('rec-gst-rate').value = '18';
+  document.getElementById('rec-frequency').value = 'MONTHLY';
+
+  const container = document.getElementById('rec-items-list');
+  if (container) {
+    container.innerHTML = '';
+    // Start with 1 default item row
+    addRecurringItemRow('', 1, '');
+  }
+
   const modal = document.getElementById('recurring-modal');
   if (modal) modal.style.display = 'flex';
 }
@@ -149,8 +244,7 @@ async function saveRecurringSchedule() {
   const profileName = document.getElementById('rec-profile-name')?.value.trim();
   const frequency = document.getElementById('rec-frequency')?.value || 'MONTHLY';
   const startDate = document.getElementById('rec-start-date')?.value;
-  const itemName = document.getElementById('rec-item-name')?.value.trim();
-  const itemPrice = Number(document.getElementById('rec-item-price')?.value);
+  const discountPercent = Number(document.getElementById('rec-discount')?.value) || 0;
   const gstPercent = Number(document.getElementById('rec-gst-rate')?.value) || 0;
   const template = document.getElementById('rec-template')?.value || 'modern';
   const notes = document.getElementById('rec-notes')?.value.trim();
@@ -163,8 +257,35 @@ async function saveRecurringSchedule() {
     if (typeof showToast === 'function') showToast('Please enter a schedule title', 'warning');
     return;
   }
-  if (!itemName || isNaN(itemPrice) || itemPrice <= 0) {
-    if (typeof showToast === 'function') showToast('Please enter a valid service description and rate', 'warning');
+
+  // Collect line items
+  const container = document.getElementById('rec-items-list');
+  const rows = container?.querySelectorAll('.rec-item-row') || [];
+  const items = [];
+
+  for (const row of rows) {
+    const desc = row.querySelector('.rec-item-desc')?.value.trim();
+    const qty = Number(row.querySelector('.rec-item-qty')?.value) || 1;
+    const rate = Number(row.querySelector('.rec-item-rate')?.value);
+
+    if (!desc) {
+      if (typeof showToast === 'function') showToast('Please provide a description for all items', 'warning');
+      return;
+    }
+    if (isNaN(rate) || rate <= 0) {
+      if (typeof showToast === 'function') showToast('Please provide a valid rate for all items', 'warning');
+      return;
+    }
+
+    items.push({
+      name: desc,
+      quantity: qty,
+      price: rate
+    });
+  }
+
+  if (items.length === 0) {
+    if (typeof showToast === 'function') showToast('Please add at least one line item', 'warning');
     return;
   }
 
@@ -174,16 +295,10 @@ async function saveRecurringSchedule() {
     frequency,
     startDate: startDate || new Date().toISOString().split('T')[0],
     template,
-    discountPercent: 0,
+    discountPercent,
     gstPercent,
     notes,
-    items: [
-      {
-        name: itemName,
-        quantity: 1,
-        price: itemPrice
-      }
-    ]
+    items
   };
 
   try {
@@ -207,7 +322,14 @@ async function toggleStatus(id) {
 }
 
 async function generateNow(id) {
-  if (!confirm('Issue invoice for this recurring profile immediately?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Generate Invoice Now?',
+    message: 'Issue an immediate billing invoice for this recurring profile schedule?',
+    confirmText: 'Generate Invoice',
+    cancelText: 'Cancel',
+    isDanger: false
+  });
+  if (!ok) return;
   try {
     const inv = await apiRequest('POST', `/api/recurring/${id}/generate`);
     if (typeof showToast === 'function') showToast(`Invoice #${inv.invoiceNumber} created successfully!`, 'success');
@@ -218,7 +340,13 @@ async function generateNow(id) {
 }
 
 async function deleteRecurring(id) {
-  if (!confirm('Are you sure you want to delete this recurring profile?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Delete Recurring Schedule?',
+    message: 'Are you sure you want to delete this recurring automation profile? Future scheduled invoices will not be generated.',
+    confirmText: 'Delete Schedule',
+    isDanger: true
+  });
+  if (!ok) return;
   try {
     await apiRequest('DELETE', `/api/recurring/${id}`);
     if (typeof showToast === 'function') showToast('Recurring profile deleted', 'success');
@@ -226,6 +354,16 @@ async function deleteRecurring(id) {
   } catch (e) {
     if (typeof showToast === 'function') showToast('Failed to delete profile', 'error');
   }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 window.toggleStatus = toggleStatus;

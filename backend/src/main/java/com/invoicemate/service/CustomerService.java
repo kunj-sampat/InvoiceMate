@@ -62,6 +62,7 @@ public class CustomerService {
         c.setEmail(req.getEmail());
         c.setPhone(req.getPhone());
         c.setAddress(req.getAddress());
+        c.setGstin(req.getGstin());
         return customerRepository.save(c);
     }
 
@@ -75,6 +76,7 @@ public class CustomerService {
         c.setEmail(req.getEmail());
         c.setPhone(req.getPhone());
         c.setAddress(req.getAddress());
+        if (req.getGstin() != null) c.setGstin(req.getGstin());
         return customerRepository.save(c);
     }
 

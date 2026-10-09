@@ -12,6 +12,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByInvoiceId(Long invoiceId);
     List<Payment> findByUserIdAndPaymentDateBetween(Long userId, LocalDate from, LocalDate to);
     
-    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.invoiceId = :invoiceId")
+    @Query("SELECT COALESCE(SUM(p.amount), 0.0) FROM Payment p WHERE p.invoiceId = :invoiceId")
     double sumAmountByInvoiceId(@Param("invoiceId") Long invoiceId);
+
+    @Query("SELECT COALESCE(SUM(p.amount), 0.0) FROM Payment p WHERE p.userId = :userId")
+    double sumAmountByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COALESCE(SUM(p.amount), 0.0) FROM Payment p WHERE p.userId = :userId AND p.paymentDate BETWEEN :from AND :to")
+    double sumAmountByUserIdAndPaymentDateBetween(@Param("userId") Long userId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 }

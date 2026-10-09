@@ -91,7 +91,14 @@ function updateSummary(estimates) {
 }
 
 async function convertToInvoice(id) {
-  if (!confirm('Convert this estimate to an invoice?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Convert to Invoice?',
+    message: 'Convert this estimate into a full invoice with billing line items?',
+    confirmText: 'Convert Now',
+    cancelText: 'Keep as Estimate',
+    isDanger: false
+  });
+  if (!ok) return;
   try {
     // Duplicate the estimate as a regular invoice by posting to duplicate and then updating
     const est = await apiRequest('GET', `/api/invoices/${id}`);
@@ -122,7 +129,13 @@ async function convertToInvoice(id) {
 }
 
 async function deleteEstimate(id) {
-  if (!confirm('Delete this estimate?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Delete Estimate?',
+    message: 'Are you sure you want to permanently delete this estimate quotation?',
+    confirmText: 'Delete Estimate',
+    isDanger: true
+  });
+  if (!ok) return;
   try {
     await apiRequest('DELETE', `/api/invoices/${id}`);
     if (typeof showToast === 'function') showToast('Estimate deleted', 'success');

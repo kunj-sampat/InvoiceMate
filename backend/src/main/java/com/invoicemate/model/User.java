@@ -41,6 +41,8 @@ public class User {
     private String invoiceHeading = "INVOICE";
     private String footerText;
     private String paymentInstructions;
+    @Column(name = "upi_id")
+    private String upiId;
     private String theme = "light";
     
     private LocalDateTime createdAt;
@@ -97,6 +99,8 @@ public class User {
     public void setFooterText(String footerText) { this.footerText = footerText; }
     public String getPaymentInstructions() { return paymentInstructions; }
     public void setPaymentInstructions(String paymentInstructions) { this.paymentInstructions = paymentInstructions; }
+    public String getUpiId() { return upiId; }
+    public void setUpiId(String upiId) { this.upiId = upiId; }
     public String getTheme() { return theme; }
     public void setTheme(String theme) { this.theme = theme; }
     public LocalDateTime getCreatedAt() { return createdAt; }

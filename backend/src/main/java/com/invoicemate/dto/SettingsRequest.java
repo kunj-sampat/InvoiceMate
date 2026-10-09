@@ -16,6 +16,7 @@ public class SettingsRequest {
     private String invoiceHeading;
     private String footerText;
     private String paymentInstructions;
+    private String upiId;
     private String theme;
 
     public SettingsRequest() {}
@@ -46,6 +47,8 @@ public class SettingsRequest {
     public void setFooterText(String footerText) { this.footerText = footerText; }
     public String getPaymentInstructions() { return paymentInstructions; }
     public void setPaymentInstructions(String paymentInstructions) { this.paymentInstructions = paymentInstructions; }
+    public String getUpiId() { return upiId; }
+    public void setUpiId(String upiId) { this.upiId = upiId; }
     public String getTheme() { return theme; }
     public void setTheme(String theme) { this.theme = theme; }
 }

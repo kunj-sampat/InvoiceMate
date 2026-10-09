@@ -19,6 +19,7 @@ public class Customer {
     private String email;
     private String phone;
     private String address;
+    private String gstin;
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -48,6 +49,8 @@ public class Customer {
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getGstin() { return gstin; }
+    public void setGstin(String gstin) { this.gstin = gstin; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

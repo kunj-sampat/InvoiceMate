@@ -488,3 +488,519 @@ tr:hover td { background: var(--color-bg-secondary); }
   background: var(--color-primary-light);
   padding: 14px 16px;
 }
+
+/* ==========================================================================
+   IMAGE 4: CLOUD DOWNLOAD BADGE (Replacing traditional download icons)
+   ========================================================================== */
+.invoza-cloud-dl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.28);
+  flex-shrink: 0;
+  margin-right: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover .invoza-cloud-dl-badge,
+a:hover .invoza-cloud-dl-badge,
+.invoza-btn-outline:hover .invoza-cloud-dl-badge {
+  transform: translateY(-1px) scale(1.08);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.45);
+}
+
+/* ==========================================================================
+   IMAGE 5: 4-BAR EQUALIZER WAVE LOADER
+   ========================================================================== */
+.invoza-bar-loader {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+
+.invoza-bar-loader span {
+  display: inline-block;
+  width: 4px;
+  background: #3b82f6;
+  border-radius: 3px;
+  animation: invozaBarWave 1.1s ease-in-out infinite;
+}
+
+.invoza-bar-loader span:nth-child(1) { height: 19px; animation-delay: 0s; }
+.invoza-bar-loader span:nth-child(2) { height: 15px; animation-delay: 0.15s; }
+.invoza-bar-loader span:nth-child(3) { height: 11px; animation-delay: 0.3s; }
+.invoza-bar-loader span:nth-child(4) { height: 7px; animation-delay: 0.45s; }
+
+@keyframes invozaBarWave {
+  0%, 100% {
+    transform: scaleY(0.35);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.invoza-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 20px;
+  color: var(--color-text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   GO PREMIUM BUTTON (Luxury Glass Amber / Gold Shimmer)
+   ========================================================================== */
+.invoza-btn-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.22));
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #b45309;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.dark .invoza-btn-premium {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.3));
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
+.invoza-btn-premium:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border-color: #d97706;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.invoza-btn-premium .premium-crown {
+  color: #d97706;
+  transition: color 0.25s;
+}
+
+.invoza-btn-premium:hover .premium-crown {
+  color: #ffffff;
+}
+
+.invoza-btn-premium .premium-sparkle {
+  font-size: 13px;
+  line-height: 1;
+  animation: sparkleTwinkle 2s infinite ease-in-out;
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+}
+
+/* ==========================================================================
+   INTERACTIVE MONTH CALENDAR & TASK PLANNER MODAL
+   ========================================================================== */
+.calendar-modal-box {
+  width: 95%;
+  max-width: 820px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.dark .calendar-modal-box {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: #334155;
+}
+
+.calendar-planner-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: 480px;
+}
+
+@media (max-width: 768px) {
+  .calendar-planner-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar-view-pane {
+  padding: 24px 28px;
+  border-right: 1px solid #e2e8f0;
+}
+
+body.dark .calendar-view-pane {
+  border-right-color: #334155;
+}
+
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+body.dark .cal-title { color: #f8fafc; }
+
+.cal-nav-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.cal-btn-nav {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.18s;
+}
+
+body.dark .cal-btn-nav {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.cal-btn-nav:hover {
+  background: #205646;
+  color: #fff;
+  border-color: #205646;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cal-day-header {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  padding: 4px 0 8px;
+}
+
+.cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  user-select: none;
+  background: transparent;
+}
+
+body.dark .cal-cell { color: #e2e8f0; }
+
+.cal-cell:hover {
+  background: #f1f5f9;
+}
+
+body.dark .cal-cell:hover { background: #1e293b; }
+
+.cal-cell.other-month {
+  color: #cbd5e1;
+  opacity: 0.5;
+}
+
+body.dark .cal-cell.other-month { color: #475569; }
+
+.cal-cell.today {
+  border: 1.5px solid #10b981;
+  color: #059669;
+}
+
+.cal-cell.selected {
+  background: #205646 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(32, 86, 70, 0.35);
+}
+
+.cal-task-dot-wrap {
+  position: absolute;
+  bottom: 4px;
+  display: flex;
+  gap: 2px;
+}
+
+.cal-task-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #3b82f6;
+}
+
+.cal-cell.selected .cal-task-dot {
+  background: #ffffff;
+}
+
+/* Tasks Pane */
+.calendar-tasks-pane {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+}
+
+body.dark .calendar-tasks-pane {
+  background: #0f172a;
+}
+
+.tasks-pane-header {
+  margin-bottom: 16px;
+}
+
+.tasks-pane-date {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px;
+}
+
+body.dark .tasks-pane-date { color: #f8fafc; }
+
+.tasks-pane-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.tasks-list-container {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 250px;
+  padding-right: 4px;
+  margin-bottom: 16px;
+}
+
+.task-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.15s ease;
+}
+
+body.dark .task-item-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.task-item-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.task-item-card.completed .task-item-title {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.task-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: #205646;
+  cursor: pointer;
+}
+
+.task-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.task-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.dark .task-item-title { color: #f1f5f9; }
+
+.task-item-time {
+  font-size: 11px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.task-badge-allday {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e0f2fe;
+  color: #0284c7;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+body.dark .task-badge-allday {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+}
+
+.task-btn-del {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.task-btn-del:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* Quick Add Task Input Box */
+.add-task-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+body.dark .add-task-box {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.add-task-box input[type="text"] {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  padding: 4px 0 8px;
+  color: #0f172a;
+  outline: none;
+  border-bottom: 1px solid #f1f5f9;
+  font-family: inherit;
+}
+
+body.dark .add-task-box input[type="text"] {
+  color: #f8fafc;
+  border-bottom-color: #334155;
+}
+
+.add-task-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.add-task-time-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.add-task-time-wrap input[type="time"] {
+  padding: 3px 6px;
+  font-size: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+}
+
+body.dark .add-task-time-wrap input[type="time"] {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.btn-add-task {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: #205646;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.btn-add-task:hover {
+  background: #173f33;
+}
+

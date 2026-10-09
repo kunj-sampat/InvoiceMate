@@ -45,6 +45,17 @@ body.auth-page {
   pointer-events: none;
   z-index: 1;
   opacity: 0.85;
+  animation: sphereAmbientFloat 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes sphereAmbientFloat {
+  0% {
+    transform: translateY(-50%) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translateY(calc(-50% - 16px)) translate3d(10px, 0, 0);
+  }
 }
 
 /* Floating Frosted Glass Card */
@@ -62,7 +73,19 @@ body.auth-page {
     0 0 0 1px rgba(255, 255, 255, 0.8);
   position: relative;
   z-index: 10;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: authCardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes authCardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Brand Header */
@@ -171,13 +194,15 @@ body.auth-page {
   color: #0f172a;
   outline: none;
   font-family: inherit;
-  transition: all 0.18s ease;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease, background-color 0.2s ease;
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
 }
 
 .auth-input-pill:focus {
   border-color: #205646;
-  box-shadow: 0 0 0 3.5px rgba(32, 86, 70, 0.12);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3.5px rgba(32, 86, 70, 0.12), 0 4px 14px rgba(32, 86, 70, 0.05);
+  transform: translateY(-1px);
 }
 
 .auth-input-pill::placeholder {
@@ -324,4 +349,64 @@ body.auth-page {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 18px;
+}
+
+/* ==========================================================================
+   AUTH ENHANCEMENTS: BRAND HEADER & INLINE ICONS
+   ========================================================================== */
+.auth-brand-center {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-brand-center .invoza-brand-wordmark {
+  font-size: 25px;
+  letter-spacing: -0.8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: baseline;
+  text-decoration: none;
+}
+
+.auth-brand-center .brand-invoice {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.auth-brand-center .brand-mate {
+  font-weight: 900;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-brand-center .brand-dot {
+  font-weight: 900;
+  color: #10b981;
+}
+
+.auth-field-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.auth-input-pill.has-icon {
+  padding-left: 48px;
+}
+
+.auth-input-pill:focus ~ .auth-field-icon,
+.auth-input-pill-wrap:focus-within .auth-field-icon {
+  color: #059669;
+}
+
+.btn-social-pill svg {
+  flex-shrink: 0;
 }

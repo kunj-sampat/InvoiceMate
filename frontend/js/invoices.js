@@ -19,7 +19,39 @@ document.addEventListener('DOMContentLoaded', () => {
   if (applyFiltersBtn) {
     applyFiltersBtn.addEventListener('click', loadInvoices);
   }
+
+  const exportBtn = document.getElementById('export-csv-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportInvoicesToCSV);
+  }
 });
+
+let currentLoadedInvoices = [];
+
+function exportInvoicesToCSV() {
+  if (!currentLoadedInvoices || currentLoadedInvoices.length === 0) {
+    if (typeof showToast === 'function') showToast('No invoices to export', 'warning');
+    return;
+  }
+  const headers = ['Invoice #', 'Customer', 'Date', 'Due Date', 'Amount (INR)', 'Status'];
+  const rows = currentLoadedInvoices.map(inv => [
+    `"${inv.invoiceNumber || inv.id}"`,
+    `"${(inv.customerName || '').replace(/"/g, '""')}"`,
+    `"${inv.invoiceDate || ''}"`,
+    `"${inv.dueDate || ''}"`,
+    (inv.grandTotal || 0).toFixed(2),
+    `"${inv.status || 'PENDING'}"`
+  ]);
+  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `InvoiceMate_Invoices_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  if (typeof showToast === 'function') showToast('Invoices exported successfully!', 'success');
+}
 
 async function loadInvoices() {
   const search = document.getElementById('invoice-search')?.value || '';
@@ -35,6 +67,7 @@ async function loadInvoices() {
 
   try {
     const data = await apiRequest('GET', `/api/invoices?${params.toString()}`);
+    currentLoadedInvoices = data || [];
     const tbody = document.getElementById('invoices-body');
     if (!tbody) return;
 
@@ -92,7 +125,13 @@ async function duplicateInvoice(id) {
 }
 
 async function deleteInvoice(id) {
-  if (!confirm('Delete this invoice?')) return;
+  const ok = await showConfirmDialog({
+    title: 'Delete Invoice?',
+    message: 'Are you sure you want to permanently delete this invoice? This action cannot be undone.',
+    confirmText: 'Delete Invoice',
+    isDanger: true
+  });
+  if (!ok) return;
   try {
     await apiRequest('DELETE', `/api/invoices/${id}`);
     if(typeof showToast === 'function') showToast('Invoice deleted', 'success');

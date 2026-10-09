@@ -118,6 +118,11 @@ async function loadUserSettings() {
       if (bizNameInput && !bizNameInput.value) {
         bizNameInput.value = settings.businessName || localStorage.getItem('businessName') || '';
       }
+
+      const upiInput = document.getElementById('inv-upi-id');
+      if (upiInput && !upiInput.value) {
+        upiInput.value = settings.upiId || localStorage.getItem('userUpiId') || '';
+      }
       
       if (!editingInvoiceId) {
         const gstInput = document.getElementById('gst-rate');
@@ -327,6 +332,7 @@ function updatePreview() {
 
   const customBizName = document.getElementById('inv-biz-name')?.value;
   const activeBizName = customBizName || bizSettings.businessName || localStorage.getItem('businessName') || 'My Business';
+  const upiId = document.getElementById('inv-upi-id')?.value?.trim() || bizSettings.upiId || localStorage.getItem('userUpiId') || '';
 
   renderInvoiceTemplate(preview, tplName, {
     docTitle: 'INVOICE',
@@ -339,6 +345,7 @@ function updatePreview() {
     bizPhone: bizSettings.businessPhone || '+91 98765 43210',
     bizEmail: bizSettings.businessEmail || localStorage.getItem('userEmail') || '',
     logoUrl: bizSettings.logoPath || localStorage.getItem('userLogo') || '',
+    upiId: upiId,
     customerName: custName,
     customerEmail: custEmail,
     customerPhone: custPhone,
@@ -381,6 +388,7 @@ async function saveInvoice(isDraft, isAutoSave = false) {
   const payload = {
     customerId: Number(customerId),
     businessName: document.getElementById('inv-biz-name')?.value || null,
+    upiId: document.getElementById('inv-upi-id')?.value?.trim() || null,
     invoiceDate: (document.getElementById('inv-date') || document.getElementById('invoice-date'))?.value,
     dueDate: document.getElementById('due-date')?.value,
     discountPercent: Number(document.getElementById('discount')?.value) || 0,
@@ -430,6 +438,10 @@ async function loadInvoiceForEditing(id) {
 
     if (data.businessName && document.getElementById('inv-biz-name')) {
       document.getElementById('inv-biz-name').value = data.businessName;
+    }
+
+    if (data.upiId && document.getElementById('inv-upi-id')) {
+      document.getElementById('inv-upi-id').value = data.upiId;
     }
 
     if (document.getElementById('customer-select')) document.getElementById('customer-select').value = data.customerId;

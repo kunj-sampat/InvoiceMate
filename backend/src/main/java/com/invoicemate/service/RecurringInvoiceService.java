@@ -152,6 +152,7 @@ public class RecurringInvoiceService {
 
     private LocalDate computeNextDate(LocalDate current, String frequency) {
         LocalDate base = current != null ? current : LocalDate.now();
+        if ("DAILY".equalsIgnoreCase(frequency)) return base.plusDays(1);
         if ("WEEKLY".equalsIgnoreCase(frequency)) return base.plusWeeks(1);
         if ("QUARTERLY".equalsIgnoreCase(frequency)) return base.plusMonths(3);
         if ("YEARLY".equalsIgnoreCase(frequency)) return base.plusYears(1);

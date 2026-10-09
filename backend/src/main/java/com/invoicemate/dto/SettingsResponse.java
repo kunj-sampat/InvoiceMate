@@ -21,6 +21,7 @@ public class SettingsResponse {
     private String invoiceHeading;
     private String footerText;
     private String paymentInstructions;
+    private String upiId;
     private String theme;
 
     public static SettingsResponse from(User u) {
@@ -43,6 +44,7 @@ public class SettingsResponse {
         r.invoiceHeading = u.getInvoiceHeading();
         r.footerText = u.getFooterText();
         r.paymentInstructions = u.getPaymentInstructions();
+        r.upiId = u.getUpiId();
         r.theme = u.getTheme();
         return r;
     }
@@ -66,5 +68,6 @@ public class SettingsResponse {
     public String getInvoiceHeading() { return invoiceHeading; }
     public String getFooterText() { return footerText; }
     public String getPaymentInstructions() { return paymentInstructions; }
+    public String getUpiId() { return upiId; }
     public String getTheme() { return theme; }
 }

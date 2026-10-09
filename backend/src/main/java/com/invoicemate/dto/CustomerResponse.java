@@ -10,6 +10,7 @@ public class CustomerResponse {
     private String email;
     private String phone;
     private String address;
+    private String gstin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -27,6 +28,7 @@ public class CustomerResponse {
         this.email = c.getEmail();
         this.phone = c.getPhone();
         this.address = c.getAddress();
+        this.gstin = c.getGstin();
         this.createdAt = c.getCreatedAt();
         this.updatedAt = c.getUpdatedAt();
     }
@@ -43,6 +45,8 @@ public class CustomerResponse {
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getGstin() { return gstin; }
+    public void setGstin(String gstin) { this.gstin = gstin; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

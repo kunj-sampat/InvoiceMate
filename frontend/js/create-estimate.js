@@ -178,6 +178,7 @@ function updatePreview() {
     dueLabel: 'Valid Until',
     bizName: biz,
     logoUrl: localStorage.getItem('userLogo') || '',
+    upiId: localStorage.getItem('userUpiId') || '',
     customerName: customerName,
     notes: notes,
     items: estimateItems.map(i => ({

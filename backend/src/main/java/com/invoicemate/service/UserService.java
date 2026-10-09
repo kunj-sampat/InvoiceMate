@@ -9,6 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class UserService {
@@ -40,6 +44,7 @@ public class UserService {
         if (req.getInvoiceHeading() != null) user.setInvoiceHeading(req.getInvoiceHeading());
         if (req.getFooterText() != null) user.setFooterText(req.getFooterText());
         if (req.getPaymentInstructions() != null) user.setPaymentInstructions(req.getPaymentInstructions());
+        if (req.getUpiId() != null) user.setUpiId(req.getUpiId());
         if (req.getTheme() != null) user.setTheme(req.getTheme());
         return userRepository.save(user);
     }
@@ -47,14 +52,14 @@ public class UserService {
     @Transactional
     public String saveLogo(Long userId, MultipartFile file) {
         try {
-            String dir = "./uploads/logos/";
-            File uploadDir = new File(dir);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
+            Path uploadPath = Paths.get("uploads", "logos").toAbsolutePath().normalize();
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
             }
-            String cleanFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename().replaceAll("[^a-zA-Z0-9.-]", "_");
-            File dest = new File(uploadDir, cleanFileName);
-            file.transferTo(dest);
+            String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "logo.png";
+            String cleanFileName = System.currentTimeMillis() + "_" + originalName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            Path targetFile = uploadPath.resolve(cleanFileName);
+            Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
 
             String webPath = "/uploads/logos/" + cleanFileName;
             User user = getUserById(userId);

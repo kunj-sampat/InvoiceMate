@@ -90,6 +90,21 @@ async function loadDashboardData() {
       document.getElementById('health-pending-text').textContent = formatCurrency(totalDue);
     }
 
+    // Fetch Profit Summary (Collected - Expenses)
+    try {
+      const profitData = await apiRequest('GET', '/api/expenses/profit-summary');
+      if (profitData) {
+        if (document.getElementById('health-expenses-text')) {
+          document.getElementById('health-expenses-text').textContent = formatCurrency(profitData.totalExpenses || 0);
+        }
+        if (document.getElementById('health-net-profit')) {
+          document.getElementById('health-net-profit').textContent = formatCurrency(profitData.netProfit || 0);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load expense profit data', e);
+    }
+
     // Overdue Alert Notice
     const overdueNotice = document.getElementById('overdue-alert-notice');
     const overdueCountEl = document.getElementById('overdue-alert-count');
@@ -102,11 +117,18 @@ async function loadDashboardData() {
 
     // 3. Render Mini SVG Graphics
     if (typeof renderInvozaStatGraphics === 'function') {
-      renderInvozaStatGraphics({ paidRate: paidRate || 72 });
+      renderInvozaStatGraphics({ paidRate: paidRate || 0 });
     }
 
-    // 4. Render Dual-Spline Area Chart
-    renderRevenueSplineChart(totalRev, totalPaid);
+    // 4. Fetch All Invoices for Real Cash Flow & Receivables Pipeline Breakdown
+    let allInvoices = [];
+    try {
+      allInvoices = await apiRequest('GET', '/api/invoices') || [];
+    } catch (e) {
+      allInvoices = data.recentInvoices || [];
+    }
+
+    renderCashFlowAndPipeline(allInvoices, totalRev, totalPaid);
 
     // 5. Render Recent Invoices
     dashboardInvoices = data.recentInvoices || [];
@@ -119,54 +141,115 @@ async function loadDashboardData() {
 }
 
 // ==========================================================================
-// 3. REVENUE SPLINE CHART (Real Invoiced vs Collected)
+// 3. REAL CASH FLOW & RECEIVABLES PIPELINE
 // ==========================================================================
-function renderRevenueSplineChart(totalRev, totalPaid) {
-  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  // Calculate scaled data points based on actual revenue
-  const baseInv = Math.max(totalRev / 12, 12000);
-  const basePaid = Math.max(totalPaid / 12, 9000);
+let currentMonthlyData = [];
 
-  const invoicedData = [
-    Math.round(baseInv * 0.8),
-    Math.round(baseInv * 0.95),
-    Math.round(baseInv * 1.1),
-    Math.round(baseInv * 0.75),
-    Math.round(baseInv * 1.05),
-    Math.round(baseInv * 1.2),
-    Math.round(baseInv * 0.9),
-    Math.round(baseInv * 1.15),
-    Math.round(baseInv * 1.0),
-    Math.round(baseInv * 0.85),
-    Math.round(baseInv * 1.1),
-    Math.round(baseInv * 1.25)
-  ];
+function renderCashFlowAndPipeline(invoices, totalRev, totalPaid) {
+  // Exclude estimates
+  const regularInvoices = (invoices || []).filter(i => !i.isEstimate);
 
-  const collectedData = [
-    Math.round(basePaid * 0.7),
-    Math.round(basePaid * 0.9),
-    Math.round(basePaid * 1.0),
-    Math.round(basePaid * 0.7),
-    Math.round(basePaid * 0.95),
-    Math.round(basePaid * 1.1),
-    Math.round(basePaid * 0.85),
-    Math.round(basePaid * 1.05),
-    Math.round(basePaid * 0.95),
-    Math.round(basePaid * 0.8),
-    Math.round(basePaid * 1.0),
-    Math.round(basePaid * 1.15)
-  ];
+  // 1. Calculate Last 6 Months (Real Data)
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const today = new Date();
+  const monthsData = [];
 
-  if (typeof drawInvozaDualSplineChart === 'function') {
-    drawInvozaDualSplineChart('invoza-spline-canvas', labels, invoicedData, collectedData);
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const label = monthNames[m];
+    const fullDate = `${label} ${y}`;
+
+    // Filter invoices matching this month & year
+    let billed = 0;
+    let collected = 0;
+
+    regularInvoices.forEach(inv => {
+      if (!inv.isDraft && inv.invoiceDate) {
+        const invD = new Date(inv.invoiceDate);
+        if (invD.getFullYear() === y && invD.getMonth() === m) {
+          billed += (inv.grandTotal || 0);
+          collected += (inv.amountPaid || 0);
+        }
+      }
+    });
+
+    monthsData.push({ label, fullDate, billed, collected });
   }
 
-  window.addEventListener('resize', () => {
-    if (typeof drawInvozaDualSplineChart === 'function') {
-      drawInvozaDualSplineChart('invoza-spline-canvas', labels, invoicedData, collectedData);
+  currentMonthlyData = monthsData;
+
+  // Draw Bar Chart
+  if (typeof drawInvozaCashFlowBarChart === 'function') {
+    drawInvozaCashFlowBarChart('invoza-bar-canvas', monthsData);
+  }
+
+  window.removeEventListener('resize', resizeCashFlowChart);
+  window.addEventListener('resize', resizeCashFlowChart);
+
+  // 2. Calculate Receivables Status & Aging Breakdown Matrix
+  let paidAmt = 0, paidCount = 0;
+  let pendingAmt = 0, pendingCount = 0;
+  let overdueAmt = 0, overdueCount = 0;
+  let draftAmt = 0, draftCount = 0;
+
+  regularInvoices.forEach(inv => {
+    const total = inv.grandTotal || 0;
+    const paid = inv.amountPaid || 0;
+    const balance = Math.max(total - paid, 0);
+
+    if (inv.isDraft || inv.status === 'DRAFT') {
+      draftAmt += total;
+      draftCount++;
+    } else if (inv.status === 'PAID') {
+      paidAmt += total;
+      paidCount++;
+    } else if (inv.status === 'OVERDUE') {
+      overdueAmt += balance;
+      overdueCount++;
+    } else {
+      // Pending / Partially Paid
+      pendingAmt += balance;
+      pendingCount++;
     }
   });
+
+  const sumAll = paidAmt + pendingAmt + overdueAmt + draftAmt || 1;
+  const paidPct = Math.round((paidAmt / sumAll) * 100);
+  const pendingPct = Math.round((pendingAmt / sumAll) * 100);
+  const overduePct = Math.round((overdueAmt / sumAll) * 100);
+  const draftPct = Math.round((draftAmt / sumAll) * 100);
+
+  // Update DOM elements for pipeline
+  const setEl = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+
+  setEl('pipe-paid-pct', `${paidPct}%`);
+  setEl('pipe-paid-amount', formatCurrency(paidAmt));
+  setEl('pipe-paid-count', `${paidCount} invoice${paidCount !== 1 ? 's' : ''}`);
+
+  setEl('pipe-pending-pct', `${pendingPct}%`);
+  setEl('pipe-pending-amount', formatCurrency(pendingAmt));
+  setEl('pipe-pending-count', `${pendingCount} invoice${pendingCount !== 1 ? 's' : ''}`);
+
+  setEl('pipe-overdue-pct', `${overduePct}%`);
+  setEl('pipe-overdue-amount', formatCurrency(overdueAmt));
+  setEl('pipe-overdue-count', `${overdueCount} invoice${overdueCount !== 1 ? 's' : ''}`);
+
+  setEl('pipe-draft-pct', `${draftPct}%`);
+  setEl('pipe-draft-amount', formatCurrency(draftAmt));
+  setEl('pipe-draft-count', `${draftCount} invoice${draftCount !== 1 ? 's' : ''}`);
+
+  setEl('badge-total-settled', `${paidPct}% Settled`);
+}
+
+function resizeCashFlowChart() {
+  if (typeof drawInvozaCashFlowBarChart === 'function' && currentMonthlyData.length > 0) {
+    drawInvozaCashFlowBarChart('invoza-bar-canvas', currentMonthlyData);
+  }
 }
 
 // ==========================================================================

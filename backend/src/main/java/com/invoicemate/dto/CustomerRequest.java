@@ -5,6 +5,7 @@ public class CustomerRequest {
     private String email;
     private String phone;
     private String address;
+    private String gstin;
 
     public CustomerRequest() {}
 
@@ -16,4 +17,6 @@ public class CustomerRequest {
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getGstin() { return gstin; }
+    public void setGstin(String gstin) { this.gstin = gstin; }
 }

@@ -53,33 +53,49 @@ body.invoza-theme {
 }
 
 .invoza-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 22px;
-  padding-left: 6px;
+  margin-bottom: 24px;
+  padding: 4px 6px;
   text-decoration: none;
+  transition: opacity 0.15s ease;
 }
 
-.invoza-brand-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 800;
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+.invoza-brand:hover {
+  opacity: 0.9;
 }
 
-.invoza-brand-name {
-  font-size: 19px;
+.invoza-brand img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.invoza-brand-wordmark {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  letter-spacing: -0.7px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.invoza-brand-wordmark .brand-invoice {
   font-weight: 800;
-  letter-spacing: -0.5px;
   color: #0f172a;
+}
+
+.invoza-brand-wordmark .brand-mate {
+  font-weight: 900;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.invoza-brand-wordmark .brand-dot {
+  font-weight: 900;
+  color: #10b981;
+  margin-left: 1px;
 }
 
 /* Sidebar Search Box */
@@ -179,17 +195,52 @@ body.invoza-theme {
 }
 
 .invoza-nav-icon {
-  font-size: 15px;
-  width: 18px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  opacity: 0.85;
+  flex-shrink: 0;
+  color: inherit;
 }
 
-.invoza-nav-item.active .invoza-nav-icon {
-  opacity: 1;
-  color: #ffffff;
+.invoza-nav-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.invoza-nav-item:hover .invoza-nav-icon svg {
+  transform: scale(1.08);
+}
+
+.invoza-nav-item.active .invoza-nav-icon svg {
+  stroke: #ffffff;
+}
+
+.invoza-qa-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.invoza-qa-btn:hover .invoza-qa-icon {
+  background: #ffffff;
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.invoza-qa-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Sidebar User Footer */
@@ -250,22 +301,167 @@ body.invoza-theme {
 
 .invoza-btn-signout {
   width: 100%;
-  margin-top: 8px;
-  padding: 6px 12px;
-  background: transparent;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.invoza-btn-signout:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.12);
+}
+
+.invoza-btn-signout:active {
+  transform: translateY(0);
+}
+
+.invoza-btn-signout svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  transition: transform 0.2s ease;
+}
+
+.invoza-btn-signout:hover svg {
+  transform: translateX(2px);
+}
+
+/* ==========================================================================
+   ON-SITE CONFIRMATION DIALOG (Invoza Frosted Glass Modal)
+   Replaces native browser alert/confirm() popups with on-page UI
+   ========================================================================== */
+.invoza-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.invoza-confirm-overlay.active {
+  display: flex !important;
+}
+
+.invoza-confirm-box {
+  width: 90%;
+  max-width: 410px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.25);
+  padding: 28px 24px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: scaleUpModal 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUpModal {
+  from { transform: scale(0.92) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.invoza-confirm-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.invoza-confirm-icon-wrap.danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 4px solid #fee2e2;
+}
+
+.invoza-confirm-icon-wrap.info {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 4px solid #dcfce7;
+}
+
+.invoza-confirm-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+  letter-spacing: -0.3px;
+}
+
+.invoza-confirm-msg {
+  font-size: 13.5px;
   color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.invoza-confirm-actions {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+}
+
+.invoza-confirm-actions button {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.invoza-btn-signout:hover {
-  background: #fee2e2;
-  border-color: #ef4444;
-  color: #dc2626;
+.invoza-confirm-actions .invoza-btn-cancel {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.invoza-confirm-actions .invoza-btn-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.invoza-confirm-actions .invoza-btn-confirm {
+  background: #dc2626;
+  border: 1px solid #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.invoza-confirm-actions .invoza-btn-confirm:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 /* ==========================================================================
@@ -673,3 +869,307 @@ tr:hover td {
     padding-right: 16px;
   }
 }
+
+/* ==========================================================================
+   INVOZA NOTIFICATIONS POPOVER
+   ========================================================================== */
+.invoza-header-tools {
+  position: relative;
+}
+
+.invoza-notifications-popover {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 340px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  padding: 16px;
+  display: none;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.invoza-notifications-popover.active {
+  display: block;
+}
+
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.invoza-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 10px;
+}
+
+.invoza-notif-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.invoza-notif-mark-read {
+  font-size: 11.5px;
+  color: #059669;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.invoza-notif-mark-read:hover {
+  text-decoration: underline;
+}
+
+.invoza-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.invoza-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: background 0.15s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.invoza-notif-item:hover {
+  background: #f1f5f9;
+}
+
+.invoza-notif-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.invoza-notif-icon.alert {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.invoza-notif-icon.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.invoza-notif-icon.info {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.invoza-notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoza-notif-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.invoza-notif-time {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   CLOUD DOWNLOAD BADGE (Uniform across all pages)
+   ========================================================================== */
+.invoza-cloud-dl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.28);
+  flex-shrink: 0;
+  margin-right: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover .invoza-cloud-dl-badge,
+a:hover .invoza-cloud-dl-badge,
+.btn:hover .invoza-cloud-dl-badge {
+  transform: translateY(-1px) scale(1.08);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.45);
+}
+
+/* ==========================================================================
+   MODAL OVERLAY (Universal fail-safe)
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+  display: flex !important;
+}
+
+/* ==========================================================================
+   SIDEBAR GLOBAL SEARCH POPOVER
+   ========================================================================== */
+.invoza-search-box {
+  position: relative;
+}
+
+.invoza-search-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  max-width: 90vw;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  z-index: 2000;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: searchPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes searchPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.invoza-search-popover.active {
+  display: flex !important;
+}
+
+.invoza-search-pop-header {
+  padding: 10px 14px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #94a3b8;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invoza-search-pop-list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.invoza-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #1e293b;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.invoza-search-item:hover,
+.invoza-search-item.highlighted {
+  background: rgba(32, 86, 70, 0.08);
+  color: #205646;
+}
+
+.invoza-search-item-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.invoza-search-item:hover .invoza-search-item-icon {
+  background: #205646;
+  color: #ffffff;
+}
+
+.invoza-search-item-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.invoza-search-item-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.invoza-search-item-sub {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.invoza-search-item-badge {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-weight: 600;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.invoza-search-empty {
+  padding: 20px 14px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12.5px;
+}
+

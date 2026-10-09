@@ -68,6 +68,92 @@ function logout() {
   window.location.href = 'login.html';
 }
 
+/**
+ * On-Site Modal Confirmation Dialog (Replaces native browser confirm/alert popups)
+ */
+/**
+ * On-Site Modal Confirmation Dialog (Replaces native browser confirm/alert popups)
+ * Supports both:
+ * 1) await showConfirmDialog({ title, message, confirmText, cancelText, isDanger })
+ * 2) showConfirmDialog('Title', 'Message', onConfirmCallback, onCancelCallback)
+ */
+function showConfirmDialog(arg1 = {}, arg2 = null, arg3 = null, arg4 = null) {
+  let opts = {};
+  let callback = null;
+  let cancelCallback = null;
+
+  if (typeof arg1 === 'string') {
+    opts.title = arg1;
+    opts.message = typeof arg2 === 'string' ? arg2 : 'Are you sure you want to proceed?';
+    if (typeof arg3 === 'function') {
+      callback = arg3;
+      if (typeof arg4 === 'function') cancelCallback = arg4;
+    }
+  } else if (typeof arg1 === 'object' && arg1 !== null) {
+    opts = { ...arg1 };
+    if (typeof opts.onConfirm === 'function') callback = opts.onConfirm;
+    if (typeof opts.onCancel === 'function') cancelCallback = opts.onCancel;
+  }
+
+  const {
+    title = 'Confirm Action',
+    message = 'Are you sure you want to proceed?',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    isDanger = true
+  } = opts;
+
+  return new Promise((resolve) => {
+    let modal = document.getElementById('invoza-confirm-dialog');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'invoza-confirm-dialog';
+      modal.className = 'invoza-confirm-overlay';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div class="invoza-confirm-box">
+        <div class="invoza-confirm-icon-wrap ${isDanger ? 'danger' : 'info'}">
+          ${isDanger 
+            ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'
+            : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+          }
+        </div>
+        <h3 class="invoza-confirm-title">${title}</h3>
+        <p class="invoza-confirm-msg">${message}</p>
+        <div class="invoza-confirm-actions">
+          <button type="button" class="invoza-btn-cancel">${cancelText}</button>
+          <button type="button" class="invoza-btn-confirm">${confirmText}</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('active');
+
+    const handleAction = async (val) => {
+      modal.classList.remove('active');
+      if (val) {
+        if (typeof callback === 'function') {
+          try { await callback(); } catch (e) { console.error('Confirm callback error', e); }
+        }
+      } else {
+        if (typeof cancelCallback === 'function') {
+          try { await cancelCallback(); } catch (e) { console.error('Cancel callback error', e); }
+        }
+      }
+      resolve(val);
+    };
+
+    modal.querySelector('.invoza-btn-cancel').onclick = () => handleAction(false);
+    modal.querySelector('.invoza-btn-confirm').onclick = () => handleAction(true);
+    modal.onclick = (e) => {
+      if (e.target === modal) handleAction(false);
+    };
+  });
+}
+window.showConfirmDialog = showConfirmDialog;
+
 function getUserId() {
   const token = localStorage.getItem('token');
   if (!token) return null;
@@ -149,8 +235,8 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
   const discountText = doc.discountText || formatCurrency(doc.discountAmount || 0);
   const gstText = doc.gstText || formatCurrency(doc.gstAmount || 0);
   const grandText = doc.grandText || formatCurrency(doc.grandTotal || 0);
-
   const logoUrl = doc.logoUrl || localStorage.getItem('userLogo') || '';
+
 
   // 1. BUSINESS TEMPLATE
   if (tpl === 'business') {
@@ -232,7 +318,7 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
 
         <div class="biz-summary-split">
           <div class="biz-terms-card">
-            <h4>Terms &amp; Instructions:</h4>
+            <h4>Payment Instructions &amp; Notes:</h4>
             <p>${notes}</p>
           </div>
           <div class="biz-totals-card">
@@ -412,7 +498,7 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
 
       <div class="min-totals-split">
         <div class="min-notes">
-          <strong style="display:block;color:#111;text-transform:uppercase;letter-spacing:1px;font-size:11px;margin-bottom:6px;">Notes</strong>
+          <strong style="display:block;color:#111;text-transform:uppercase;letter-spacing:1px;font-size:11px;margin-bottom:6px;">Payment Instructions &amp; Notes</strong>
           ${notes}
         </div>
         <div class="min-totals-table">
@@ -489,7 +575,7 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
 
     <div class="cls-bottom-split">
       <div class="cls-notes-box">
-        <strong>Notes:</strong> ${notes}
+        <strong>Payment Instructions &amp; Notes:</strong> ${notes}
       </div>
       <div class="cls-totals-box">
         <div class="cls-tot-line"><span>Subtotal:</span><span>${subtotalText}</span></div>

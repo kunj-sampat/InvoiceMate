@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account - InvoiceMate</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="auth-page">
 
@@ -15,25 +19,34 @@
     <!-- Floating Frosted Glass Container -->
     <div class="auth-glass-container" style="max-width: 470px;">
         
-        <div class="auth-header">
-            <h1 class="auth-header-title">Create your account</h1>
+        <!-- Brand Wordmark Header -->
+        <div class="auth-brand-center">
+            <a href="index.html" class="invoza-brand-wordmark">
+                <span class="brand-invoice">Invoice</span><span class="brand-mate">Mate</span><span class="brand-dot">.</span>
+            </a>
+        </div>
+
+        <div class="auth-header" style="text-align: center;">
+            <h1 class="auth-header-title">Create Your Account</h1>
             <p class="auth-header-sub">Start managing invoicing and estimates professionally.</p>
         </div>
 
-        <!-- Social Quick Setup -->
+        <!-- Social Quick Setup with Official Vector SVGs -->
         <div class="auth-social-row">
             <button type="button" class="btn-social-pill" onclick="fillQuickSignup()">
-                <span class="social-icon">&#127760;</span>
-                <span>Sign up with Google</span>
+                <!-- Official 4-color Google Vector Logo -->
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                <span>Google</span>
             </button>
             <button type="button" class="btn-social-pill" onclick="fillQuickSignup()">
-                <span class="social-icon">&#63743;</span>
-                <span>Sign up with Apple</span>
+                <!-- Official LinkedIn Vector Logo -->
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="#0A66C2"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                <span>LinkedIn</span>
             </button>
         </div>
 
         <div class="auth-divider">
-            <span>or</span>
+            <span>or sign up with work email</span>
         </div>
 
         <!-- Error Banner -->
@@ -44,33 +57,47 @@
             <div class="auth-field-group">
                 <label class="auth-field-label" for="full-name">Full Name *</label>
                 <div class="auth-input-pill-wrap">
-                    <input type="text" id="full-name" class="auth-input-pill" placeholder="e.g. Alex Morgan" required autocomplete="name">
+                    <span class="auth-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </span>
+                    <input type="text" id="full-name" class="auth-input-pill has-icon" placeholder="e.g. Alex Morgan" required autocomplete="name">
                 </div>
             </div>
 
             <div class="auth-field-group">
                 <label class="auth-field-label" for="business-name">Company / Business Name *</label>
                 <div class="auth-input-pill-wrap">
-                    <input type="text" id="business-name" class="auth-input-pill" placeholder="e.g. Morgan Studios Pvt Ltd" required>
+                    <span class="auth-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    </span>
+                    <input type="text" id="business-name" class="auth-input-pill has-icon" placeholder="e.g. Morgan Studios Pvt Ltd" required>
                 </div>
             </div>
 
             <div class="auth-field-group">
                 <label class="auth-field-label" for="email">Work Email *</label>
                 <div class="auth-input-pill-wrap">
-                    <input type="email" id="email" class="auth-input-pill" placeholder="alex@morganstudios.com" required autocomplete="email">
+                    <span class="auth-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </span>
+                    <input type="email" id="email" class="auth-input-pill has-icon" placeholder="alex@morganstudios.com" required autocomplete="email">
                 </div>
             </div>
 
             <div class="auth-field-group">
                 <label class="auth-field-label" for="password">Password *</label>
                 <div class="auth-input-pill-wrap">
-                    <input type="password" id="password" class="auth-input-pill" placeholder="Min. 6 characters" required autocomplete="new-password">
-                    <button type="button" class="auth-eye-btn" id="toggle-password" title="Show/hide password">&#128065;</button>
+                    <span class="auth-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </span>
+                    <input type="password" id="password" class="auth-input-pill has-icon" placeholder="Min. 6 characters" required autocomplete="new-password">
+                    <button type="button" class="auth-eye-btn" id="toggle-password" title="Show/hide password" aria-label="Toggle password visibility">
+                        <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
                 </div>
             </div>
 
-            <div class="auth-options-row" style="margin-bottom: 20px;">
+            <div class="auth-options-row" style="margin-bottom: 22px;">
                 <label class="auth-checkbox-label">
                     <input type="checkbox" id="terms-agree" required checked>
                     <span>I agree to the Terms of Service &amp; Privacy Policy</span>
@@ -78,13 +105,15 @@
             </div>
 
             <button type="submit" class="btn-pill-submit" id="submit-btn">
-                <span>Create Account</span>
-                <span class="btn-pill-arrow-notch">&rsaquo;</span>
+                <span>Create Workspace</span>
+                <span class="btn-pill-arrow-notch">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </span>
             </button>
         </form>
 
         <div class="auth-bottom-switch">
-            Already have an account? <a href="login.html">Log In</a>
+            Already have an account? <a href="login.html">Sign In &rarr;</a>
         </div>
 
     </div>
@@ -95,27 +124,30 @@
     <script src="js/api.js"></script>
     <script src="js/toast.js"></script>
     <script>
-        // Password toggle
+        // Password toggle with vector SVGs
         const toggleBtn = document.getElementById('toggle-password');
         const passInput = document.getElementById('password');
         if (toggleBtn && passInput) {
             toggleBtn.addEventListener('click', () => {
                 const isPass = passInput.type === 'password';
                 passInput.type = isPass ? 'text' : 'password';
-                toggleBtn.innerHTML = isPass ? '&#128064;' : '&#128065;';
+                toggleBtn.innerHTML = isPass 
+                    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>'
+                    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
             });
         }
 
+        // Quick sign up template filler
         function fillQuickSignup() {
-            const rand = Math.floor(100 + Math.random() * 900);
-            document.getElementById('full-name').value = 'Jordan Miller';
-            document.getElementById('business-name').value = 'Miller Design Studio';
-            document.getElementById('email').value = `jordan${rand}@millerstudio.com`;
-            document.getElementById('password').value = 'securepass123';
-            if (typeof showToast === 'function') showToast('Quick details prefilled! Click Create Account.', 'info');
+            const rand = Math.floor(Math.random() * 899 + 100);
+            document.getElementById('full-name').value = 'Rohan Verma';
+            document.getElementById('business-name').value = 'Verma Creative Studio';
+            document.getElementById('email').value = `rohan${rand}@vermastudios.com`;
+            document.getElementById('password').value = 'Secret@123';
+            if (typeof showToast === 'function') showToast('Quick profile loaded! Click Create Workspace.', 'info');
         }
 
-        // Handle Register Submission
+        // Handle Registration Submission
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fullName = document.getElementById('full-name').value.trim();
@@ -125,41 +157,41 @@
             const errorDiv = document.getElementById('error-msg');
             const submitBtn = document.getElementById('submit-btn');
 
-            errorDiv.style.display = 'none';
-
             if (password.length < 6) {
                 errorDiv.textContent = 'Password must be at least 6 characters.';
                 errorDiv.style.display = 'block';
                 return;
             }
 
+            errorDiv.style.display = 'none';
             submitBtn.disabled = true;
             submitBtn.querySelector('span:first-child').textContent = 'Creating account...';
 
             try {
-                const res = await apiRequest('POST', '/api/auth/register', {
-                    fullName,
-                    businessName,
-                    email,
-                    password
+                const res = await apiRequest('POST', '/api/auth/register', { 
+                    fullName, 
+                    email, 
+                    password, 
+                    businessName 
                 });
-
+                
                 if (res && res.token) {
                     localStorage.setItem('token', res.token);
                     localStorage.setItem('userName', res.fullName || fullName);
                     localStorage.setItem('userEmail', email);
                     localStorage.setItem('businessName', businessName);
 
-                    if (typeof showToast === 'function') showToast('Account created successfully! Welcome to InvoiceMate.', 'success');
-                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
+                    if (typeof showToast === 'function') showToast('Account created successfully! Welcome.', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
                 } else {
-                    throw new Error('Registration failed. Please try again.');
+                    if (typeof showToast === 'function') showToast('Account created! Please sign in.', 'success');
+                    setTimeout(() => { window.location.href = 'login.html'; }, 800);
                 }
             } catch (err) {
-                errorDiv.textContent = err.message || 'Registration failed. Email may already be in use.';
+                errorDiv.textContent = err.message || 'Registration failed. Please try again.';
                 errorDiv.style.display = 'block';
                 submitBtn.disabled = false;
-                submitBtn.querySelector('span:first-child').textContent = 'Create Account';
+                submitBtn.querySelector('span:first-child').textContent = 'Create Workspace';
             }
         });
     </script>

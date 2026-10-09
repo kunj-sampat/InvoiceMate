@@ -132,15 +132,20 @@ function drawGroupedBarChart(canvasId, labels, datasets) {
 // INVOZA DUAL-SPLINE CHART & SVG VISUALS
 // ==========================================================================
 
-function drawInvozaDualSplineChart(canvasId, labels, dataSub, dataInv) {
+// ==========================================================================
+// INVOZA MONTHLY CASH FLOW GROUPED BAR CHART
+// Clean, logical comparison of Billed Invoices vs Actual Cash Received
+// ==========================================================================
+
+function drawInvozaCashFlowBarChart(canvasId, monthlyData = []) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  const width = rect.width || canvas.parentElement.clientWidth || 500;
-  const height = 190;
+  const width = rect.width || canvas.parentElement.clientWidth || 560;
+  const height = 185;
   
   canvas.width = width * dpr;
   canvas.height = height * dpr;
@@ -148,167 +153,165 @@ function drawInvozaDualSplineChart(canvasId, labels, dataSub, dataInv) {
   
   ctx.clearRect(0, 0, width, height);
 
-  const padLeft = 38;
+  const padLeft = 45;
   const padRight = 20;
-  const padTop = 20;
-  const padBottom = 30;
+  const padTop = 15;
+  const padBottom = 28;
   const plotWidth = width - padLeft - padRight;
   const plotHeight = height - padTop - padBottom;
 
-  const allVals = [...dataSub, ...dataInv];
-  const maxVal = Math.max(...allVals, 25000);
-  const minVal = 0;
+  if (!monthlyData || monthlyData.length === 0) {
+    // Empty state
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No invoice activity recorded in this period', width / 2, height / 2);
+    return;
+  }
 
-  // Grid lines
-  const gridSteps = [4000, 8000, 12000, 16000, 20000, 25000];
-  ctx.strokeStyle = 'rgba(226, 232, 240, 0.7)';
+  // Find max value across all months for scale
+  let maxVal = 0;
+  monthlyData.forEach(m => {
+    if (m.billed > maxVal) maxVal = m.billed;
+    if (m.collected > maxVal) maxVal = m.collected;
+  });
+
+  if (maxVal === 0) maxVal = 10000;
+  // Round maxVal up to clean interval
+  const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+  maxVal = Math.ceil((maxVal * 1.15) / magnitude) * magnitude;
+
+  // Draw 4 dashed horizontal guide lines
+  const steps = 4;
+  ctx.strokeStyle = 'rgba(226, 232, 240, 0.85)';
   ctx.lineWidth = 1;
-  ctx.setLineDash([4, 4]);
+  ctx.setLineDash([3, 4]);
 
-  gridSteps.forEach(step => {
-    const y = padTop + plotHeight - ((step - minVal) / (maxVal - minVal)) * plotHeight;
+  for (let i = 0; i <= steps; i++) {
+    const val = (maxVal / steps) * i;
+    const y = padTop + plotHeight - (val / maxVal) * plotHeight;
     ctx.beginPath();
     ctx.moveTo(padLeft, y);
     ctx.lineTo(width - padRight, y);
     ctx.stroke();
 
-    // Y Axis Label
+    // Axis label
     ctx.setLineDash([]);
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(`${Math.round(step / 1000)}k`, padLeft - 6, y + 3);
-    ctx.setLineDash([4, 4]);
-  });
+    let label = '₹0';
+    if (val >= 100000) label = `₹${(val / 100000).toFixed(1)}L`;
+    else if (val >= 1000) label = `₹${Math.round(val / 1000)}k`;
+    else if (val > 0) label = `₹${Math.round(val)}`;
+    ctx.fillText(label, padLeft - 6, y + 3);
+    ctx.setLineDash([3, 4]);
+  }
   ctx.setLineDash([]);
 
-  // X Axis month labels
-  const numPts = labels.length;
-  const stepX = plotWidth / (numPts - 1);
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.textAlign = 'center';
+  // Calculate grouped bars
+  const numGroups = monthlyData.length;
+  const groupSlot = plotWidth / numGroups;
+  const barWidth = Math.min(Math.max(groupSlot * 0.28, 12), 24);
+  const barGap = 3;
 
-  const ptsSub = [];
-  const ptsInv = [];
+  const barPositions = [];
 
-  for (let i = 0; i < numPts; i++) {
-    const x = padLeft + i * stepX;
-    const ySub = padTop + plotHeight - ((dataSub[i] - minVal) / (maxVal - minVal)) * plotHeight;
-    const yInv = padTop + plotHeight - ((dataInv[i] - minVal) / (maxVal - minVal)) * plotHeight;
-    ptsSub.push({ x, y: ySub, val: dataSub[i], label: labels[i] });
-    ptsInv.push({ x, y: yInv, val: dataInv[i], label: labels[i] });
+  monthlyData.forEach((m, idx) => {
+    const groupCenterX = padLeft + idx * groupSlot + groupSlot / 2;
+    const xBilled = groupCenterX - barWidth - (barGap / 2);
+    const xCollected = groupCenterX + (barGap / 2);
 
-    ctx.fillText(labels[i], x, height - 10);
-  }
+    const hBilled = Math.max((m.billed / maxVal) * plotHeight, m.billed > 0 ? 3 : 0);
+    const yBilled = padTop + plotHeight - hBilled;
 
-  // Draw Spline Curve Helper
-  function drawSpline(pts, strokeColor, fillColor, dotColor) {
-    if (pts.length < 2) return;
+    const hCollected = Math.max((m.collected / maxVal) * plotHeight, m.collected > 0 ? 3 : 0);
+    const yCollected = padTop + plotHeight - hCollected;
 
-    // Fill under curve
-    if (fillColor) {
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, padTop + plotHeight);
-      ctx.lineTo(pts[0].x, pts[0].y);
-
-      for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[i === 0 ? 0 : i - 1];
-        const p1 = pts[i];
-        const p2 = pts[i + 1];
-        const p3 = pts[i + 2 < pts.length ? i + 2 : i + 1];
-
-        const cp1x = p1.x + (p2.x - p0.x) / 6;
-        const cp1y = p1.y + (p2.y - p0.y) / 6;
-        const cp2x = p2.x - (p3.x - p1.x) / 6;
-        const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-      }
-
-      ctx.lineTo(pts[pts.length - 1].x, padTop + plotHeight);
-      ctx.closePath();
-      ctx.fillStyle = fillColor;
-      ctx.fill();
+    // Draw Billed bar (Forest Green #205646)
+    ctx.fillStyle = '#205646';
+    if (hBilled > 0) {
+      drawRoundedBar(ctx, xBilled, yBilled, barWidth, hBilled, 4);
+    } else {
+      ctx.fillStyle = '#f1f5f9';
+      drawRoundedBar(ctx, xBilled, padTop + plotHeight - 2, barWidth, 2, 1);
     }
 
-    // Stroke
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i === 0 ? 0 : i - 1];
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      const p3 = pts[i + 2 < pts.length ? i + 2 : i + 1];
-
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    // Draw Collected bar (Mint Green #10b981)
+    ctx.fillStyle = '#10b981';
+    if (hCollected > 0) {
+      drawRoundedBar(ctx, xCollected, yCollected, barWidth, hCollected, 4);
+    } else {
+      ctx.fillStyle = '#f1f5f9';
+      drawRoundedBar(ctx, xCollected, padTop + plotHeight - 2, barWidth, 2, 1);
     }
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = 2.2;
-    ctx.stroke();
 
-    // Dots on points
-    pts.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = dotColor || strokeColor;
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+    // Month label
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(m.label, groupCenterX, height - 8);
+
+    barPositions.push({
+      x: groupCenterX,
+      month: m.label,
+      fullDate: m.fullDate || m.label,
+      billed: m.billed,
+      collected: m.collected
     });
+  });
+
+  // Rounded bar drawing helper
+  function drawRoundedBar(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h);
+    c.lineTo(x, y + h);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+    c.fill();
   }
 
-  // Gradient 1: Subscription (Coral / Amber)
-  const gradSub = ctx.createLinearGradient(0, padTop, 0, height);
-  gradSub.addColorStop(0, 'rgba(224, 109, 83, 0.22)');
-  gradSub.addColorStop(1, 'rgba(224, 109, 83, 0.0)');
-
-  // Gradient 2: Invoice (Forest Teal / Green)
-  const gradInv = ctx.createLinearGradient(0, padTop, 0, height);
-  gradInv.addColorStop(0, 'rgba(32, 86, 70, 0.28)');
-  gradInv.addColorStop(1, 'rgba(32, 86, 70, 0.0)');
-
-  drawSpline(ptsSub, '#e06d53', gradSub, '#e06d53');
-  drawSpline(ptsInv, '#205646', gradInv, '#10b981');
-
-  // Interactive Hover Listener
+  // Interactive Hover Tooltip
   canvas.onmousemove = function(e) {
     const mouseX = e.offsetX;
-    let closestIdx = 0;
-    let closestDist = Infinity;
-    ptsSub.forEach((p, idx) => {
-      const dist = Math.abs(p.x - mouseX);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestIdx = idx;
+    let closest = null;
+    let minDist = Infinity;
+    barPositions.forEach(b => {
+      const dist = Math.abs(b.x - mouseX);
+      if (dist < minDist && dist < groupSlot * 0.7) {
+        minDist = dist;
+        closest = b;
       }
     });
 
     const tip = document.getElementById('chart-tooltip-floating');
-    if (tip) {
-      tip.style.left = `${Math.min(Math.max(ptsSub[closestIdx].x - 60, 20), width - 150)}px`;
-      tip.style.top = `15px`;
+    if (tip && closest) {
+      tip.style.left = `${Math.min(Math.max(closest.x - 70, 10), width - 160)}px`;
+      tip.style.top = `10px`;
       tip.style.display = 'block';
-      const subVal = ptsSub[closestIdx].val;
-      const invVal = ptsInv[closestIdx].val;
       tip.innerHTML = `
-        <div class="chart-tooltip-title">${ptsSub[closestIdx].label} Overview</div>
+        <div class="chart-tooltip-title">${closest.fullDate}</div>
         <div class="chart-tooltip-row">
-          <span style="color:#e06d53;">■ Subscription</span>
-          <strong>₹${subVal.toLocaleString('en-IN')}</strong>
+          <span style="color:#205646; font-weight:600;">■ Billed:</span>
+          <strong>₹${closest.billed.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
         </div>
         <div class="chart-tooltip-row">
-          <span style="color:#205646;">■ Invoice</span>
-          <strong>₹${invVal.toLocaleString('en-IN')}</strong>
+          <span style="color:#10b981; font-weight:600;">■ Collected:</span>
+          <strong>₹${closest.collected.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
         </div>
       `;
+    } else if (tip) {
+      tip.style.display = 'none';
     }
+  };
+
+  canvas.onmouseleave = function() {
+    const tip = document.getElementById('chart-tooltip-floating');
+    if (tip) tip.style.display = 'none';
   };
 }
 

@@ -41,6 +41,19 @@ async function loadSettings() {
     setVal('set-payment-terms', data.defaultPaymentTermsDays || 30);
     setVal('set-default-notes', data.defaultNotes);
 
+    // Dynamic UPI QR Settings
+    setVal('set-upi-id', data.upiId || '');
+    if (data.upiId) {
+      localStorage.setItem('userUpiId', data.upiId);
+    } else {
+      localStorage.removeItem('userUpiId');
+    }
+    const payeeEl = document.getElementById('upi-display-payee');
+    if (payeeEl) {
+      payeeEl.value = data.businessName || data.fullName || 'Merchant';
+    }
+    updateSettingsUpiPreview();
+
     // Logo
     updateLogoPreview(data.logoPath);
     if (data.logoPath) {
@@ -92,18 +105,73 @@ async function saveProfileSettings() {
 }
 
 async function saveInvoiceSettings() {
+  const upiId = document.getElementById('set-upi-id')?.value?.trim();
   const payload = {
     invoicePrefix: document.getElementById('set-prefix')?.value,
     nextInvoiceNumber: Number(document.getElementById('set-next-num')?.value) || 1,
     defaultGst: Number(document.getElementById('set-default-gst')?.value) || 18,
     defaultPaymentTermsDays: Number(document.getElementById('set-payment-terms')?.value) || 30,
     defaultNotes: document.getElementById('set-default-notes')?.value,
+    upiId: upiId !== undefined ? upiId : null,
   };
   try {
     await apiRequest('PUT', '/api/settings/invoice', payload);
+    if (upiId !== undefined) {
+      if (upiId) localStorage.setItem('userUpiId', upiId);
+      else localStorage.removeItem('userUpiId');
+    }
     if(typeof showToast === 'function') showToast('Invoice settings saved', 'success');
   } catch (error) {
     if(typeof showToast === 'function') showToast(error.message, 'error');
+  }
+}
+
+async function saveUpiSettings() {
+  const upiId = document.getElementById('set-upi-id')?.value?.trim() || '';
+  try {
+    await apiRequest('PUT', '/api/settings/invoice', { upiId: upiId });
+    if (upiId) {
+      localStorage.setItem('userUpiId', upiId);
+    } else {
+      localStorage.removeItem('userUpiId');
+    }
+    if (typeof showToast === 'function') showToast('Business UPI ID saved successfully!', 'success');
+    updateSettingsUpiPreview();
+  } catch (error) {
+    if (typeof showToast === 'function') showToast(error.message || 'Failed to save UPI ID', 'error');
+  }
+}
+
+function updateSettingsUpiPreview() {
+  const upiId = document.getElementById('set-upi-id')?.value?.trim();
+  const qrContainer = document.getElementById('settings-upi-qr');
+  const statusEl = document.getElementById('settings-upi-preview-status');
+  const payee = document.getElementById('upi-display-payee')?.value || document.getElementById('set-biz-name')?.value || 'Merchant';
+  if (!qrContainer) return;
+
+  if (upiId && typeof InvoiceMateUPI !== 'undefined') {
+    const uri = InvoiceMateUPI.buildUpiUri({
+      upiId: upiId,
+      payeeName: payee,
+      amount: 1000,
+      invoiceNumber: 'TEST-001'
+    });
+    qrContainer.innerHTML = InvoiceMateUPI.generateQRCodeSVG(uri, 130);
+    if (statusEl) {
+      statusEl.textContent = `Active: ${upiId} • Test ₹1,000.00`;
+      statusEl.style.color = '#059669';
+    }
+  } else {
+    qrContainer.innerHTML = `
+      <div style="width:130px; height:130px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; font-size:11px; text-align:center; padding:10px;">
+        <span style="font-size:26px; margin-bottom:6px;">⚡</span>
+        Enter UPI ID to generate live QR
+      </div>
+    `;
+    if (statusEl) {
+      statusEl.textContent = 'Enter UPI ID to preview test QR';
+      statusEl.style.color = '#64748b';
+    }
   }
 }
 
@@ -169,11 +237,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('remove-logo-btn')?.addEventListener('click', removeLogo);
   document.getElementById('save-invoice-settings-btn')?.addEventListener('click', saveInvoiceSettings);
   document.getElementById('save-appearance-btn')?.addEventListener('click', saveAppearanceSettings);
+  document.getElementById('save-upi-settings-btn')?.addEventListener('click', saveUpiSettings);
+  document.getElementById('set-upi-id')?.addEventListener('input', updateSettingsUpiPreview);
+  document.getElementById('set-biz-name')?.addEventListener('input', () => {
+    const payeeEl = document.getElementById('upi-display-payee');
+    if (payeeEl) payeeEl.value = document.getElementById('set-biz-name')?.value || 'Merchant';
+    updateSettingsUpiPreview();
+  });
 });
 
 // Bind to window if buttons are calling these directly from HTML onClick attributes
 window.saveProfileSettings = saveProfileSettings;
 window.saveInvoiceSettings = saveInvoiceSettings;
+window.saveUpiSettings = saveUpiSettings;
+window.updateSettingsUpiPreview = updateSettingsUpiPreview;
 window.saveAppearanceSettings = saveAppearanceSettings;
 window.uploadLogo = uploadLogo;
 window.removeLogo = removeLogo;

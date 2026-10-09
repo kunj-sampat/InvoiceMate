@@ -7,10 +7,12 @@ public class GstInvoiceRecordDto {
     private String invoiceNumber;
     private LocalDate invoiceDate;
     private String customerName;
+    private String customerGstin;
     private double taxableAmount;
     private double gstPercent;
     private double cgstAmount;
     private double sgstAmount;
+    private double igstAmount;
     private double totalGst;
     private double grandTotal;
     private String status;
@@ -25,6 +27,8 @@ public class GstInvoiceRecordDto {
     public void setInvoiceDate(LocalDate invoiceDate) { this.invoiceDate = invoiceDate; }
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getCustomerGstin() { return customerGstin; }
+    public void setCustomerGstin(String customerGstin) { this.customerGstin = customerGstin; }
     public double getTaxableAmount() { return taxableAmount; }
     public void setTaxableAmount(double taxableAmount) { this.taxableAmount = taxableAmount; }
     public double getGstPercent() { return gstPercent; }
@@ -33,6 +37,8 @@ public class GstInvoiceRecordDto {
     public void setCgstAmount(double cgstAmount) { this.cgstAmount = cgstAmount; }
     public double getSgstAmount() { return sgstAmount; }
     public void setSgstAmount(double sgstAmount) { this.sgstAmount = sgstAmount; }
+    public double getIgstAmount() { return igstAmount; }
+    public void setIgstAmount(double igstAmount) { this.igstAmount = igstAmount; }
     public double getTotalGst() { return totalGst; }
     public void setTotalGst(double totalGst) { this.totalGst = totalGst; }
     public double getGrandTotal() { return grandTotal; }

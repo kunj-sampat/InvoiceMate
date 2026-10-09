@@ -6,10 +6,13 @@ import java.util.List;
 public class GstQuarterlyResponse {
     private String quarter;
     private int year;
+    private String periodType = "QUARTER"; // MONTH, QUARTER, FY
+    private Integer month;
     private String dateRangeLabel;
     private double totalTaxableAmount;
     private double totalCgstAmount;
     private double totalSgstAmount;
+    private double totalIgstAmount;
     private double totalGstAmount;
     private double totalGrandAmount;
     private int totalInvoiceCount;
@@ -22,6 +25,10 @@ public class GstQuarterlyResponse {
     public void setQuarter(String quarter) { this.quarter = quarter; }
     public int getYear() { return year; }
     public void setYear(int year) { this.year = year; }
+    public String getPeriodType() { return periodType; }
+    public void setPeriodType(String periodType) { this.periodType = periodType; }
+    public Integer getMonth() { return month; }
+    public void setMonth(Integer month) { this.month = month; }
     public String getDateRangeLabel() { return dateRangeLabel; }
     public void setDateRangeLabel(String dateRangeLabel) { this.dateRangeLabel = dateRangeLabel; }
     public double getTotalTaxableAmount() { return totalTaxableAmount; }
@@ -30,6 +37,8 @@ public class GstQuarterlyResponse {
     public void setTotalCgstAmount(double totalCgstAmount) { this.totalCgstAmount = totalCgstAmount; }
     public double getTotalSgstAmount() { return totalSgstAmount; }
     public void setTotalSgstAmount(double totalSgstAmount) { this.totalSgstAmount = totalSgstAmount; }
+    public double getTotalIgstAmount() { return totalIgstAmount; }
+    public void setTotalIgstAmount(double totalIgstAmount) { this.totalIgstAmount = totalIgstAmount; }
     public double getTotalGstAmount() { return totalGstAmount; }
     public void setTotalGstAmount(double totalGstAmount) { this.totalGstAmount = totalGstAmount; }
     public double getTotalGrandAmount() { return totalGrandAmount; }

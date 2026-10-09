@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports &amp; GST - InvoiceMate</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -77,12 +78,15 @@
         <!-- Sidebar -->
         <aside class="invoza-sidebar">
             <a href="dashboard.html" class="invoza-brand">
-                <div class="invoza-brand-logo">&#10022;</div>
-                <div class="invoza-brand-name">InvoiceMate</div>
+                <span class="invoza-brand-wordmark">
+                    <span class="brand-invoice">Invoice</span><span class="brand-mate">Mate</span><span class="brand-dot">.</span>
+                </span>
             </a>
 
             <div class="invoza-search-box">
-                <span class="invoza-search-icon">&#128269;</span>
+                <span class="invoza-search-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
                 <input type="text" placeholder="Search..." id="sidebar-search-input">
                 <span class="invoza-search-kbd">/</span>
             </div>
@@ -90,28 +94,29 @@
             <div class="invoza-nav-group">
                 <div class="invoza-nav-header">Main Menu</div>
                 <ul class="invoza-nav-list">
-                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon">&#9632;</span><span>Dashboard</span></a></li>
-                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon">&#128203;</span><span>Invoices</span></a></li>
-                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon">&#128196;</span><span>Estimates</span></a></li>
-                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon">&#128176;</span><span>Payments</span></a></li>
-                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon">&#128209;</span><span>Customer Statements</span></a></li>
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg></span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="expenses.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path><line x1="8" y1="9" x2="16" y2="9"></line><line x1="8" y1="13" x2="14" y2="13"></line><line x1="8" y1="17" x2="12" y2="17"></line></svg></span><span>Expenses</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></span><span>Customer Statements</span></a></li>
                 </ul>
             </div>
 
             <div class="invoza-nav-group">
                 <div class="invoza-nav-header">Sales &amp; Customers</div>
                 <ul class="invoza-nav-list">
-                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon">&#128230;</span><span>Product Catalog</span></a></li>
-                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon">&#8635;</span><span>Recurring Invoices</span></a></li>
-                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon">&#128101;</span><span>Clients</span></a></li>
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Clients</span></a></li>
                 </ul>
             </div>
 
             <div class="invoza-nav-group">
                 <div class="invoza-nav-header">Insights &amp; System</div>
                 <ul class="invoza-nav-list">
-                    <li class="invoza-nav-item active"><a href="reports.html"><span class="invoza-nav-icon">&#128202;</span><span>GST &amp; Reports</span></a></li>
-                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon">&#9881;</span><span>Settings</span></a></li>
+                    <li class="invoza-nav-item active"><a href="reports.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span>Settings</span></a></li>
                 </ul>
             </div>
 
@@ -123,7 +128,10 @@
                         <span class="sub">View Profile</span>
                     </div>
                 </a>
-                <button id="logout-link" class="invoza-btn-signout">Sign Out</button>
+                <button id="logout-link" class="invoza-btn-signout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Sign Out</span>
+                </button>
             </div>
         </aside>
 
@@ -134,8 +142,16 @@
                     <span>Insights</span> &rsaquo; <span class="current">GST &amp; Reports</span>
                 </div>
                 <div class="invoza-header-tools">
-                    <button class="invoza-circle-btn" title="Notifications">&#128276;<span class="invoza-notification-dot"></span></button>
-                    <a href="settings.html" class="invoza-circle-btn" title="Settings">&#9881;</a>
+                    <button id="btn-go-premium" class="invoza-btn-premium" title="Upgrade to InvoiceMate Pro">
+                        <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+                        </svg>
+                        <span>Go Premium</span>
+                        <span class="premium-sparkle">&#10024;</span>
+                    </button>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </a>
                     <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
                 </div>
             </header>
@@ -153,76 +169,143 @@
 
                 <!-- Tab Switcher -->
                 <div class="report-nav-tabs">
-                    <button class="report-tab-btn active" id="tab-btn-gst">GST Quarterly Summary (GSTR-1)</button>
+                    <button class="report-tab-btn active" id="tab-btn-gst">GST Tax Summary &amp; CA Filing Prep</button>
                     <button class="report-tab-btn" id="tab-btn-sales">Sales Overview &amp; Analytics</button>
                 </div>
 
                 <!-- ==========================================
-                     TAB 1: GST QUARTERLY SUMMARY (GSTR-1)
+                     TAB 1: GST TAX SUMMARY & FILING PREP
                      ========================================== -->
                 <div id="tab-content-gst">
-                    <!-- Quarter & Year Filter Card -->
+                    
+                    <!-- Notice Banner for CA Preparation -->
+                    <div style="background: rgba(32, 86, 70, 0.06); border: 1px solid rgba(32, 86, 70, 0.2); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px; color: #205646;">ℹ️</span>
+                            <span style="font-size: 12.5px; color: #334155;">
+                                <strong>Chartered Accountant Tax Prep:</strong> This report compiles your recorded outward supplies, taxable turnover, and rate-wise slabs for preparation of GSTR-1 and GSTR-3B filings.
+                            </span>
+                        </div>
+                        <span style="font-size: 11px; background: #205646; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;">Filing Ready</span>
+                    </div>
+
+                    <!-- Period Filter Card (Month, Quarter, Financial Year) -->
                     <div class="card" style="margin-bottom: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-                            <div>
-                                <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 8px;">Select Quarter</label>
-                                <div class="quarter-pills">
-                                    <button class="quarter-btn active" data-quarter="Q1">Q1 (Apr - Jun)</button>
-                                    <button class="quarter-btn" data-quarter="Q2">Q2 (Jul - Sep)</button>
-                                    <button class="quarter-btn" data-quarter="Q3">Q3 (Oct - Dec)</button>
-                                    <button class="quarter-btn" data-quarter="Q4">Q4 (Jan - Mar)</button>
-                                    <button class="quarter-btn" data-quarter="ALL">Full FY</button>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            
+                            <!-- Filter Type Selector: Quarter vs Month vs Full FY -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+                                <div>
+                                    <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Filter GST Period By</label>
+                                    <div style="display: inline-flex; background: #f1f5f9; padding: 3px; border-radius: 10px;">
+                                        <button class="report-filter-mode-btn active" id="mode-btn-quarter" style="padding: 6px 14px; border-radius: 8px; border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; background: #205646; color: #fff;">By Quarter</button>
+                                        <button class="report-filter-mode-btn" id="mode-btn-month" style="padding: 6px 14px; border-radius: 8px; border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; background: transparent; color: #64748b;">By Month</button>
+                                        <button class="report-filter-mode-btn" id="mode-btn-fy" style="padding: 6px 14px; border-radius: 8px; border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; background: transparent; color: #64748b;">Financial Year</button>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div>
+                                        <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Financial Year</label>
+                                        <select id="gst-year-select" style="padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 13.5px; background: var(--color-bg); color: var(--color-text);">
+                                            <option value="2026">FY 2026-27</option>
+                                            <option value="2025">FY 2025-26</option>
+                                            <option value="2024">FY 2024-25</option>
+                                        </select>
+                                    </div>
+                                    <div style="margin-top: 22px;">
+                                        <button id="export-gst-csv-btn" class="btn btn-secondary" style="font-size: 12.5px; padding: 7px 16px; display:inline-flex; align-items:center; gap:6px;">
+                                            <span class="invoza-cloud-dl-badge">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M7 16a4 4 0 0 1-.88-7.903A5 5 0 1 1 15.9 6L16 6a5 5 0 0 1 1 9.9"></path>
+                                                    <polyline points="9 13 12 16 15 13"></polyline>
+                                                    <line x1="12" y1="9" x2="12" y2="16"></line>
+                                                </svg>
+                                            </span>
+                                            <span>Download GST Report (CSV)</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style="display: flex; align-items: center; gap: 14px;">
-                                <div>
-                                    <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Financial Year</label>
-                                    <select id="gst-year-select" style="padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 13.5px; background: var(--color-bg); color: var(--color-text);">
-                                        <option value="2026">FY 2026-27</option>
-                                        <option value="2025">FY 2025-26</option>
-                                        <option value="2024">FY 2024-25</option>
+                            <!-- Dynamic Period Sub-Controls -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <!-- Quarter Pills (Default) -->
+                                <div id="period-control-quarter">
+                                    <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Select Quarter</label>
+                                    <div class="quarter-pills">
+                                        <button class="quarter-btn active" data-quarter="Q1">Q1 (Apr - Jun)</button>
+                                        <button class="quarter-btn" data-quarter="Q2">Q2 (Jul - Sep)</button>
+                                        <button class="quarter-btn" data-quarter="Q3">Q3 (Oct - Dec)</button>
+                                        <button class="quarter-btn" data-quarter="Q4">Q4 (Jan - Mar)</button>
+                                    </div>
+                                </div>
+
+                                <!-- Month Dropdown (shown when By Month active) -->
+                                <div id="period-control-month" style="display: none;">
+                                    <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text-tertiary); display: block; margin-bottom: 6px;">Select Month</label>
+                                    <select id="gst-month-select" style="padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 13.5px; background: var(--color-bg); color: var(--color-text);">
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10" selected>October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
                                     </select>
                                 </div>
-                                <div style="margin-top: 22px;">
-                                    <button id="export-gst-csv-btn" class="btn btn-secondary btn-sm">&#128196; Export GSTR CSV</button>
+
+                                <!-- Active Range Label -->
+                                <div style="font-size: 13px; color: var(--color-text-secondary); font-weight: 500;" id="gst-period-label">
+                                    Showing filing data for 01 Apr 2026 to 30 Jun 2026
                                 </div>
                             </div>
-                        </div>
-                        <div style="margin-top: 14px; font-size: 13px; color: var(--color-text-secondary);" id="gst-period-label">
-                            Showing filing data for 01 Apr 2026 to 30 Jun 2026
+
                         </div>
                     </div>
 
-                    <!-- GST Summary Cards -->
-                    <div class="summary-grid">
+                    <!-- GST 5 KPI Summary Cards (Taxable Sales, GST Collected, CGST, SGST, IGST) -->
+                    <div class="summary-grid" style="grid-template-columns: repeat(5, 1fr);">
                         <div class="summary-card">
-                            <div class="label">Taxable Turnover</div>
+                            <div class="label">Taxable Sales</div>
                             <div class="value" id="gst-taxable-val">&#8377;0.00</div>
                             <div class="sub-value" id="gst-invoice-count">0 filed invoices</div>
                         </div>
                         <div class="summary-card">
-                            <div class="label">Total GST Collected</div>
-                            <div class="value" id="gst-total-tax">&#8377;0.00</div>
+                            <div class="label">GST Collected</div>
+                            <div class="value" id="gst-total-tax" style="color: #205646;">&#8377;0.00</div>
                             <div class="sub-value"><span class="trend-up">Total Output Tax</span></div>
                         </div>
                         <div class="summary-card">
-                            <div class="label">Central GST (CGST)</div>
+                            <div class="label">CGST (Central)</div>
                             <div class="value" id="gst-cgst-val">&#8377;0.00</div>
-                            <div class="sub-value">50% of intra-state tax</div>
+                            <div class="sub-value">50% Intra-state</div>
                         </div>
                         <div class="summary-card">
-                            <div class="label">State GST (SGST)</div>
+                            <div class="label">SGST (State)</div>
                             <div class="value" id="gst-sgst-val">&#8377;0.00</div>
-                            <div class="sub-value">50% of intra-state tax</div>
+                            <div class="sub-value">50% Intra-state</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="label">IGST (Integrated)</div>
+                            <div class="value" id="gst-igst-val">&#8377;0.00</div>
+                            <div class="sub-value">Inter-state Supplies</div>
                         </div>
                     </div>
 
-                    <!-- Rate-Wise Slab Breakdown -->
+                    <!-- Rate-Wise Slab Breakdown (0%, 5%, 12%, 18%, 28%) -->
                     <div class="card" style="margin-bottom: 24px; padding: 0; overflow: hidden;">
                         <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Rate-Wise GST Slabs (GSTR-1 Section 12)</h3>
-                            <span style="font-size: 12px; color: var(--color-text-tertiary);">Summary of Outward Supplies</span>
+                            <div>
+                                <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Rate-Wise GST Slabs (0%, 5%, 12%, 18%, 28%)</h3>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-tertiary);">Summary of Outward Taxable Supplies across standard slabs</p>
+                            </div>
+                            <span style="font-size: 12px; background: #f1f5f9; padding: 3px 10px; border-radius: 999px; font-weight: 600; color: #475569;">GSTR-1 Table 12</span>
                         </div>
                         <div class="table-container">
                             <table>
@@ -233,6 +316,7 @@
                                         <th style="text-align: right;">Taxable Amount</th>
                                         <th style="text-align: right;">CGST</th>
                                         <th style="text-align: right;">SGST</th>
+                                        <th style="text-align: right;">IGST</th>
                                         <th style="text-align: right;">Total Tax</th>
                                     </tr>
                                 </thead>
@@ -243,23 +327,30 @@
                         </div>
                     </div>
 
-                    <!-- Quarterly Invoice Details -->
+                    <!-- Invoice-Wise GST Report Table -->
                     <div class="card" style="padding: 0; overflow: hidden;">
-                        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border);">
-                            <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Quarterly B2B / B2C Invoices Register</h3>
+                        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 15px; font-weight: 700;">Invoice-Wise GST Report</h3>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-tertiary);">Individual outward supply invoices with client GSTIN &amp; tax split</p>
+                            </div>
+                            <span id="gst-invoice-table-count" style="font-size: 12px; color: var(--color-text-tertiary);">0 invoices</span>
                         </div>
                         <div class="table-container">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Invoice #</th>
-                                        <th>Date</th>
-                                        <th>Customer</th>
-                                        <th>GST %</th>
-                                        <th style="text-align: right;">Taxable Value</th>
-                                        <th style="text-align: right;">Total GST</th>
-                                        <th style="text-align: right;">Grand Total</th>
-                                        <th>Status</th>
+                                        <th>Invoice Date</th>
+                                        <th>Customer Name</th>
+                                        <th>Customer GSTIN</th>
+                                        <th style="text-align: right;">Taxable Amount</th>
+                                        <th style="text-align: center;">GST Rate</th>
+                                        <th style="text-align: right;">CGST</th>
+                                        <th style="text-align: right;">SGST</th>
+                                        <th style="text-align: right;">IGST</th>
+                                        <th style="text-align: right;">Total Amount</th>
+                                        <th style="text-align: center;">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="gst-invoices-body">
