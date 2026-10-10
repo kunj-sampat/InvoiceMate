@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" fill="none">
+  <defs>
+    <linearGradient id="invBg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="invGlow" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.3" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#047857" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle Card -->
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#invBg)" filter="url(#shadow)" />
+  <rect x="8.75" y="8.75" width="102.5" height="102.5" rx="27.25" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+
+  <!-- Subtle Inner Specular Rim -->
+  <rect x="14" y="14" width="92" height="46" rx="22" fill="url(#invGlow)" opacity="0.25" />
+
+  <!-- Main Invoice Document Shape -->
+  <path d="M38 32 C38 29.79 39.79 28 42 28 H68 L82 42 V88 C82 90.21 80.21 92 78 92 H42 C39.79 92 38 90.21 38 88 Z" fill="#ffffff" />
+  
+  <!-- Document Fold Corner -->
+  <path d="M68 28 V39 C68 40.66 69.34 42 71 42 H82 Z" fill="#d1fae5" />
+  
+  <!-- Invoice Content Lines -->
+  <rect x="46" y="50" width="28" height="4" rx="2" fill="#0f172a" opacity="0.85" />
+  <rect x="46" y="60" width="20" height="4" rx="2" fill="#64748b" opacity="0.7" />
+  
+  <!-- Emerald Verification Badge / Lightning Accent -->
+  <circle cx="72" cy="74" r="14" fill="#10b981" />
+  <path d="M68 74.2 L70.8 77 L76.5 71.3" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

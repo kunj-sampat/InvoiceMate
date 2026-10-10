@@ -175,69 +175,74 @@ function openPremiumModal() {
     modal.id = 'invoza-premium-modal';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-      <div class="modal" style="max-width: 580px; width: 92%; padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: 0 25px 60px -15px rgba(217, 119, 6, 0.25);">
+      <div class="modal" style="max-width: 600px; width: 92%; padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); background: var(--color-bg);">
         
         <!-- Header Banner -->
-        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 32px 32px 28px; position: relative; color: #ffffff;">
-          <div style="position: absolute; top: -20px; right: -20px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%); pointer-events: none;"></div>
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%); padding: 30px 32px 26px; position: relative; color: #ffffff;">
+          <div style="position: absolute; top: -30px; right: -30px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(99, 102, 241, 0.15) 50%, transparent 70%); pointer-events: none;"></div>
           
-          <button id="close-premium-modal" style="position: absolute; top: 16px; right: 18px; background: transparent; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</button>
+          <button id="close-premium-modal" style="position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #94a3b8; cursor: pointer; transition: all 0.2s; line-height: 1;" onhover="this.style.color='#fff'">&times;</button>
           
-          <div style="display: inline-flex; align-items: center; gap: 7px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 4px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 12px;">
-            <span>👑 INVOICEMATE PRO</span>
-            <span>✦ UNLIMITED ACCESS</span>
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 14px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+            <span>INVOICEMATE PRO ✦ UNLIMITED</span>
           </div>
           
-          <h2 style="margin: 0 0 6px 0; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff;">Elevate Your Invoicing &amp; Cash Flow</h2>
-          <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5;">Supercharge client payments, automate tax filing preparation, and scale your business with zero limits.</p>
+          <h2 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff;">Elevate Your Invoicing & Cash Flow</h2>
+          <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5; font-weight: 400;">Automate follow-ups, export CA compliance packs, and remove all platform watermarks.</p>
         </div>
 
         <!-- Perks List -->
         <div style="padding: 24px 32px; background: var(--color-bg); display: flex; flex-direction: column; gap: 14px;">
           
-          <div style="display: flex; align-items: flex-start; gap: 14px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">📲</div>
+          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M14 2a6 6 0 0 1 6 6"/><path d="M14 6a2 2 0 0 1 2 2"/></svg>
+            </div>
             <div>
-              <div style="font-size: 13.5px; font-weight: 700; color: var(--color-text);">Automated WhatsApp Payment Follow-ups</div>
-              <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Dispatch instant payment reminders with pre-filled UPI links straight to client WhatsApp.</div>
+              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">Automated WhatsApp & Email Follow-ups</div>
+              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Dispatch instant 1-click payment reminders with custom links directly to clients.</div>
             </div>
           </div>
 
-          <div style="display: flex; align-items: flex-start; gap: 14px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">⚡</div>
+          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #8b5cf6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
             <div>
-              <div style="font-size: 13.5px; font-weight: 700; color: var(--color-text);">Dynamic UPI QR Code Auto-Reconciliation</div>
-              <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">GPay, PhonePe, and Paytm scan-to-pay codes with instant settlement marking.</div>
+              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">White-Label Branding & Watermark Removal</div>
+              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Remove "Powered by InvoiceMate" badge, apply custom stamps, signature seals, & custom themes.</div>
             </div>
           </div>
 
-          <div style="display: flex; align-items: flex-start; gap: 14px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(124, 58, 237, 0.12); color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">🏢</div>
-            <div>
-              <div style="font-size: 13.5px; font-weight: 700; color: var(--color-text);">White-Label Branding &amp; Custom Domain</div>
-              <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Remove InvoiceMate watermark, apply custom stamp, and use your bespoke billing domain.</div>
+          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
-          </div>
-
-          <div style="display: flex; align-items: flex-start; gap: 14px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">📑</div>
             <div>
-              <div style="font-size: 13.5px; font-weight: 700; color: var(--color-text);">CA &amp; Accountant GST Compliance Pack</div>
-              <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">1-Click GSTR-1, GSTR-3B B2B/B2C summaries and Excel tax audits.</div>
+              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">CA & Accountant GST Compliance Export</div>
+              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">1-Click export of GSTR-1, GSTR-3B audit sheets formatted directly for tax filing.</div>
             </div>
           </div>
 
         </div>
 
-        <!-- Footer / CTA -->
-        <div style="padding: 18px 32px 24px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <!-- Footer / Pricing CTA -->
+        <div style="padding: 20px 32px 24px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div style="font-size: 18px; font-weight: 800; color: var(--color-text);">₹499 <span style="font-size: 12.5px; font-weight: 500; color: var(--color-text-tertiary);">/ month (Billed Annually)</span></div>
-            <div style="font-size: 11px; color: #10b981; font-weight: 600;">✨ 14-day risk-free money-back guarantee</div>
+            <div style="display: flex; align-items: baseline; gap: 6px;">
+              <span style="font-size: 22px; font-weight: 800; color: var(--color-text);">₹499</span>
+              <span style="font-size: 12.5px; font-weight: 600; color: var(--color-text-tertiary);">/ month</span>
+              <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">Billed Annually (Save 35%)</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>14-day risk-free money-back guarantee. Cancel anytime.</span>
+            </div>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button id="cancel-premium-modal" class="btn btn-secondary btn-sm" style="padding: 8px 14px;">Maybe Later</button>
-            <button id="confirm-premium-upgrade" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 8px 18px; font-weight: 700; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="cancel-premium-modal" class="btn btn-secondary" style="padding: 9px 16px; font-weight: 600; font-size: 13px; border-radius: 10px;">Maybe Later</button>
+            <button id="confirm-premium-upgrade" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 10px 22px; font-weight: 700; font-size: 13.5px; border-radius: 10px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); cursor: pointer; transition: all 0.2s;">
               Upgrade Now &rarr;
             </button>
           </div>

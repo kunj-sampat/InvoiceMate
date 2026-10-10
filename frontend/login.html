@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="auth-page">
 
@@ -33,12 +35,12 @@
 
         <!-- Social Quick Login Pills with Official Vector SVGs -->
         <div class="auth-social-row">
-            <button type="button" class="btn-social-pill" onclick="fillDemoAccount()">
+            <button type="button" class="btn-social-pill" onclick="signInWithGoogle()">
                 <!-- Official 4-color Google Vector Logo -->
                 <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
                 <span>Google</span>
             </button>
-            <button type="button" class="btn-social-pill" onclick="fillDemoAccount()">
+            <button type="button" class="btn-social-pill" onclick="signInWithLinkedIn()">
                 <!-- Official LinkedIn Vector Logo -->
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="#0A66C2"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                 <span>LinkedIn</span>
@@ -97,6 +99,11 @@
             Don't have an account? <a href="register.html">Create one &rarr;</a>
         </div>
 
+        <div style="text-align: center; margin-top: 16px; font-size: 12px; color: #94a3b8;">
+            <a href="privacy.html" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &bull; 
+            <a href="terms.html" style="color: inherit; text-decoration: underline;">Terms of Service</a>
+        </div>
+
     </div>
 
     <!-- Toast Notifications -->
@@ -134,6 +141,61 @@
             document.getElementById('email').value = 'admin@invoicemate.com';
             document.getElementById('password').value = 'admin123';
             if (typeof showToast === 'function') showToast('Demo credentials auto-filled! Click Sign In.', 'info');
+        }
+
+        // Google Sign-In via Google Identity Services
+        const GOOGLE_CLIENT_ID = '820451064085-6krcpht9fcde3krqirfli8bnffiame8t.apps.googleusercontent.com';
+
+        function signInWithGoogle() {
+            if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                if (typeof showToast === 'function') showToast('Google services loading, please retry in a moment...', 'info');
+                return;
+            }
+
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: 'email profile openid',
+                callback: async (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        const errorDiv = document.getElementById('error-msg');
+                        if (errorDiv) errorDiv.style.display = 'none';
+                        if (typeof showToast === 'function') showToast('Authenticating with Google...', 'info');
+
+                        try {
+                            const res = await apiRequest('POST', '/api/auth/google', { token: tokenResponse.access_token });
+                            if (res && res.token) {
+                                localStorage.setItem('token', res.token);
+                                localStorage.setItem('userName', res.fullName || res.name || 'User');
+                                localStorage.setItem('userEmail', res.email);
+                                if (res.businessName) localStorage.setItem('businessName', res.businessName);
+                                if (res.logoPath) localStorage.setItem('userLogo', res.logoPath);
+
+                                if (typeof showToast === 'function') showToast('Google sign-in successful! Redirecting...', 'success');
+                                setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+                            } else {
+                                throw new Error('Invalid authentication response');
+                            }
+                        } catch (err) {
+                            if (errorDiv) {
+                                errorDiv.textContent = err.message || 'Google sign-in failed. Please verify credentials.';
+                                errorDiv.style.display = 'block';
+                            }
+                        }
+                    }
+                }
+            });
+
+            tokenClient.requestAccessToken();
+        }
+
+        const LINKEDIN_CLIENT_ID = '77anf5g8oa87ds';
+
+        function signInWithLinkedIn() {
+            const redirectUri = encodeURIComponent(window.location.origin + '/oauth-callback.html');
+            const state = Math.random().toString(36).substring(7);
+            const scope = encodeURIComponent('openid profile email');
+            const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+            window.location.href = authUrl;
         }
 
         // Handle Login Submission

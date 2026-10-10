@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - InvoiceMate</title>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --bg-page: #0b0f17;
+            --card-bg: rgba(22, 30, 46, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }
+        .header {
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            background: rgba(11, 15, 23, 0.85);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 800;
+            font-size: 19px;
+        }
+        .container {
+            max-width: 860px;
+            margin: 48px auto;
+            padding: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 0;
+            background: linear-gradient(135deg, #fff 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h2 {
+            font-size: 20px;
+            color: #34d399;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        p, li {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(5, 150, 105, 0.2);
+            color: #34d399;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #34d399;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 32px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo-wrap">
+            <img src="assets/logo.svg" alt="InvoiceMate Logo" width="28" height="28">
+            <span>InvoiceMate.</span>
+        </a>
+        <a href="login.html" style="color: #34d399; text-decoration: none; font-weight: 600; font-size: 14px;">Sign In &rarr;</a>
+    </header>
+
+    <div class="container">
+        <span class="badge">Legal Document</span>
+        <h1>Privacy Policy</h1>
+        <p><strong>Effective Date:</strong> October 10, 2026</p>
+        <p>At <strong>InvoiceMate</strong> ("we", "our", or "us"), we value your privacy and are committed to protecting the confidential financial, client, and personal information you entrust to our invoicing and billing operating system.</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>When you register for an account or use InvoiceMate, we may collect the following categories of information:</p>
+        <ul>
+            <li><strong>Account Information:</strong> Your full name, work email address, hashed password, and organization name.</li>
+            <li><strong>Third-Party Single Sign-On (OAuth):</strong> When signing in via Google or LinkedIn, we receive basic verified identity data (full name, email address, and profile photo avatar) in accordance with OAuth 2.0 standards.</li>
+            <li><strong>Business & Billing Records:</strong> Client contact details, line items, invoice numbers, tax rates (GST/HSN), discount figures, and expense items that you create to generate bills and track profitability.</li>
+            <li><strong>Payment Identifiers:</strong> Virtual Payment Addresses (UPI VPAs), payment modes, and payment receipt confirmations.</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your information solely to deliver and maintain high-grade invoicing services:</p>
+        <ul>
+            <li>To authenticate your identity and safeguard your workspace sessions via signed JWT tokens.</li>
+            <li>To render PDF invoices, generate scan-to-pay dynamic UPI QR codes, and prepare client statements.</li>
+            <li>To calculate net revenue, categorize business expenses, and produce GSTR-1 compliant tax summaries.</li>
+            <li>We do <strong>not</strong> sell, rent, or monetize your customer lists or billing entries to third-party data brokers or advertisers.</li>
+        </ul>
+
+        <h2>3. Data Storage & Security</h2>
+        <p>Your records are persisted on secure, enterprise-grade cloud database infrastructure with end-to-end SSL/TLS encryption in transit and AES-256 encryption at rest. Passwords are never stored in plaintext and are securely hashed using industry-standard salted BCrypt cryptography.</p>
+
+        <h2>4. Third-Party Integrations</h2>
+        <p>InvoiceMate interfaces with authorized third-party identity and infrastructure providers:</p>
+        <ul>
+            <li><strong>Google Identity Services:</strong> Used strictly for secure authentication upon your explicit user consent.</li>
+            <li><strong>LinkedIn OpenID Connect:</strong> Used strictly for profile verification and authentication.</li>
+        </ul>
+
+        <h2>5. Your Rights & Data Ownership</h2>
+        <p>You retain 100% full ownership over your invoicing and client data. You may download, export (via CSV or PDF), update, or delete your client records and invoices at any time from your account workspace.</p>
+
+        <h2>6. Contact Us</h2>
+        <p>If you have any questions or inquiries regarding this Privacy Policy, please contact our support team at:</p>
+        <p><strong>Email:</strong> support@invoicemate.com<br><strong>Website:</strong> <a href="index.html" style="color:#34d399;">https://invoicemate.com</a></p>
+
+        <a href="index.html" class="back-link">&larr; Return to Home</a>
+    </div>
+</body>
+</html>
