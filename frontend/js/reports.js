@@ -11,8 +11,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('gst-year-select')?.addEventListener('change', loadGstReport);
   document.getElementById('gst-month-select')?.addEventListener('change', loadGstReport);
-  document.getElementById('export-gst-csv-btn')?.addEventListener('click', exportGstCsv);
-  document.getElementById('print-report-btn')?.addEventListener('click', () => window.print());
+  document.getElementById('export-gst-csv-btn')?.addEventListener('click', (e) => {
+    const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+    if (!isPro) {
+      if (typeof showToast === 'function') showToast('🔒 GSTR-1 & CA Tax Export requires InvoiceMate Pro', 'warning');
+      if (typeof openPremiumModal === 'function') openPremiumModal();
+      return;
+    }
+    exportGstCsv();
+  });
+
+  document.getElementById('print-report-btn')?.addEventListener('click', (e) => {
+    const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+    if (!isPro) {
+      if (typeof showToast === 'function') showToast('🔒 Printing Tax Compliance Pack requires InvoiceMate Pro', 'warning');
+      if (typeof openPremiumModal === 'function') openPremiumModal();
+      return;
+    }
+    window.print();
+  });
 
   document.getElementById('generate-report-btn')?.addEventListener('click', loadSalesReport);
 

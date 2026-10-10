@@ -252,32 +252,315 @@ function openPremiumModal() {
     `;
 
     document.body.appendChild(modal);
-
-    const closeBtn = modal.querySelector('#close-premium-modal');
-    const cancelBtn = modal.querySelector('#cancel-premium-modal');
-    const confirmBtn = modal.querySelector('#confirm-premium-upgrade');
-
-    const closeModal = () => modal.classList.remove('active');
-
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', () => {
-        closeModal();
-        if (typeof showToast === 'function') {
-          showToast('🎉 InvoiceMate Pro activated for your account trial!', 'success');
-        } else {
-          alert('🎉 InvoiceMate Pro activated for your account trial!');
-        }
-      });
-    }
   }
 
   modal.classList.add('active');
+}
+
+// Update Premium Button state based on User Tier
+function updatePremiumButtonState() {
+  const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+  const premiumBtns = document.querySelectorAll('#btn-go-premium, .invoza-btn-premium');
+  
+  premiumBtns.forEach(btn => {
+    if (isPro) {
+      btn.classList.add('pro-active');
+      btn.title = "InvoiceMate Pro Active";
+      btn.style.background = "rgba(16, 185, 129, 0.12)";
+      btn.style.borderColor = "rgba(16, 185, 129, 0.4)";
+      btn.style.color = "#047857";
+      btn.innerHTML = `
+        <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
+        <span style="font-weight: 800;">PRO Active</span>
+        <span style="font-size: 11px; color: #10b981; font-weight: 800;">✔</span>
+      `;
+    }
+  });
+}
+
+// Global Event Delegation for Premium Modal Actions
+document.addEventListener('click', (e) => {
+  // Go Premium Button Click
+  const premiumBtn = e.target.closest('#btn-go-premium, .invoza-btn-premium');
+  if (premiumBtn && !premiumBtn.classList.contains('invoza-locked-btn-upgrade')) {
+    e.preventDefault();
+    const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+    if (isPro) {
+      if (typeof showToast === 'function') {
+        showToast('✨ InvoiceMate Pro Active! All features & CA exports unlocked.', 'success');
+      } else {
+        alert('✨ InvoiceMate Pro Active! All features & CA exports unlocked.');
+      }
+      return;
+    }
+    openPremiumModal();
+    return;
+  }
+
+  // Upgrade Now Button Click inside Pro Modal
+  const confirmBtn = e.target.closest('#confirm-premium-upgrade');
+  if (confirmBtn) {
+    e.preventDefault();
+    const modal = document.getElementById('invoza-premium-modal');
+    if (modal) modal.classList.remove('active');
+    openRazorpayDemoCheckout();
+    return;
+  }
+
+  // Close / Cancel Pro Modal
+  const cancelBtn = e.target.closest('#close-premium-modal, #cancel-premium-modal');
+  if (cancelBtn) {
+    e.preventDefault();
+    const modal = document.getElementById('invoza-premium-modal');
+    if (modal) modal.classList.remove('active');
+    return;
+  }
+
+  // Click backdrop overlay to close
+  const activeModal = e.target.closest('#invoza-premium-modal');
+  if (activeModal && e.target === activeModal) {
+    activeModal.classList.remove('active');
+  }
+});
+
+// Export to window scope for inline onclick accessibility
+window.openPremiumModal = openPremiumModal;
+window.openRazorpayDemoCheckout = openRazorpayDemoCheckout;
+
+// --- Interactive Ultra-Sleek Payment Checkout (InvoiceMate Executive Dark Theme) ---
+function openRazorpayDemoCheckout() {
+  let checkoutModal = document.getElementById('razorpay-demo-modal');
+  if (checkoutModal) checkoutModal.remove();
+
+  checkoutModal = document.createElement('div');
+  checkoutModal.id = 'razorpay-demo-modal';
+  checkoutModal.className = 'modal-overlay active';
+  checkoutModal.style.zIndex = '99999';
+  
+  // Inject Glassmorphic Styles
+  if (!document.getElementById('inv-checkout-styles')) {
+    const style = document.createElement('style');
+    style.id = 'inv-checkout-styles';
+    style.innerHTML = `
+      @keyframes invSpinRing {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes invPulseGlow {
+        0%, 100% { transform: scale(1); opacity: 0.35; }
+        50% { transform: scale(1.15); opacity: 0.7; }
+      }
+      .inv-pay-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        color: #f8fafc;
+      }
+      .inv-pay-card:hover {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(16, 185, 129, 0.4);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+        transform: translateY(-1px);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(checkoutModal);
+
+  // --- Step 1: Payment Method Selection Screen ---
+  const renderPaymentOptions = () => {
+    checkoutModal.innerHTML = `
+      <div class="modal" style="max-width: 460px; width: 92%; padding: 0; overflow: hidden; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.5); background: #0f172a; color: #ffffff; position: relative;">
+        
+        <!-- Executive Header -->
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%); padding: 24px 26px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: relative;">
+          <button id="inv-pay-close" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: 30px; height: 30px; border-radius: 50%; color: #94a3b8; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">&times;</button>
+          
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <span style="font-weight: 900; font-size: 17px; color: #ffffff; letter-spacing: -0.5px;">Invoice<span style="color: #10b981;">Mate</span>.</span>
+            <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; letter-spacing: 0.5px;">PRO GATEWAY</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <div style="font-size: 13.5px; font-weight: 700; color: #f1f5f9;">Pro Subscription (Annual Plan)</div>
+              <div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">256-bit Encrypted SSL Payment</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 20px; font-weight: 800; color: #ffffff;">₹499<span style="font-size: 12px; color: #94a3b8; font-weight: 500;">/mo</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Options Body -->
+        <div style="padding: 24px 26px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 4px;">Choose Preferred Payment Method</div>
+          
+          <div class="inv-pay-card" data-method="UPI">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: #ffffff;">UPI Instant Pay</div>
+                <div style="font-size: 12px; color: #94a3b8;">GPay, PhonePe, Paytm, BHIM</div>
+              </div>
+            </div>
+            <span style="color: #64748b; font-weight: 700;">&rarr;</span>
+          </div>
+
+          <div class="inv-pay-card" data-method="Cards">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: #ffffff;">Credit / Debit Card</div>
+                <div style="font-size: 12px; color: #94a3b8;">4111 •••• •••• 1111 (Demo Card)</div>
+              </div>
+            </div>
+            <span style="color: #64748b; font-weight: 700;">&rarr;</span>
+          </div>
+
+          <div class="inv-pay-card" data-method="Netbanking">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.25); color: #a78bfa; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: #ffffff;">Netbanking</div>
+                <div style="font-size: 12px; color: #94a3b8;">HDFC, ICICI, SBI, Axis Bank</div>
+              </div>
+            </div>
+            <span style="color: #64748b; font-weight: 700;">&rarr;</span>
+          </div>
+
+          <div class="inv-pay-card" data-method="Cash / Test Sandbox">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: #ffffff;">Test Sandbox Voucher</div>
+                <div style="font-size: 12px; color: #94a3b8;">Instant Portfolio Demo Unlock</div>
+              </div>
+            </div>
+            <span style="color: #64748b; font-weight: 700;">&rarr;</span>
+          </div>
+
+        </div>
+
+        <div style="padding: 16px 26px; background: rgba(15, 23, 42, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; font-size: 11.5px; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Secured by InvoiceMate Gateway &amp; Razorpay Sandbox</span>
+        </div>
+
+      </div>
+    `;
+
+    checkoutModal.querySelector('#inv-pay-close').addEventListener('click', () => checkoutModal.remove());
+
+    checkoutModal.querySelectorAll('.inv-pay-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const method = card.getAttribute('data-method');
+        renderProcessingScreen(method);
+      });
+    });
+  };
+
+  // --- Step 2: Processing Screen ---
+  const renderProcessingScreen = (selectedMethod) => {
+    checkoutModal.innerHTML = `
+      <div class="modal" style="max-width: 440px; width: 92%; padding: 44px 28px 36px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.5); background: #0f172a; color: #ffffff; text-align: center; position: relative;">
+        
+        <h3 style="font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Processing Payment</h3>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 36px;">Securing authorization via ${selectedMethod}...</p>
+        
+        <!-- Glowing Emerald Ring Loader -->
+        <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 36px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%); animation: invPulseGlow 1.6s infinite ease-in-out;"></div>
+          <div style="width: 64px; height: 64px; border-radius: 50%; border: 4px solid rgba(16, 185, 129, 0.15); border-top-color: #10b981; border-right-color: #34d399; animation: invSpinRing 1s infinite linear;"></div>
+        </div>
+
+        <button id="cancel-proc-btn" style="padding: 9px 24px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-weight: 600; cursor: pointer; font-size: 12.5px;">
+          Cancel Transaction
+        </button>
+
+      </div>
+    `;
+
+    checkoutModal.querySelector('#cancel-proc-btn').addEventListener('click', () => checkoutModal.remove());
+
+    setTimeout(() => {
+      renderSuccessScreen(selectedMethod);
+    }, 2000);
+  };
+
+  // --- Step 3: Executive Success Screen ---
+  const renderSuccessScreen = (selectedMethod) => {
+    const paymentId = 'pay_' + Math.random().toString(36).substring(2, 14);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ', ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    checkoutModal.innerHTML = `
+      <div class="modal" style="max-width: 440px; width: 92%; padding: 36px 26px 28px; border-radius: 22px; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 30px 60px -12px rgba(16, 185, 129, 0.25); background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); color: #ffffff; text-align: center; position: relative;">
+        
+        <!-- Animated Emerald Checkmark -->
+        <div style="width: 76px; height: 76px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; color: #34d399; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+
+        <h3 style="font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">Payment Successful!</h3>
+        <p style="font-size: 13px; color: #34d399; font-weight: 600; margin-bottom: 24px;">🎉 InvoiceMate Pro is now active on your account.</p>
+
+        <!-- Transaction Receipt Box -->
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 16px; text-align: left; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 12px; color: #94a3b8;">Plan Subscribed</span>
+            <span style="font-size: 12.5px; font-weight: 700; color: #ffffff;">InvoiceMate Pro (Annual)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 12px; color: #94a3b8;">Amount Paid</span>
+            <span style="font-size: 13px; font-weight: 800; color: #10b981;">₹499.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 12px; color: #94a3b8;">Payment Reference</span>
+            <span style="font-size: 12px; font-family: monospace; color: #38bdf8; font-weight: 600;">${paymentId}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 12px; color: #94a3b8;">Timestamp</span>
+            <span style="font-size: 11.5px; color: #cbd5e1;">${dateStr}</span>
+          </div>
+        </div>
+
+        <button id="finish-pro-btn" style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #ffffff; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);">
+          Explore Pro Dashboard &rarr;
+        </button>
+
+      </div>
+    `;
+
+    // Save Pro tier status in localStorage
+    localStorage.setItem('invoza_user_tier', 'PRO');
+
+    checkoutModal.querySelector('#finish-pro-btn').addEventListener('click', () => {
+      checkoutModal.remove();
+      if (typeof showToast === 'function') {
+        showToast('🎉 InvoiceMate Pro features unlocked!', 'success');
+      }
+    });
+  };
+
+  // Render options
+  renderPaymentOptions();
 }
 
 // --- Interactive Sidebar Global Search ---
@@ -460,5 +743,81 @@ function initSidebarGlobalSearch() {
     }
   });
 }
+
+// --- Reusable Locked Feature Banner Renderer ---
+function renderLockedFeatureBanner(container, featureTitle, featureDescription) {
+  if (!container) return;
+  const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+  if (isPro) return; // PRO tier users don't see locked banners
+
+  // Avoid duplicate banner insertion
+  if (container.querySelector('.invoza-locked-banner-card')) return;
+
+  const banner = document.createElement('div');
+  banner.className = 'invoza-locked-banner-card';
+  banner.innerHTML = `
+    <div class="invoza-locked-left">
+      <div class="invoza-locked-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="invoza-locked-text-wrap">
+        <div class="invoza-locked-pill-tag">🔒 PRO FEATURE LOCKED</div>
+        <h4 class="invoza-locked-title">${featureTitle || 'Upgrade to InvoiceMate Pro'}</h4>
+        <p class="invoza-locked-desc">${featureDescription || 'Unlock automated follow-ups, CA GST compliance exports, and watermark-free branding.'}</p>
+      </div>
+    </div>
+    <button class="invoza-locked-btn-upgrade invoza-btn-premium">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+      <span>Upgrade to Unlock &rarr;</span>
+    </button>
+  `;
+
+  container.prepend(banner);
+}
+
+// Auto-initialize Locked Feature Banners across app pages for FREE tier users
+function initLockedFeatureBanners() {
+  const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+  if (isPro) return;
+
+  // 1. Reports Page: GST & CA Compliance Tab
+  const gstTabContent = document.getElementById('tab-content-gst');
+  if (gstTabContent) {
+    renderLockedFeatureBanner(
+      gstTabContent,
+      'CA & Accountant GST Compliance Pack Locked',
+      'Export official GSTR-1 & GSTR-3B audit sheets formatted directly for tax filing and CA review.'
+    );
+  }
+
+  // 2. Settings Page: Logo & Branding Card
+  const logoCard = document.getElementById('logo-settings-card');
+  if (logoCard) {
+    renderLockedFeatureBanner(
+      logoCard,
+      'White-Label Branding & Custom Watermark Removal Locked',
+      'Remove "Powered by InvoiceMate" watermark from all PDFs and apply custom company seals.'
+    );
+  }
+
+  // 3. Recurring Invoices Page: Automation Profile List
+  const recurringContent = document.querySelector('.invoza-page-content');
+  if (window.location.pathname.includes('recurring.html') && recurringContent) {
+    renderLockedFeatureBanner(
+      recurringContent,
+      'Automated WhatsApp & Email Reminders Locked',
+      'Dispatch scheduled payment follow-ups automatically straight to client WhatsApp and inbox.'
+    );
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updatePremiumButtonState();
+  initLockedFeatureBanners();
+});
+
+window.renderLockedFeatureBanner = renderLockedFeatureBanner;
+window.initLockedFeatureBanners = initLockedFeatureBanners;
+window.updatePremiumButtonState = updatePremiumButtonState;
 
 

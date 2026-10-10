@@ -20,8 +20,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ApiError(403, ex.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler({BadRequestException.class, MethodArgumentNotValidException.class})
-    public ResponseEntity<ApiError> handleBadRequest(Exception ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed. Please check your inputs.");
+        return new ResponseEntity<>(new ApiError(400, message), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequest(BadRequestException ex) {
         return new ResponseEntity<>(new ApiError(400, ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
