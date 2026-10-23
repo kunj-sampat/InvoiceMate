@@ -42,25 +42,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setupTabs() {
   const tabGst = document.getElementById('tab-btn-gst');
   const tabSales = document.getElementById('tab-btn-sales');
+  const tabAi = document.getElementById('tab-btn-ai-advisor');
+  const tabExport = document.getElementById('tab-btn-export');
+
   const contentGst = document.getElementById('tab-content-gst');
   const contentSales = document.getElementById('tab-content-sales');
+  const contentAi = document.getElementById('tab-content-ai-advisor');
+  const contentExport = document.getElementById('tab-content-export');
 
-  if (tabGst && tabSales) {
+  const allTabs = [tabGst, tabSales, tabAi, tabExport];
+  const allContents = [contentGst, contentSales, contentAi, contentExport];
+
+  function activateTab(activeTab, activeContent) {
+    allTabs.forEach(t => t && t.classList.remove('active'));
+    allContents.forEach(c => c && (c.style.display = 'none'));
+    if (activeTab) activeTab.classList.add('active');
+    if (activeContent) activeContent.style.display = 'block';
+  }
+
+  if (tabGst) {
     tabGst.addEventListener('click', () => {
-      tabGst.classList.add('active');
-      tabSales.classList.remove('active');
-      if (contentGst) contentGst.style.display = 'block';
-      if (contentSales) contentSales.style.display = 'none';
+      activateTab(tabGst, contentGst);
     });
+  }
 
+  if (tabSales) {
     tabSales.addEventListener('click', () => {
-      tabSales.classList.add('active');
-      tabGst.classList.remove('active');
-      if (contentSales) contentSales.style.display = 'block';
-      if (contentGst) contentGst.style.display = 'none';
+      activateTab(tabSales, contentSales);
       loadSalesReport();
     });
   }
+
+  if (tabAi) {
+    tabAi.addEventListener('click', () => {
+      activateTab(tabAi, contentAi);
+      loadAiInsights();
+    });
+  }
+
+  if (tabExport) {
+    tabExport.addEventListener('click', () => {
+      activateTab(tabExport, contentExport);
+    });
+  }
+
+  document.getElementById('btn-refresh-ai-insights')?.addEventListener('click', loadAiInsights);
 }
 
 function setupFilterModes() {
@@ -363,3 +389,88 @@ async function loadSalesReport() {
     if (typeof showToast === 'function') showToast('Failed to load sales report', 'error');
   }
 }
+
+async function loadAiInsights() {
+  const scoreEl = document.getElementById('ai-health-score');
+  const statusEl = document.getElementById('ai-health-status');
+  const summaryEl = document.getElementById('ai-summary-text');
+  const actionsEl = document.getElementById('ai-action-items-list');
+  const modelTag = document.getElementById('ai-model-tag');
+
+  if (summaryEl) summaryEl.textContent = 'Grok is calculating cashflow metrics, operating ratios, and revenue trends...';
+  if (actionsEl) actionsEl.innerHTML = '<div style="padding:12px 16px; background:#f8fafc; border-radius:6px; color:#64748b;">Consulting Grok AI advisor...</div>';
+
+  try {
+    const data = await apiRequest('GET', '/api/ai/business-insights');
+    if (!data) return;
+
+    if (scoreEl) scoreEl.textContent = data.healthScore || '90/100';
+    if (statusEl) {
+      statusEl.textContent = data.healthStatus || 'Active';
+      const isGood = (data.healthStatus || '').toLowerCase().includes('excel') || (data.healthStatus || '').toLowerCase().includes('stable');
+      statusEl.style.background = isGood ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)';
+      statusEl.style.color = isGood ? '#10b981' : '#ef4444';
+    }
+    if (summaryEl) summaryEl.textContent = data.summary || 'Your cashflow metrics are solid.';
+    if (modelTag) modelTag.textContent = data.aiModel ? data.aiModel : 'xAI Grok';
+
+    if (actionsEl && Array.isArray(data.actionItems)) {
+      actionsEl.innerHTML = '';
+      data.actionItems.forEach((action, idx) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:14px 18px; background:#f8fafc; border-left:3px solid #0284c7; border-radius:8px; font-size:0.92rem; color:#1e293b; line-height:1.5; display:flex; gap:12px; align-items:flex-start;';
+        item.innerHTML = `
+          <span style="background:#0284c7; color:#fff; width:22px; height:22px; min-width:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700;">${idx + 1}</span>
+          <div>${action}</div>
+        `;
+        actionsEl.appendChild(item);
+      });
+    }
+  } catch (err) {
+    console.error('AI Insights error:', err);
+    if (summaryEl) summaryEl.textContent = 'Grok AI insights could not be retrieved at this moment.';
+  }
+}
+
+async function downloadBackup(type) {
+  let endpoint = '/api/export/backup/json';
+  let defaultFilename = `invoicemate_backup_${new Date().toISOString().split('T')[0]}.json`;
+
+  if (type === 'invoices') {
+    endpoint = '/api/export/invoices/csv';
+    defaultFilename = `invoices_export_${new Date().toISOString().split('T')[0]}.csv`;
+  } else if (type === 'customers') {
+    endpoint = '/api/export/customers/csv';
+    defaultFilename = `customers_export_${new Date().toISOString().split('T')[0]}.csv`;
+  }
+
+  try {
+    if (typeof showToast === 'function') showToast('Preparing your export download...', 'info');
+    const token = localStorage.getItem('token');
+    const res = await fetch(endpoint, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) throw new Error('Download failed: ' + res.status);
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = defaultFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    if (typeof showToast === 'function') showToast('File downloaded successfully!', 'success');
+  } catch (err) {
+    console.error('Backup download error:', err);
+    if (typeof showToast === 'function') showToast(err.message || 'Failed to download backup', 'error');
+  }
+}
+
+window.downloadBackup = downloadBackup;
+window.loadAiInsights = loadAiInsights;

@@ -41,6 +41,9 @@ public class Invoice {
     
     @Column(name = "is_estimate", nullable = false)
     private boolean isEstimate = false;
+
+    @Column(name = "share_token", unique = true)
+    private String shareToken;
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -54,6 +57,9 @@ public class Invoice {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
+        if (shareToken == null || shareToken.trim().isEmpty()) {
+            shareToken = java.util.UUID.randomUUID().toString().replace("-", "");
+        }
     }
 
     @PreUpdate
@@ -104,6 +110,9 @@ public class Invoice {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getShareToken() { return shareToken; }
+    public void setShareToken(String shareToken) { this.shareToken = shareToken; }
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "invoiceId", insertable = false, updatable = false)

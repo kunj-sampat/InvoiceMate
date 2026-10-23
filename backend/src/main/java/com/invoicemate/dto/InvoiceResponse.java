@@ -40,6 +40,7 @@ public class InvoiceResponse {
     private String businessEmail;
     private String logoUrl;
     private String upiId;
+    private String shareToken;
 
     private List<InvoiceItem> items;
     private List<PaymentResponse> payments;
@@ -82,6 +83,7 @@ public class InvoiceResponse {
         res.setNotes(invoice.getNotes());
         res.setDraft(invoice.isDraft());
         res.setEstimate(invoice.isEstimate());
+        res.setShareToken(invoice.getShareToken() != null ? invoice.getShareToken() : String.valueOf(invoice.getId()));
         res.setCreatedAt(invoice.getCreatedAt());
         res.setUpdatedAt(invoice.getUpdatedAt());
 
@@ -161,4 +163,6 @@ public class InvoiceResponse {
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
     public String getUpiId() { return upiId; }
     public void setUpiId(String upiId) { this.upiId = upiId; }
+    public String getShareToken() { return shareToken; }
+    public void setShareToken(String shareToken) { this.shareToken = shareToken; }
 }

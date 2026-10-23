@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice | Client Payment Portal</title>
+  <meta name="description" content="View and securely settle your invoice via instant UPI scan-to-pay, card, or direct bank transfer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/invoice-templates.css">
+  <link rel="stylesheet" href="css/print.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 40%),
+                          radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent 40%);
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-image: var(--bg-gradient);
+    }
+
+    /* Top Sticky Header */
+    .portal-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(11, 15, 25, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .portal-brand img {
+      height: 34px;
+      width: auto;
+    }
+
+    .portal-brand-text {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #60a5fa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .portal-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Main Container */
+    .portal-container {
+      max-width: 1280px;
+      margin: 32px auto;
+      padding: 0 20px 60px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .portal-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left: Invoice Paper Preview */
+    .invoice-card-wrapper {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Right: Payment & Settlement Panel */
+    .portal-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 90px;
+    }
+
+    .settlement-card {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .settlement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .settlement-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-paid {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-overdue {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .amount-due-box {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .amount-due-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .amount-due-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    /* QR Code Display */
+    .qr-frame {
+      background: #ffffff;
+      padding: 14px;
+      border-radius: 16px;
+      display: inline-block;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .qr-frame canvas, .qr-frame img {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .upi-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .upi-id-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-family: monospace;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .upi-id-pill:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .upi-apps-icons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      align-items: center;
+      margin-top: 10px;
+      color: #94a3b8;
+      font-size: 0.8rem;
+    }
+
+    .btn-pay-upi {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-pay-upi:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-portal-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #f1f5f9;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-portal-action:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .btn-paid-notify {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: transparent;
+      color: #94a3b8;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-paid-notify:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Loading state */
+    .loading-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .portal-nav, .portal-sidebar, .toast-container {
+        display: none !important;
+      }
+      .portal-container {
+        display: block !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .invoice-card-wrapper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="portal-nav">
+    <a href="#" class="portal-brand" id="portal-brand-link">
+      <img src="assets/logo.svg" alt="InvoiceMate" id="portal-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2338bdf8%22><path d=%22M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z%22/></svg>'">
+      <span class="portal-brand-text" id="portal-biz-name">InvoiceMate Client Portal</span>
+    </a>
+
+    <div class="portal-actions">
+      <button class="btn-portal-action" id="btn-print-invoice" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Print
+      </button>
+      <a href="#" class="btn-portal-action" id="btn-download-pdf" target="_blank">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+      </a>
+    </div>
+  </header>
+
+  <!-- Loading View -->
+  <div id="portal-loader" class="loading-overlay">
+    <div class="spinner"></div>
+    <p style="color: #94a3b8; font-size: 0.95rem;">Securing connection and loading invoice...</p>
+  </div>
+
+  <!-- Error View -->
+  <div id="portal-error" style="display: none; text-align: center; padding: 80px 20px;">
+    <i class="fa-solid fa-circle-exclamation" style="font-size: 3rem; color: #ef4444; margin-bottom: 16px;"></i>
+    <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Invoice Not Found</h2>
+    <p style="color: #94a3b8; max-width: 480px; margin: 0 auto 24px;">This invoice link may have expired, or the share token is invalid. Please contact the merchant for an updated payment link.</p>
+  </div>
+
+  <!-- Portal Main Content -->
+  <main class="portal-container" id="portal-content" style="display: none;">
+    <!-- Left Paper Preview -->
+    <div class="invoice-card-wrapper">
+      <div id="invoice-preview" class="invoice-preview template-modern"></div>
+    </div>
+
+    <!-- Right Settlement Sidebar -->
+    <aside class="portal-sidebar">
+      <div class="settlement-card">
+        <div class="settlement-header">
+          <span class="settlement-title">
+            <i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i> Settlement Portal
+          </span>
+          <span id="settlement-badge" class="badge-pending">Pending</span>
+        </div>
+
+        <div class="amount-due-box">
+          <div class="amount-due-label" id="settlement-amount-label">Amount Payable</div>
+          <div class="amount-due-value" id="settlement-amount">₹0.00</div>
+          <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;" id="settlement-due-date">Due: -</div>
+        </div>
+
+        <!-- Scan to Pay UPI Section -->
+        <div id="settlement-upi-block" style="text-align: center;">
+          <div class="qr-frame">
+            <div id="upi-qr-box"></div>
+          </div>
+
+          <div class="upi-info">
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Zero-Fee Instant UPI Transfer</div>
+            <div class="upi-id-pill" id="upi-pill" title="Click to copy UPI ID" onclick="copyUpiId()">
+              <span id="upi-display-id">-</span>
+              <i class="fa-regular fa-copy"></i>
+            </div>
+            <div class="upi-apps-icons">
+              <span><i class="fa-brands fa-google-pay"></i> GPay</span>
+              <span><i class="fa-solid fa-mobile-screen"></i> PhonePe</span>
+              <span><i class="fa-solid fa-wallet"></i> Paytm</span>
+              <span><i class="fa-solid fa-building-columns"></i> BHIM</span>
+            </div>
+          </div>
+
+          <!-- Direct Mobile Deep Link -->
+          <a href="#" id="btn-upi-intent" class="btn-pay-upi">
+            <i class="fa-solid fa-qrcode"></i> Pay via UPI App
+          </a>
+        </div>
+
+        <!-- Already Paid View -->
+        <div id="settlement-paid-block" style="display: none; text-align: center; padding: 20px 10px;">
+          <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: #10b981; margin-bottom: 12px;"></i>
+          <h3 style="color: #10b981; margin-bottom: 6px;">Invoice Fully Settled</h3>
+          <p style="color: #94a3b8; font-size: 0.85rem;">This invoice has been marked as fully paid. You may download or print the official tax receipt above.</p>
+        </div>
+
+        <button type="button" class="btn-paid-notify" id="btn-paid-confirm" onclick="confirmPaymentSent()">
+          <i class="fa-solid fa-check"></i> I have made this payment
+        </button>
+      </div>
+
+      <!-- Verified Business Trust Badge -->
+      <div style="text-align: center; font-size: 0.8rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <i class="fa-solid fa-lock" style="color: #10b981;"></i>
+        <span>256-bit Encrypted Invoice via <strong style="color: #94a3b8;">InvoiceMate</strong></span>
+      </div>
+    </aside>
+  </main>
+
+  <!-- External libraries -->
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/pay.js"></script>
+</body>
+</html>

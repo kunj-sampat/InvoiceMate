@@ -96,7 +96,10 @@
                         <h2>Create Invoice</h2>
                         <p>Draft professional GST-compliant invoices with live real-time preview.</p>
                     </div>
-                    <div style="display: flex; gap: 12px;">
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <button type="button" id="btn-grok-magic-create" class="btn btn-sm" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Use Grok AI to convert raw notes into a filled invoice">
+                            <span>✨ Grok AI Magic Create</span>
+                        </button>
                         <button id="save-draft-btn" class="btn btn-secondary">Save Draft</button>
                         <button id="generate-btn" class="btn btn-primary">Save &amp; Send</button>
                     </div>
@@ -315,6 +318,54 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- Grok AI Magic Create Modal -->
+    <div id="grok-magic-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 620px;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.3rem;">✨</span>
+                    <div>
+                        <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">Grok AI Magic Invoice Copilot</h3>
+                        <div style="font-size: 0.78rem; color: #94a3b8;">Paste any raw message, WhatsApp chat, or bullet points to auto-fill</div>
+                    </div>
+                </div>
+                <button class="modal-close" id="close-grok-magic-modal">&times;</button>
+            </div>
+
+            <div class="form-group" style="margin: 16px 0 10px;">
+                <label for="grok-prompt-input" style="font-size: 0.85rem; color: #94a3b8; display: flex; justify-content: space-between;">
+                    <span>Describe your bill or paste client notes:</span>
+                    <span style="color: #38bdf8; font-weight: 600;">Powered by xAI Grok</span>
+                </label>
+                <textarea id="grok-prompt-input" rows="5" style="width: 100%; border-radius: 10px; padding: 12px; font-family: inherit; font-size: 0.9rem; line-height: 1.5; background: rgba(255,255,255,0.04); color: #f8fafc; border: 1px solid rgba(255,255,255,0.12);" placeholder="e.g. Billed Sharma Tech for 3 landing pages at ₹12,000 each, plus brand logo identity at ₹8,000. Give 10% discount and 18% GST. Due in 15 days."></textarea>
+            </div>
+
+            <!-- Quick sample chips -->
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Try an example:</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="grok-sample-chip" data-sample="Billed Acme Corp for 40 hours of fullstack web development at 2500 per hour, plus cloud setup at 15000. Apply 18% GST and 10% discount. Due in 15 days." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
+                        💻 Web Development
+                    </button>
+                    <button type="button" class="grok-sample-chip" data-sample="Invoice to Creative Pulse: 3 video editing deliverables at 6000 each, and 1 YouTube thumbnail pack at 3500. GST 18%. Due in 7 days." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
+                        🎬 Video &amp; Design
+                    </button>
+                    <button type="button" class="grok-sample-chip" data-sample="Billed Nexa Logistics for monthly marketing retainer at 35000. Zero discount. 18% GST. Due on next Friday." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
+                        🚀 Monthly Retainer
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" id="cancel-grok-magic-btn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="submit-grok-magic-btn" class="btn" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <span id="grok-magic-spinner" style="display:none;" class="spinner-sm"></span>
+                    <span id="grok-magic-btn-text">✨ Auto-Fill Invoice</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>

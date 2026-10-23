@@ -89,6 +89,7 @@ async function loadInvoices() {
         <td><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
         <td>
           <a href="invoice-detail.html?id=${inv.id}" class="btn btn-sm btn-secondary">View</a>
+          <button onclick="copyPublicLink('${inv.shareToken || inv.id}')" class="btn btn-sm btn-secondary" title="Copy client share link">🔗 Link</button>
           <button onclick="quickWhatsApp('${inv.id}')" class="btn btn-sm" style="background:#25d366;color:#ffffff;border:none;" title="Send on WhatsApp">&#128172; WhatsApp</button>
           <button onclick="duplicateInvoice('${inv.id}')" class="btn btn-sm btn-secondary">Duplicate</button>
           <button onclick="deleteInvoice('${inv.id}')" class="btn btn-sm btn-danger">Delete</button>
@@ -140,3 +141,17 @@ async function deleteInvoice(id) {
     if(typeof showToast === 'function') showToast(error.message, 'error');
   }
 }
+
+window.copyPublicLink = function(token) {
+  if (!token) return;
+  const url = `${window.location.origin}/pay.html?token=${encodeURIComponent(token)}`;
+  navigator.clipboard.writeText(url).then(() => {
+    if (typeof showToast === 'function') {
+      showToast('🔗 Public client link copied to clipboard!', 'success');
+    } else {
+      alert('Client link: ' + url);
+    }
+  }).catch(() => {
+    prompt('Copy client link:', url);
+  });
+};

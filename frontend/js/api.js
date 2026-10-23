@@ -734,6 +734,8 @@ function shareOnWhatsApp(doc, type = 'invoice') {
   const amount = formatCurrency(doc.grandTotal !== undefined ? doc.grandTotal : (doc.balanceDue || doc.total || 0));
   const rawPhone = (doc.customerPhone || doc.phone || '').trim();
 
+  const publicLink = (doc.shareToken || doc.id) ? `${window.location.origin}/pay.html?token=${doc.shareToken || doc.id}` : '';
+
   let msg = '';
   if (type === 'reminder') {
     msg = `*🔔 PAYMENT REMINDER*\n\n` +
@@ -741,7 +743,8 @@ function shareOnWhatsApp(doc, type = 'invoice') {
       `This is a gentle reminder that invoice *#${num}* from *${bizName}* was due on *${dueDate}*.\n\n` +
       `📄 *Invoice No:* #${num}\n` +
       `💰 *Pending Amount:* ${amount}\n` +
-      `📅 *Due Date:* ${dueDate}\n\n` +
+      `📅 *Due Date:* ${dueDate}\n` +
+      (publicLink ? `\n💳 *Pay or View Bill Online (Zero-Fee UPI/Card):*\n${publicLink}\n\n` : '\n\n') +
       `Please clear the balance at your earliest convenience or let us know if you need another copy of the invoice.\n\n` +
       `Thank you!\n*${bizName}*`;
   } else if (type === 'estimate') {
@@ -751,7 +754,8 @@ function shareOnWhatsApp(doc, type = 'invoice') {
       `📄 *Estimate No:* #${num}\n` +
       `📅 *Date:* ${date}\n` +
       `💰 *Total Estimated:* ${amount}\n` +
-      (dueDate ? `⏳ *Valid Until:* ${dueDate}\n\n` : '\n') +
+      (dueDate ? `⏳ *Valid Until:* ${dueDate}\n` : '') +
+      (publicLink ? `\n🔗 *Review Proposal Online:*\n${publicLink}\n\n` : '\n\n') +
       `Please review and let us know if you approve this quote to proceed.\n\n` +
       `Best regards,\n*${bizName}*`;
   } else if (type === 'statement') {
@@ -770,7 +774,8 @@ function shareOnWhatsApp(doc, type = 'invoice') {
       `📄 *Invoice No:* #${num}\n` +
       `📅 *Invoice Date:* ${date}\n` +
       `⏳ *Due Date:* ${dueDate}\n` +
-      `💰 *Total Amount:* ${amount}\n\n` +
+      `💰 *Total Amount:* ${amount}\n` +
+      (publicLink ? `\n💳 *Pay or View Bill Online (Scan UPI QR / Download PDF):*\n${publicLink}\n\n` : '\n\n') +
       `Please let us know once the payment is initiated.\n\n` +
       `Best regards,\n*${bizName}*`;
   }

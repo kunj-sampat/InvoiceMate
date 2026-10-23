@@ -27,7 +27,7 @@ public class SecurityConfig {
                 })
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/", "/*.html", "/css/**", "/js/**", "/assets/**", "/uploads/**", "/h2-console/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/public/**", "/", "/*.html", "/css/**", "/js/**", "/assets/**", "/uploads/**", "/h2-console/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )

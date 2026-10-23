@@ -278,4 +278,49 @@ public class InvoiceService {
         act.setDescription(desc);
         activityRepository.save(act);
     }
+
+    @Transactional
+    public InvoiceResponse getPublicInvoiceByToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new ResourceNotFoundException("Invalid or missing invoice token");
+        }
+
+        Invoice inv = invoiceRepository.findByShareToken(token).orElse(null);
+        if (inv == null) {
+            try {
+                Long id = Long.parseLong(token);
+                inv = invoiceRepository.findById(id).orElse(null);
+            } catch (Exception ignored) {}
+        }
+
+        if (inv == null) {
+            throw new ResourceNotFoundException("Invoice not found or public link has expired");
+        }
+
+        if (inv.getShareToken() == null || inv.getShareToken().isEmpty()) {
+            inv.setShareToken(java.util.UUID.randomUUID().toString().replace("-", ""));
+            invoiceRepository.save(inv);
+        }
+
+        updateStatusIfOverdue(inv);
+        Customer c = customerRepository.findById(inv.getCustomerId()).orElse(null);
+        List<InvoiceItem> items = itemRepository.findByInvoiceId(inv.getId());
+        User user = userRepository.findById(inv.getUserId()).orElse(null);
+
+        logActivity(inv.getId(), "Invoice viewed by client via public link");
+
+        return InvoiceResponse.fromInvoice(inv, c, items, user);
+    }
+
+    public Invoice getInvoiceEntityByToken(String token) {
+        Invoice inv = invoiceRepository.findByShareToken(token).orElse(null);
+        if (inv == null) {
+            try {
+                Long id = Long.parseLong(token);
+                inv = invoiceRepository.findById(id).orElse(null);
+            } catch (Exception ignored) {}
+        }
+        if (inv == null) throw new ResourceNotFoundException("Invoice not found");
+        return inv;
+    }
 }

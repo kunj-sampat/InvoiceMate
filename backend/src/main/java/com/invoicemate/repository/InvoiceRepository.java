@@ -33,4 +33,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByCustomerIdAndUserIdAndIsEstimateFalseAndInvoiceDateBetween(
         Long customerId, Long userId, java.time.LocalDate from, java.time.LocalDate to
     );
+
+    java.util.Optional<Invoice> findByShareToken(String shareToken);
 }

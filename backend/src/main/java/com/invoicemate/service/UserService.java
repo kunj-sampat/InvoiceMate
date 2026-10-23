@@ -1,9 +1,12 @@
 package com.invoicemate.service;
 
+import com.invoicemate.dto.ChangePasswordRequest;
 import com.invoicemate.dto.SettingsRequest;
+import com.invoicemate.exception.BadRequestException;
 import com.invoicemate.exception.ResourceNotFoundException;
 import com.invoicemate.model.*;
 import com.invoicemate.repository.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +30,7 @@ public class UserService {
     private final ProductRepository productRepository;
     private final ExpenseRepository expenseRepository;
     private final RecurringInvoiceRepository recurringInvoiceRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        InvoiceRepository invoiceRepository,
@@ -36,7 +40,8 @@ public class UserService {
                        CustomerRepository customerRepository,
                        ProductRepository productRepository,
                        ExpenseRepository expenseRepository,
-                       RecurringInvoiceRepository recurringInvoiceRepository) {
+                       RecurringInvoiceRepository recurringInvoiceRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
@@ -46,6 +51,7 @@ public class UserService {
         this.productRepository = productRepository;
         this.expenseRepository = expenseRepository;
         this.recurringInvoiceRepository = recurringInvoiceRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User getUserById(Long id) {
@@ -170,5 +176,29 @@ public class UserService {
 
         // 8. Delete user account from database
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest req) {
+        User user = getUserById(userId);
+
+        if (req.getCurrentPassword() == null || req.getCurrentPassword().trim().isEmpty()) {
+            throw new BadRequestException("Current password cannot be empty");
+        }
+
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+
+        if (req.getNewPassword() == null || req.getNewPassword().length() < 6) {
+            throw new BadRequestException("New password must be at least 6 characters long");
+        }
+
+        if (req.getConfirmPassword() != null && !req.getNewPassword().equals(req.getConfirmPassword())) {
+            throw new BadRequestException("New password and confirmation do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(user);
     }
 }

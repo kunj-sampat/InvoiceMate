@@ -493,3 +493,155 @@ async function loadInvoiceForEditing(id) {
     if(typeof showToast === 'function') showToast('Failed to load invoice', 'error');
   }
 }
+
+// ==========================================
+// GROK AI MAGIC INVOICE COPILOT
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  setupGrokMagicCopilot();
+});
+
+function setupGrokMagicCopilot() {
+  const openBtn = document.getElementById('btn-grok-magic-create');
+  const modal = document.getElementById('grok-magic-modal');
+  const closeBtn = document.getElementById('close-grok-magic-modal');
+  const cancelBtn = document.getElementById('cancel-grok-magic-btn');
+  const submitBtn = document.getElementById('submit-grok-magic-btn');
+  const promptInput = document.getElementById('grok-prompt-input');
+  const spinner = document.getElementById('grok-magic-spinner');
+  const btnText = document.getElementById('grok-magic-btn-text');
+
+  if (!openBtn || !modal) return;
+
+  const openModal = () => {
+    modal.classList.add('show');
+    if (promptInput) promptInput.focus();
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('show');
+  };
+
+  openBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('ai') === '1') {
+    setTimeout(openModal, 250);
+  }
+
+  // Sample prompt chips
+  const chips = document.querySelectorAll('.grok-sample-chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (promptInput) {
+        promptInput.value = chip.dataset.sample || '';
+        promptInput.focus();
+      }
+    });
+  });
+
+  // Submit Prompt to Grok
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const text = promptInput?.value?.trim();
+      if (!text) {
+        if (typeof showToast === 'function') showToast('Please enter invoice details or paste client notes', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      if (spinner) spinner.style.display = 'inline-block';
+      if (btnText) btnText.textContent = 'Grok is Analyzing...';
+
+      try {
+        const parsed = await apiRequest('POST', '/api/ai/parse-invoice', { prompt: text });
+        if (parsed && !parsed.error) {
+          applyGrokParsedData(parsed);
+          closeModal();
+          if (typeof showToast === 'function') {
+            showToast('✨ Invoice populated successfully using Grok AI!', 'success');
+          }
+        } else {
+          if (typeof showToast === 'function') showToast(parsed?.error || 'Grok could not parse details', 'error');
+        }
+      } catch (err) {
+        console.error('Grok parse error:', err);
+        if (typeof showToast === 'function') showToast('Grok service temporarily unavailable', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+        if (btnText) btnText.textContent = '✨ Auto-Fill Invoice';
+      }
+    });
+  }
+}
+
+function applyGrokParsedData(data) {
+  // 1. Customer Selection / Match
+  if (data.customerName) {
+    const custSelect = document.getElementById('customer-select');
+    if (custSelect) {
+      let matched = false;
+      const lower = data.customerName.toLowerCase();
+      for (let i = 0; i < custSelect.options.length; i++) {
+        const optText = custSelect.options[i].text.toLowerCase();
+        if (optText.includes(lower) || lower.includes(optText)) {
+          custSelect.selectedIndex = i;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && custSelect.options.length > 1) {
+        // Fallback to first customer or prompt
+        custSelect.selectedIndex = 1;
+      }
+    }
+  }
+
+  // 2. Due Date Calculation
+  if (data.dueDays && data.dueDays > 0) {
+    const invDateVal = (document.getElementById('inv-date') || document.getElementById('invoice-date'))?.value;
+    const base = invDateVal ? new Date(invDateVal) : new Date();
+    base.setDate(base.getDate() + Number(data.dueDays));
+    const dueEl = document.getElementById('due-date');
+    if (dueEl) dueEl.value = base.toISOString().split('T')[0];
+  }
+
+  // 3. Discount & GST Rate
+  if (data.discountPercent !== undefined && document.getElementById('discount')) {
+    document.getElementById('discount').value = Number(data.discountPercent);
+  }
+  if (data.gstPercent !== undefined && document.getElementById('gst-rate')) {
+    document.getElementById('gst-rate').value = Number(data.gstPercent);
+  }
+
+  // 4. Notes
+  if (data.notes && document.getElementById('notes')) {
+    document.getElementById('notes').value = data.notes;
+  }
+
+  // 5. Line items
+  if (Array.isArray(data.items) && data.items.length > 0) {
+    items = data.items.map(i => {
+      const q = Number(i.quantity) || 1;
+      const p = Number(i.price) || 0;
+      return {
+        name: i.name || 'Service Item',
+        hsnSacCode: i.hsnSacCode || '998311',
+        quantity: q,
+        price: p,
+        total: q * p,
+        productId: null
+      };
+    });
+    rebuildItemsTable();
+  }
+
+  calculateTotals();
+  if (typeof updateLivePreview === 'function') {
+    updateLivePreview();
+  }
+}
+

@@ -301,6 +301,97 @@
                         </div>
                     </div>
 
+                    <!-- Security & Authentication Card -->
+                    <div class="card" id="security-card">
+                        <div class="card-header">
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                Account Security &amp; Password
+                            </h3>
+                        </div>
+
+                        <!-- System Security Badges -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; color: #10b981; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span>BCrypt Salted Password Hashing</span>
+                            </div>
+                            <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; color: #0284c7; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                                <span>Neon Serverless PostgreSQL (Active)</span>
+                            </div>
+                            <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; color: #6366f1; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
+                                <span>Stateless Signed JWT Session</span>
+                            </div>
+                        </div>
+
+                        <form id="change-password-form" onsubmit="event.preventDefault(); updatePassword();">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="current-password">Current Password *</label>
+                                    <input type="password" id="current-password" placeholder="Enter your current password" required autocomplete="current-password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-password">New Password * (Min 6 chars)</label>
+                                    <input type="password" id="new-password" placeholder="Enter new strong password" required minlength="6" autocomplete="new-password">
+                                </div>
+                            </div>
+                            <div class="form-group" style="max-width: 50%;">
+                                <label for="confirm-new-password">Confirm New Password *</label>
+                                <input type="password" id="confirm-new-password" placeholder="Re-enter new password" required minlength="6" autocomplete="new-password">
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                                <button type="submit" id="update-password-btn" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                    <span>Update Password</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Data Backup & Full Export Card -->
+                    <div class="card" id="backup-card">
+                        <div class="card-header">
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Data Backup &amp; Full Export Center
+                            </h3>
+                        </div>
+                        <p style="font-size: 13.5px; color: #64748b; margin-top: -6px; margin-bottom: 18px;">
+                            Download your complete business records for tax audits, offline accounting, or migrating data. Zero lock-in.
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                            <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px;">
+                                <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">Invoices Register (CSV)</div>
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">All invoice numbers, amounts, taxes, client names, and payment statuses.</div>
+                                <button type="button" onclick="exportData('invoices')" class="btn btn-secondary btn-sm" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Export Invoices CSV
+                                </button>
+                            </div>
+
+                            <div style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px;">
+                                <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">Client Directory (CSV)</div>
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">Complete customer contact list, phone numbers, addresses, and emails.</div>
+                                <button type="button" onclick="exportData('customers')" class="btn btn-secondary btn-sm" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Export Clients CSV
+                                </button>
+                            </div>
+
+                            <div style="background: rgba(37, 99, 235, 0.04); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 12px; padding: 16px;">
+                                <div style="font-weight: 700; font-size: 14px; color: #1d4ed8; margin-bottom: 4px;">Full Workspace JSON Backup</div>
+                                <div style="font-size: 12px; color: #64748b; margin-bottom: 14px;">1-Click database snapshot of all invoices, items, expenses, and clients.</div>
+                                <button type="button" onclick="exportData('backup')" class="btn btn-primary btn-sm" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Download JSON Backup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Danger Zone Card: Delete Account -->
                     <div class="card" style="border: 1.5px solid #fecaca; background: #fff5f5; margin-top: 24px;">
                         <div class="card-header" style="border-bottom: 1px solid #fee2e2; padding-bottom: 14px; margin-bottom: 16px;">

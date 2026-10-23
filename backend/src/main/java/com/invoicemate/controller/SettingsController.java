@@ -72,4 +72,10 @@ public class SettingsController {
         User user = userService.upgradeToPro(getUserId(), days);
         return SettingsResponse.from(user);
     }
+
+    @PutMapping("/password")
+    public java.util.Map<String, String> changePassword(@jakarta.validation.Valid @RequestBody com.invoicemate.dto.ChangePasswordRequest req) {
+        userService.changePassword(getUserId(), req);
+        return java.util.Map.of("message", "Password updated successfully. Please use your new password next time you sign in.");
+    }
 }

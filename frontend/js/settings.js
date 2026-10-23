@@ -303,3 +303,93 @@ window.saveAppearanceSettings = saveAppearanceSettings;
 window.uploadLogo = uploadLogo;
 window.removeLogo = removeLogo;
 window.deleteAccount = deleteAccount;
+window.updatePassword = updatePassword;
+window.exportData = exportData;
+
+async function updatePassword() {
+  const curPass = document.getElementById('current-password')?.value;
+  const newPass = document.getElementById('new-password')?.value;
+  const confirmPass = document.getElementById('confirm-new-password')?.value;
+
+  if (!curPass) {
+    if (typeof showToast === 'function') showToast('Please enter your current password', 'error');
+    return;
+  }
+  if (!newPass || newPass.length < 6) {
+    if (typeof showToast === 'function') showToast('New password must be at least 6 characters long', 'error');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    if (typeof showToast === 'function') showToast('New password and confirmation do not match', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('update-password-btn');
+  const origText = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Updating...';
+  }
+
+  try {
+    const res = await apiRequest('PUT', '/api/settings/password', {
+      currentPassword: curPass,
+      newPassword: newPass,
+      confirmPassword: confirmPass
+    });
+
+    if (typeof showToast === 'function') {
+      showToast(res?.message || 'Password updated successfully!', 'success');
+    }
+    document.getElementById('change-password-form')?.reset();
+  } catch (err) {
+    if (typeof showToast === 'function') {
+      showToast(err.message || 'Failed to update password', 'error');
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+}
+
+async function exportData(type) {
+  let endpoint = '/api/export/backup/json';
+  let defaultFilename = `invoicemate_backup_${new Date().toISOString().split('T')[0]}.json`;
+
+  if (type === 'invoices') {
+    endpoint = '/api/export/invoices/csv';
+    defaultFilename = `invoices_export_${new Date().toISOString().split('T')[0]}.csv`;
+  } else if (type === 'customers') {
+    endpoint = '/api/export/customers/csv';
+    defaultFilename = `customers_export_${new Date().toISOString().split('T')[0]}.csv`;
+  }
+
+  try {
+    if (typeof showToast === 'function') showToast('Preparing export download...', 'info');
+    const token = localStorage.getItem('token');
+    const res = await fetch(endpoint, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) throw new Error('Export download failed: ' + res.status);
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = defaultFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    if (typeof showToast === 'function') showToast('File downloaded successfully!', 'success');
+  } catch (err) {
+    console.error('Export error:', err);
+    if (typeof showToast === 'function') showToast(err.message || 'Failed to download export', 'error');
+  }
+}
