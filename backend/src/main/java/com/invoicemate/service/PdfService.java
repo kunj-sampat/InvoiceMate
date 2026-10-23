@@ -169,12 +169,22 @@ public class PdfService {
             if (invoice.getGstAmount() > 0) {
                 addSummaryRow(totalTable, "GST (" + invoice.getGstPercent() + "%):", String.format("%.2f", invoice.getGstAmount()), normalFont, false);
             }
-            addSummaryRow(totalTable, "Grand Total:", currencyFmt.format(invoice.getGrandTotal()), boldFont, true);
+            if (invoice.getAmountPaid() > 0) {
+                addSummaryRow(totalTable, "Grand Total:", currencyFmt.format(invoice.getGrandTotal()), normalFont, false);
+                addSummaryRow(totalTable, "Less: Advance Paid:", "-" + currencyFmt.format(invoice.getAmountPaid()), normalFont, false);
+                double balanceDue = Math.max(0, invoice.getGrandTotal() - invoice.getAmountPaid());
+                addSummaryRow(totalTable, "Balance Due:", currencyFmt.format(balanceDue), boldFont, true);
+            } else {
+                addSummaryRow(totalTable, "Grand Total:", currencyFmt.format(invoice.getGrandTotal()), boldFont, true);
+            }
 
             document.add(totalTable);
 
             // 5. Payment details & UPI info
             if (user.getUpiId() != null && !user.getUpiId().isBlank()) {
+                double payableAmt = invoice.getAmountPaid() > 0 
+                    ? Math.max(0, invoice.getGrandTotal() - invoice.getAmountPaid()) 
+                    : invoice.getGrandTotal();
                 document.add(new Paragraph(" "));
                 PdfPTable upiTable = new PdfPTable(1);
                 upiTable.setWidthPercentage(100);
@@ -182,7 +192,7 @@ public class PdfService {
                 upiCell.setBackgroundColor(new Color(240, 253, 244));
                 upiCell.setBorderColor(new Color(187, 247, 208));
                 upiCell.setPadding(8);
-                Paragraph upiPara = new Paragraph("PAY VIA UPI: " + user.getUpiId() + " (Scan & Pay with GPay / PhonePe / Paytm)", boldFont);
+                Paragraph upiPara = new Paragraph("PAY VIA UPI: " + user.getUpiId() + " (Pay Balance Due: " + currencyFmt.format(payableAmt) + " via GPay / PhonePe / Paytm)", boldFont);
                 upiPara.getFont().setColor(new Color(21, 128, 61));
                 upiCell.addElement(upiPara);
                 upiTable.addCell(upiCell);
@@ -196,7 +206,10 @@ public class PdfService {
                 document.add(new Paragraph(invoice.getNotes(), smallFont));
             }
 
-            Paragraph footer = new Paragraph("\nThank you for your business! Generated with InvoiceMate.", smallFont);
+            String footerText = (user.getFooterText() != null && !user.getFooterText().isBlank())
+                ? user.getFooterText()
+                : "Thank you for your business! Powered by InvoiceMate.";
+            Paragraph footer = new Paragraph("\n" + footerText, smallFont);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.add(footer);
 

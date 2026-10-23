@@ -23,6 +23,8 @@ public class SettingsResponse {
     private String paymentInstructions;
     private String upiId;
     private String theme;
+    private String subscriptionTier;
+    private java.time.LocalDateTime proExpiryDate;
 
     public static SettingsResponse from(User u) {
         SettingsResponse r = new SettingsResponse();
@@ -46,6 +48,8 @@ public class SettingsResponse {
         r.paymentInstructions = u.getPaymentInstructions();
         r.upiId = u.getUpiId();
         r.theme = u.getTheme();
+        r.subscriptionTier = u.getSubscriptionTier();
+        r.proExpiryDate = u.getProExpiryDate();
         return r;
     }
 
@@ -70,4 +74,6 @@ public class SettingsResponse {
     public String getPaymentInstructions() { return paymentInstructions; }
     public String getUpiId() { return upiId; }
     public String getTheme() { return theme; }
+    public String getSubscriptionTier() { return subscriptionTier; }
+    public java.time.LocalDateTime getProExpiryDate() { return proExpiryDate; }
 }

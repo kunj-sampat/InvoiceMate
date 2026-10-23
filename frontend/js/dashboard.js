@@ -47,6 +47,12 @@ function getInitials(name) {
 // 2. LOAD DASHBOARD DATA
 // ==========================================================================
 async function loadDashboardData() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
   try {
     const data = await apiRequest('GET', '/api/dashboard/summary');
     if (!data) return;
@@ -136,7 +142,8 @@ async function loadDashboardData() {
 
   } catch (err) {
     console.error('Failed to load dashboard data', err);
-    if (typeof showToast === 'function') showToast('Failed to load dashboard statistics', 'error');
+    const msg = (err && err.message) ? err.message : 'Failed to load dashboard statistics';
+    if (typeof showToast === 'function') showToast(msg, 'error');
   }
 }
 

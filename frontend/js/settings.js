@@ -223,12 +223,59 @@ async function uploadLogo() {
 
 async function removeLogo() {
   try {
-    await apiRequest('PUT', '/api/settings/profile', { logoPath: '' });
+    await apiRequest('DELETE', '/api/settings/logo');
     localStorage.removeItem('userLogo');
+    const fileInput = document.getElementById('logo-upload');
+    if (fileInput) fileInput.value = '';
     updateLogoPreview('');
-    if (typeof showToast === 'function') showToast('Logo removed', 'info');
+    if (typeof showToast === 'function') showToast('Business logo removed successfully', 'info');
   } catch (e) {
-    if (typeof showToast === 'function') showToast('Failed to remove logo', 'error');
+    console.error('Remove logo error:', e);
+    if (typeof showToast === 'function') showToast(e.message || 'Failed to remove logo', 'error');
+  }
+}
+
+async function deleteAccount() {
+  const confirmed = await showConfirmDialog({
+    title: 'Delete InvoiceMate Account?',
+    message: 'This will permanently wipe your account, invoices, customer records, products, and all workspace data from the database. This action cannot be reversed.',
+    confirmText: 'Yes, Delete Account',
+    cancelText: 'Cancel',
+    isDanger: true
+  });
+
+  if (!confirmed) return;
+
+  const deleteBtn = document.getElementById('delete-account-btn');
+  if (deleteBtn) {
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="invoza-spin" style="animation: spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+      Deleting Account...
+    `;
+  }
+
+  try {
+    await apiRequest('DELETE', '/api/settings/account');
+    localStorage.clear();
+    sessionStorage.clear();
+    if (typeof showToast === 'function') {
+      showToast('Your account and workspace data have been permanently deleted.', 'info');
+    }
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 400);
+  } catch (err) {
+    if (deleteBtn) {
+      deleteBtn.disabled = false;
+      deleteBtn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        Delete Account
+      `;
+    }
+    if (typeof showToast === 'function') {
+      showToast(err.message || 'Failed to delete account. Please try again.', 'error');
+    }
   }
 }
 
@@ -238,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save-invoice-settings-btn')?.addEventListener('click', saveInvoiceSettings);
   document.getElementById('save-appearance-btn')?.addEventListener('click', saveAppearanceSettings);
   document.getElementById('save-upi-settings-btn')?.addEventListener('click', saveUpiSettings);
+  document.getElementById('delete-account-btn')?.addEventListener('click', deleteAccount);
   document.getElementById('set-upi-id')?.addEventListener('input', updateSettingsUpiPreview);
   document.getElementById('set-biz-name')?.addEventListener('input', () => {
     const payeeEl = document.getElementById('upi-display-payee');
@@ -254,3 +302,4 @@ window.updateSettingsUpiPreview = updateSettingsUpiPreview;
 window.saveAppearanceSettings = saveAppearanceSettings;
 window.uploadLogo = uploadLogo;
 window.removeLogo = removeLogo;
+window.deleteAccount = deleteAccount;

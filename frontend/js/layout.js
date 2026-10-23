@@ -168,136 +168,324 @@ function getInitials(name) {
   return name.substring(0, 2).toUpperCase();
 }
 
+function getProStatus() {
+  const currentEmail = localStorage.getItem('userEmail');
+  const tierOwner = localStorage.getItem('invoza_tier_owner');
+  let tier = (localStorage.getItem('invoza_user_tier') || 'FREE').toUpperCase();
+
+  // If tier was recorded for a different user, reset to FREE
+  if (tierOwner && currentEmail && tierOwner !== currentEmail) {
+    localStorage.setItem('invoza_user_tier', 'FREE');
+    localStorage.removeItem('invoza_pro_expiry');
+    localStorage.setItem('invoza_tier_owner', currentEmail);
+    tier = 'FREE';
+  }
+
+  if (tier !== 'PRO') {
+    return { isPro: false, isExpired: false, daysLeft: 0, expiryDate: null };
+  }
+
+  let proExpiry = localStorage.getItem('invoza_pro_expiry');
+  if (!proExpiry) {
+    // Default to 1 year from now if missing so PRO is not abruptly lost
+    const def = new Date(Date.now() + 365 * 86400000);
+    proExpiry = def.toISOString();
+    localStorage.setItem('invoza_pro_expiry', proExpiry);
+  }
+
+  let expiryDate = new Date(proExpiry);
+  if (isNaN(expiryDate.getTime())) {
+    const def = new Date(Date.now() + 365 * 86400000);
+    expiryDate = def;
+    localStorage.setItem('invoza_pro_expiry', def.toISOString());
+  }
+
+  const now = new Date();
+  const diffMs = expiryDate.getTime() - now.getTime();
+  const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMs <= 0) {
+    // Expired
+    localStorage.setItem('invoza_user_tier', 'FREE');
+    localStorage.removeItem('invoza_pro_expiry');
+    return { isPro: false, isExpired: true, daysLeft: 0, expiryDate };
+  }
+
+  return { isPro: true, isExpired: false, daysLeft, expiryDate };
+}
+
+async function syncUserSubscriptionTier() {
+  const token = localStorage.getItem('token');
+  const userEmail = localStorage.getItem('userEmail') || '';
+  if (!token || typeof apiRequest !== 'function') return;
+
+  try {
+    const res = await apiRequest('GET', '/api/settings');
+    if (res) {
+      const tier = (res.subscriptionTier || 'FREE').toUpperCase();
+      localStorage.setItem('invoza_user_tier', tier);
+      localStorage.setItem('invoza_tier_owner', userEmail);
+      if (tier === 'PRO') {
+        if (res.proExpiryDate) {
+          let expStr = res.proExpiryDate;
+          if (Array.isArray(res.proExpiryDate)) {
+            const a = res.proExpiryDate;
+            expStr = new Date(a[0], a[1] - 1, a[2] || 1, a[3] || 0, a[4] || 0).toISOString();
+          }
+          localStorage.setItem('invoza_pro_expiry', expStr);
+        } else if (!localStorage.getItem('invoza_pro_expiry')) {
+          const oneYear = new Date(Date.now() + 365 * 86400000);
+          localStorage.setItem('invoza_pro_expiry', oneYear.toISOString());
+        }
+      } else {
+        localStorage.removeItem('invoza_pro_expiry');
+      }
+      updatePremiumButtonState();
+    }
+  } catch (e) {
+    // Network / offline fallback, do nothing
+  }
+}
+
 function openPremiumModal() {
   let modal = document.getElementById('invoza-premium-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'invoza-premium-modal';
-    modal.className = 'modal-overlay';
-    modal.innerHTML = `
-      <div class="modal" style="max-width: 600px; width: 92%; padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); background: var(--color-bg);">
-        
-        <!-- Header Banner -->
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%); padding: 30px 32px 26px; position: relative; color: #ffffff;">
-          <div style="position: absolute; top: -30px; right: -30px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(99, 102, 241, 0.15) 50%, transparent 70%); pointer-events: none;"></div>
-          
-          <button id="close-premium-modal" style="position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #94a3b8; cursor: pointer; transition: all 0.2s; line-height: 1;" onhover="this.style.color='#fff'">&times;</button>
-          
-          <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 14px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
-            <span>INVOICEMATE PRO ✦ UNLIMITED</span>
+  if (modal) modal.remove(); // Re-render fresh each time to reflect live expiry / tier
+
+  const pro = getProStatus();
+  const expiryFormatted = pro.expiryDate ? pro.expiryDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+
+  let ctaSectionHtml = '';
+  let badgeHeaderHtml = '';
+
+  if (pro.isPro && pro.daysLeft > 1) {
+    // Case 1: Pro already subscribed and expiry is MORE than 1 day away
+    badgeHeaderHtml = `
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 14px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+        <span>PRO PLAN ACTIVE ✦ UNLIMITED</span>
+      </div>
+    `;
+
+    ctaSectionHtml = `
+      <div style="padding: 20px 32px 24px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0;">
+            &#10003;
           </div>
-          
-          <h2 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff;">Elevate Your Invoicing & Cash Flow</h2>
-          <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5; font-weight: 400;">Automate follow-ups, export CA compliance packs, and remove all platform watermarks.</p>
-        </div>
-
-        <!-- Perks List -->
-        <div style="padding: 24px 32px; background: var(--color-bg); display: flex; flex-direction: column; gap: 14px;">
-          
-          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M14 2a6 6 0 0 1 6 6"/><path d="M14 6a2 2 0 0 1 2 2"/></svg>
-            </div>
-            <div>
-              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">Automated WhatsApp & Email Follow-ups</div>
-              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Dispatch instant 1-click payment reminders with custom links directly to clients.</div>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #8b5cf6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div>
-              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">White-Label Branding & Watermark Removal</div>
-              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Remove "Powered by InvoiceMate" badge, apply custom stamps, signature seals, & custom themes.</div>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            </div>
-            <div>
-              <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">CA & Accountant GST Compliance Export</div>
-              <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">1-Click export of GSTR-1, GSTR-3B audit sheets formatted directly for tax filing.</div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Footer / Pricing CTA -->
-        <div style="padding: 20px 32px 24px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div style="display: flex; align-items: baseline; gap: 6px;">
-              <span style="font-size: 22px; font-weight: 800; color: var(--color-text);">₹499</span>
-              <span style="font-size: 12.5px; font-weight: 600; color: var(--color-text-tertiary);">/ month</span>
-              <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">Billed Annually (Save 35%)</span>
+            <div style="font-size: 15px; font-weight: 800; color: var(--color-text); display: flex; align-items: center; gap: 8px;">
+              <span>Pro Plan Already Subscribed</span>
+              <span style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">Active</span>
             </div>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>14-day risk-free money-back guarantee. Cancel anytime.</span>
+            <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 3px;">
+              Your subscription is active until <strong>${expiryFormatted}</strong> (${pro.daysLeft} days remaining).
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <button id="cancel-premium-modal" class="btn btn-secondary" style="padding: 9px 16px; font-weight: 600; font-size: 13px; border-radius: 10px;">Maybe Later</button>
-            <button id="confirm-premium-upgrade" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 10px 22px; font-weight: 700; font-size: 13.5px; border-radius: 10px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); cursor: pointer; transition: all 0.2s;">
-              Upgrade Now &rarr;
-            </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button id="close-premium-modal-btn" class="btn btn-secondary" style="padding: 9px 22px; font-weight: 600; font-size: 13.5px; border-radius: 10px;">Close</button>
+        </div>
+      </div>
+    `;
+  } else if (pro.isPro && pro.daysLeft <= 1) {
+    // Case 2: Pro already subscribed but expiring within 1 day (<= 1 day left) -> Show Renew / Upgrade Now!
+    badgeHeaderHtml = `
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 14px;">
+        <span>⚠️ EXPIRES IN ${pro.daysLeft <= 0 ? 'FEW HOURS' : '1 DAY'}</span>
+      </div>
+    `;
+
+    ctaSectionHtml = `
+      <div style="padding: 20px 32px 24px; background: #fffbeb; border-top: 1px solid #fef3c7; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px; font-weight: 800; color: #b45309;">⚠️ Subscription Expiring Soon</span>
+            <span style="background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">Renew Now</span>
+          </div>
+          <div style="font-size: 12px; color: #78350f; margin-top: 3px;">
+            Your Pro plan expires on <strong>${expiryFormatted}</strong>. Renew to keep watermark removal &amp; auto-reminders.
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button id="cancel-premium-modal" class="btn btn-secondary" style="padding: 9px 16px; font-weight: 600; font-size: 13px; border-radius: 10px;">Maybe Later</button>
+          <button id="confirm-premium-upgrade" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border: none; padding: 10px 22px; font-weight: 700; font-size: 13.5px; border-radius: 10px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); cursor: pointer;">
+            Renew Now &rarr;
+          </button>
+        </div>
+      </div>
+    `;
+  } else {
+    // Case 3: Free Tier / Expired -> Standard Upgrade Now
+    badgeHeaderHtml = `
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 14px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+        <span>INVOICEMATE PRO ✦ UNLIMITED</span>
+      </div>
+    `;
+
+    ctaSectionHtml = `
+      <div style="padding: 20px 32px 24px; background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: flex; align-items: baseline; gap: 6px;">
+            <span style="font-size: 22px; font-weight: 800; color: var(--color-text);">₹499</span>
+            <span style="font-size: 12.5px; font-weight: 600; color: var(--color-text-tertiary);">/ month</span>
+            <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">Billed Annually (Save 35%)</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>14-day risk-free money-back guarantee. Cancel anytime.</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button id="cancel-premium-modal" class="btn btn-secondary" style="padding: 9px 16px; font-weight: 600; font-size: 13px; border-radius: 10px;">Maybe Later</button>
+          <button id="confirm-premium-upgrade" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 10px 22px; font-weight: 700; font-size: 13.5px; border-radius: 10px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); cursor: pointer; transition: all 0.2s;">
+            Upgrade Now &rarr;
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  modal = document.createElement('div');
+  modal.id = 'invoza-premium-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal" style="max-width: 600px; width: 92%; padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); background: var(--color-bg);">
+      
+      <!-- Header Banner -->
+      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%); padding: 30px 32px 26px; position: relative; color: #ffffff;">
+        <div style="position: absolute; top: -30px; right: -30px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(99, 102, 241, 0.15) 50%, transparent 70%); pointer-events: none;"></div>
+        
+        <button id="close-premium-modal" style="position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #94a3b8; cursor: pointer; transition: all 0.2s; line-height: 1;">&times;</button>
+        
+        ${badgeHeaderHtml}
+        
+        <h2 style="margin: 0 0 8px 0; font-size: 23px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff;">Elevate Your Invoicing & Cash Flow</h2>
+        <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5; font-weight: 400;">Automate follow-ups, export CA compliance packs, and remove all platform watermarks.</p>
+      </div>
+
+      <!-- Perks List -->
+      <div style="padding: 24px 32px; background: var(--color-bg); display: flex; flex-direction: column; gap: 14px;">
+        
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="M14 2a6 6 0 0 1 6 6"/><path d="M14 6a2 2 0 0 1 2 2"/></svg>
+          </div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">Automated WhatsApp & Email Follow-ups</div>
+            <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Dispatch instant 1-click payment reminders with custom links directly to clients.</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #8b5cf6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">White-Label Branding & Watermark Removal</div>
+            <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">Remove "Powered by InvoiceMate" watermark from previews & PDFs, apply custom business seals.</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 14px; padding: 10px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--color-bg-secondary)'" onmouseout="this.style.background='transparent'">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--color-text);">CA & Accountant GST Compliance Export</div>
+            <div style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.45;">1-Click export of GSTR-1, GSTR-3B audit sheets formatted directly for tax filing.</div>
           </div>
         </div>
 
       </div>
-    `;
 
-    document.body.appendChild(modal);
-  }
+      <!-- Footer / Pricing or Subscribed Status -->
+      ${ctaSectionHtml}
 
+    </div>
+  `;
+
+  document.body.appendChild(modal);
   modal.classList.add('active');
 }
 
-// Update Premium Button state based on User Tier
+// Update Premium Button state based on User Tier & Expiry
 function updatePremiumButtonState() {
-  const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+  const pro = getProStatus();
   const premiumBtns = document.querySelectorAll('#btn-go-premium, .invoza-btn-premium');
   
   premiumBtns.forEach(btn => {
-    if (isPro) {
+    if (pro.isPro) {
       btn.classList.add('pro-active');
-      btn.title = "InvoiceMate Pro Active";
-      btn.style.background = "rgba(16, 185, 129, 0.12)";
-      btn.style.borderColor = "rgba(16, 185, 129, 0.4)";
-      btn.style.color = "#047857";
+      if (pro.daysLeft <= 1) {
+        // Expiring within 1 day
+        btn.title = `InvoiceMate Pro Expiring (${pro.daysLeft <= 0 ? 'Today' : '1 day left'}). Click to renew!`;
+        btn.style.background = "rgba(245, 158, 11, 0.15)";
+        btn.style.borderColor = "rgba(245, 158, 11, 0.4)";
+        btn.style.color = "#d97706";
+        btn.innerHTML = `
+          <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
+          <span style="font-weight: 800;">PRO Expiring (1d)</span>
+          <span style="font-size: 11px; color: #d97706; font-weight: 800;">⚠️</span>
+        `;
+      } else {
+        // Pro Active with plenty of time
+        btn.title = `InvoiceMate Pro Active (Expires ${pro.expiryDate ? pro.expiryDate.toLocaleDateString() : ''})`;
+        btn.style.background = "rgba(16, 185, 129, 0.12)";
+        btn.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        btn.style.color = "#047857";
+        btn.innerHTML = `
+          <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
+          <span style="font-weight: 800;">PRO Active</span>
+          <span style="font-size: 11px; color: #10b981; font-weight: 800;">✔</span>
+        `;
+      }
+    } else {
+      btn.classList.remove('pro-active');
+      btn.style.background = "";
+      btn.style.borderColor = "";
+      btn.style.color = "";
       btn.innerHTML = `
-        <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
-        <span style="font-weight: 800;">PRO Active</span>
-        <span style="font-size: 11px; color: #10b981; font-weight: 800;">✔</span>
+        <svg class="premium-crown" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>
+        <span>Upgrade to PRO</span>
       `;
     }
   });
 }
 
+// Testing helper to easily test 1-day expiry or custom duration
+window.setProExpiryDays = async function(days) {
+  const currentEmail = localStorage.getItem('userEmail') || '';
+  const exp = new Date(Date.now() + days * 86400000);
+  localStorage.setItem('invoza_user_tier', 'PRO');
+  localStorage.setItem('invoza_pro_expiry', exp.toISOString());
+  localStorage.setItem('invoza_tier_owner', currentEmail);
+  updatePremiumButtonState();
+
+  if (typeof apiRequest === 'function') {
+    try {
+      await apiRequest('POST', '/api/settings/upgrade', { days: days });
+    } catch (e) {
+      console.warn('Could not persist test expiry to server', e);
+    }
+  }
+
+  if (typeof showToast === 'function') {
+    showToast(`Test: Set Pro expiry to ${days} day(s) from now (persisted)`, 'info');
+  }
+};
+
 // Global Event Delegation for Premium Modal Actions
 document.addEventListener('click', (e) => {
-  // Go Premium Button Click
+  // Go Premium Button Click in header or sidebar
   const premiumBtn = e.target.closest('#btn-go-premium, .invoza-btn-premium');
   if (premiumBtn && !premiumBtn.classList.contains('invoza-locked-btn-upgrade')) {
     e.preventDefault();
-    const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
-    if (isPro) {
-      if (typeof showToast === 'function') {
-        showToast('✨ InvoiceMate Pro Active! All features & CA exports unlocked.', 'success');
-      } else {
-        alert('✨ InvoiceMate Pro Active! All features & CA exports unlocked.');
-      }
-      return;
-    }
     openPremiumModal();
     return;
   }
 
-  // Upgrade Now Button Click inside Pro Modal
+  // Upgrade / Renew Button Click inside Pro Modal
   const confirmBtn = e.target.closest('#confirm-premium-upgrade');
   if (confirmBtn) {
     e.preventDefault();
@@ -307,8 +495,8 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  // Close / Cancel Pro Modal
-  const cancelBtn = e.target.closest('#close-premium-modal, #cancel-premium-modal');
+  // Close / Cancel Pro Modal (including "Got it" / "Close" button when already subscribed)
+  const cancelBtn = e.target.closest('#close-premium-modal, #cancel-premium-modal, #close-premium-modal-btn');
   if (cancelBtn) {
     e.preventDefault();
     const modal = document.getElementById('invoza-premium-modal');
@@ -548,13 +736,41 @@ function openRazorpayDemoCheckout() {
       </div>
     `;
 
-    // Save Pro tier status in localStorage
+    // Save Pro tier status and set expiry to 1 year in localStorage & server database
+    const currentEmail = localStorage.getItem('userEmail') || '';
+    const oneYearLater = new Date();
+    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
     localStorage.setItem('invoza_user_tier', 'PRO');
+    localStorage.setItem('invoza_pro_expiry', oneYearLater.toISOString());
+    localStorage.setItem('invoza_tier_owner', currentEmail);
+    updatePremiumButtonState();
+
+    // Persist to Spring Boot backend database so it remains PRO across all tabs/reloads
+    if (typeof apiRequest === 'function') {
+      apiRequest('POST', '/api/settings/upgrade', { days: 365 })
+        .then(res => {
+          if (res && res.proExpiryDate) {
+            let expStr = res.proExpiryDate;
+            if (Array.isArray(res.proExpiryDate)) {
+              const a = res.proExpiryDate;
+              expStr = new Date(a[0], a[1] - 1, a[2] || 1, a[3] || 0, a[4] || 0).toISOString();
+            }
+            localStorage.setItem('invoza_pro_expiry', expStr);
+          }
+          localStorage.setItem('invoza_user_tier', 'PRO');
+          localStorage.setItem('invoza_tier_owner', currentEmail);
+          updatePremiumButtonState();
+        })
+        .catch(err => {
+          console.error('Failed to sync pro upgrade with database:', err);
+        });
+    }
 
     checkoutModal.querySelector('#finish-pro-btn').addEventListener('click', () => {
       checkoutModal.remove();
       if (typeof showToast === 'function') {
-        showToast('🎉 InvoiceMate Pro features unlocked!', 'success');
+        showToast('🎉 InvoiceMate Pro features unlocked for 1 year!', 'success');
       }
     });
   };
@@ -814,6 +1030,7 @@ function initLockedFeatureBanners() {
 document.addEventListener('DOMContentLoaded', () => {
   updatePremiumButtonState();
   initLockedFeatureBanners();
+  syncUserSubscriptionTier();
 });
 
 window.renderLockedFeatureBanner = renderLockedFeatureBanner;

@@ -18,8 +18,12 @@ public class SettingsRequest {
     private String paymentInstructions;
     private String upiId;
     private String theme;
+    private String logoPath;
 
     public SettingsRequest() {}
+
+    public String getLogoPath() { return logoPath; }
+    public void setLogoPath(String logoPath) { this.logoPath = logoPath; }
 
     public String getBusinessName() { return businessName; }
     public void setBusinessName(String businessName) { this.businessName = businessName; }

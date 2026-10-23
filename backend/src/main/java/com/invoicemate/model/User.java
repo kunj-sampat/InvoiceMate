@@ -45,6 +45,12 @@ public class User {
     private String upiId;
     private String theme = "light";
     
+    @Column(name = "subscription_tier")
+    private String subscriptionTier = "FREE";
+    
+    @Column(name = "pro_expiry_date")
+    private LocalDateTime proExpiryDate;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -107,4 +113,8 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getSubscriptionTier() { return subscriptionTier != null ? subscriptionTier : "FREE"; }
+    public void setSubscriptionTier(String subscriptionTier) { this.subscriptionTier = subscriptionTier; }
+    public LocalDateTime getProExpiryDate() { return proExpiryDate; }
+    public void setProExpiryDate(LocalDateTime proExpiryDate) { this.proExpiryDate = proExpiryDate; }
 }

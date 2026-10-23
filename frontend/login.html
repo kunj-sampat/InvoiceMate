@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - InvoiceMate</title>
+    <title>Login | InvoiceMate</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/auth.css">
@@ -14,6 +14,9 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="auth-page">
+
+    <!-- Top Loading Progress Beam -->
+    <div class="auth-progress-beam" id="auth-beam"></div>
 
     <!-- 3D Pearlescent Background Sphere -->
     <div class="auth-bg-sphere"></div>
@@ -164,14 +167,24 @@
                         try {
                             const res = await apiRequest('POST', '/api/auth/google', { token: tokenResponse.access_token });
                             if (res && res.token) {
+                                localStorage.clear();
                                 localStorage.setItem('token', res.token);
                                 localStorage.setItem('userName', res.fullName || res.name || 'User');
                                 localStorage.setItem('userEmail', res.email);
                                 if (res.businessName) localStorage.setItem('businessName', res.businessName);
                                 if (res.logoPath) localStorage.setItem('userLogo', res.logoPath);
+                                const tier = (res.subscriptionTier || 'FREE').toUpperCase();
+                                localStorage.setItem('invoza_user_tier', tier);
+                                localStorage.setItem('invoza_tier_owner', res.email);
+                                if (tier === 'PRO' && res.proExpiryDate) {
+                                    localStorage.setItem('invoza_pro_expiry', res.proExpiryDate);
+                                } else {
+                                    localStorage.removeItem('invoza_pro_expiry');
+                                }
 
-                                if (typeof showToast === 'function') showToast('Google sign-in successful! Redirecting...', 'success');
-                                setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+                                document.getElementById('auth-beam')?.classList.add('active');
+                                document.querySelector('.auth-glass-container')?.classList.add('auth-exiting');
+                                setTimeout(() => { window.location.href = 'dashboard.html'; }, 380);
                             } else {
                                 throw new Error('Invalid authentication response');
                             }
@@ -208,26 +221,43 @@
 
             errorDiv.style.display = 'none';
             submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
             submitBtn.querySelector('span:first-child').textContent = 'Signing in...';
 
             try {
                 const res = await apiRequest('POST', '/api/auth/login', { email, password });
                 if (res && res.token) {
+                    localStorage.clear();
                     localStorage.setItem('token', res.token);
                     localStorage.setItem('userName', res.fullName || res.name || email.split('@')[0]);
                     localStorage.setItem('userEmail', email);
                     if (res.businessName) localStorage.setItem('businessName', res.businessName);
-                    if (res.logoPath) localStorage.setItem('userLogo', res.logoPath);
-
-                    if (typeof showToast === 'function') showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+                    if (res.logoPath) {
+                        localStorage.setItem('userLogo', res.logoPath);
+                    } else {
+                        localStorage.removeItem('userLogo');
+                    }
+                    const tier = (res.subscriptionTier || 'FREE').toUpperCase();
+                    localStorage.setItem('invoza_user_tier', tier);
+                    localStorage.setItem('invoza_tier_owner', email);
+                    if (tier === 'PRO' && res.proExpiryDate) {
+                        localStorage.setItem('invoza_pro_expiry', res.proExpiryDate);
+                    } else {
+                        localStorage.removeItem('invoza_pro_expiry');
+                    }
+                    submitBtn.classList.add('btn-success-state');
+                    submitBtn.querySelector('span:first-child').textContent = 'Welcome!';
+                    document.getElementById('auth-beam')?.classList.add('active');
+                    document.querySelector('.auth-glass-container')?.classList.add('auth-exiting');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 380);
                 } else {
-                    throw new Error('Invalid response from server');
+                    throw new Error('Invalid email or password. If you deleted your account, please click "Create one" below.');
                 }
             } catch (err) {
-                errorDiv.textContent = err.message || 'Invalid email or password';
+                errorDiv.textContent = err.message || 'Invalid email or password. If you deleted your account, please click "Create one" below.';
                 errorDiv.style.display = 'block';
                 submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading', 'btn-success-state');
                 submitBtn.querySelector('span:first-child').textContent = 'Sign In to Workspace';
             }
         });

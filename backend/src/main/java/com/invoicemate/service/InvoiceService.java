@@ -92,8 +92,8 @@ public class InvoiceService {
         Invoice inv = new Invoice();
         inv.setUserId(userId);
         inv.setCustomerId(req.getCustomerId());
-        inv.setInvoiceDate(req.getInvoiceDate());
-        inv.setDueDate(req.getDueDate());
+        inv.setInvoiceDate(req.getInvoiceDate() != null ? req.getInvoiceDate() : LocalDate.now());
+        inv.setDueDate(req.getDueDate() != null ? req.getDueDate() : inv.getInvoiceDate().plusDays(30));
         
         inv.setDiscountPercent(req.getDiscountPercent());
         inv.setGstPercent(req.getGstPercent());
@@ -101,6 +101,7 @@ public class InvoiceService {
         inv.setNotes(req.getNotes());
         inv.setDraft(req.isDraft());
         inv.setEstimate(req.isEstimate());
+        inv.setAmountPaid(req.getAmountPaid());
 
         // Update company name and UPI ID on user if provided in invoice request
         if (req.getBusinessName() != null && !req.getBusinessName().isBlank()) {
@@ -144,6 +145,7 @@ public class InvoiceService {
         inv.setTemplate(req.getTemplate() != null ? req.getTemplate() : inv.getTemplate());
         inv.setNotes(req.getNotes());
         inv.setDraft(req.isDraft());
+        inv.setAmountPaid(req.getAmountPaid());
         
         if ((req.getBusinessName() != null && !req.getBusinessName().isBlank()) || 
             (req.getUpiId() != null && !req.getUpiId().isBlank())) {
@@ -258,12 +260,13 @@ public class InvoiceService {
         if (inv.isDraft()) return "DRAFT";
         if (inv.getAmountPaid() >= inv.getGrandTotal()) return "PAID";
         if (inv.getAmountPaid() > 0) return "PARTIALLY_PAID";
-        if (inv.getDueDate().isBefore(LocalDate.now())) return "OVERDUE";
+        if (inv.getDueDate() != null && inv.getDueDate().isBefore(LocalDate.now())) return "OVERDUE";
         return "PENDING";
     }
 
     private void updateStatusIfOverdue(Invoice inv) {
-        if (!inv.isDraft() && !inv.getStatus().equals("PAID") && inv.getDueDate().isBefore(LocalDate.now())) {
+        if (!inv.isDraft() && !inv.isEstimate() && !"PAID".equalsIgnoreCase(inv.getStatus())
+                && inv.getDueDate() != null && inv.getDueDate().isBefore(LocalDate.now())) {
             inv.setStatus("OVERDUE");
             invoiceRepository.save(inv);
         }

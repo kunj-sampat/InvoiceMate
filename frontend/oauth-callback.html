@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authenticating - InvoiceMate</title>
+    <title>Authenticating | InvoiceMate</title>
     <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -137,10 +137,10 @@
                     if (res.logoPath) localStorage.setItem('userLogo', res.logoPath);
 
                     title.textContent = 'Sign-In Successful!';
-                    msg.textContent = 'Redirecting to your workspace...';
+                    msg.textContent = 'Setting up your workspace...';
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
-                    }, 500);
+                    }, 400);
                 } else {
                     throw new Error('Invalid token response from server.');
                 }

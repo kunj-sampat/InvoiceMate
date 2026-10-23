@@ -17,16 +17,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> searchInvoices(@Param("userId") Long userId, @Param("query") String query);
     
     long countByUserId(Long userId);
+    long countByUserIdAndIsEstimateFalse(Long userId);
     long countByUserIdAndStatus(Long userId, String status);
+    long countByUserIdAndStatusAndIsEstimateFalse(Long userId, String status);
     
-    @Query("SELECT COALESCE(SUM(i.grandTotal), 0) FROM Invoice i WHERE i.userId = :userId AND i.status != 'DRAFT'")
+    @Query("SELECT COALESCE(SUM(i.grandTotal), 0) FROM Invoice i WHERE i.userId = :userId AND i.status != 'DRAFT' AND i.isEstimate = false")
     double sumGrandTotalByUserId(@Param("userId") Long userId);
     
-    @Query("SELECT COALESCE(SUM(i.amountPaid), 0) FROM Invoice i WHERE i.userId = :userId AND i.status != 'DRAFT'")
+    @Query("SELECT COALESCE(SUM(i.amountPaid), 0) FROM Invoice i WHERE i.userId = :userId AND i.status != 'DRAFT' AND i.isEstimate = false")
     double sumAmountPaidByUserId(@Param("userId") Long userId);
     
     List<Invoice> findByUserIdAndStatusAndDueDateBefore(Long userId, String status, LocalDate date);
     List<Invoice> findTop10ByUserIdOrderByCreatedAtDesc(Long userId);
+    List<Invoice> findTop10ByUserIdAndIsEstimateFalseOrderByCreatedAtDesc(Long userId);
     List<Invoice> findByCustomerIdAndUserIdAndIsEstimateFalseAndInvoiceDateBetween(
         Long customerId, Long userId, java.time.LocalDate from, java.time.LocalDate to
     );

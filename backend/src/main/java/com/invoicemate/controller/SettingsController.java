@@ -48,4 +48,28 @@ public class SettingsController {
     public String uploadLogo(@RequestParam("file") MultipartFile file) {
         return userService.saveLogo(getUserId(), file);
     }
+
+    @DeleteMapping("/logo")
+    public java.util.Map<String, String> deleteLogo() {
+        userService.deleteLogo(getUserId());
+        return java.util.Map.of("message", "Logo removed successfully");
+    }
+
+    @DeleteMapping("/account")
+    public java.util.Map<String, String> deleteAccount() {
+        userService.deleteAccount(getUserId());
+        return java.util.Map.of("message", "Account and all workspace data permanently deleted");
+    }
+
+    @PostMapping("/upgrade")
+    public SettingsResponse upgradeToPro(@RequestBody(required = false) java.util.Map<String, Object> payload) {
+        int days = 365;
+        if (payload != null && payload.containsKey("days")) {
+            try {
+                days = Integer.parseInt(payload.get("days").toString());
+            } catch (Exception ignored) {}
+        }
+        User user = userService.upgradeToPro(getUserId(), days);
+        return SettingsResponse.from(user);
+    }
 }

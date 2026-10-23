@@ -193,6 +193,9 @@ function setupEventListeners() {
   const gstInput = document.getElementById('gst-rate');
   if (gstInput) gstInput.addEventListener('change', () => { calculateTotals(); updatePreview(); triggerAutoSave(); });
 
+  const advanceInput = document.getElementById('advance-paid');
+  if (advanceInput) advanceInput.addEventListener('input', () => { calculateTotals(); updatePreview(); triggerAutoSave(); });
+
   const templateSelector = document.getElementById('template-selector');
   if (templateSelector) templateSelector.addEventListener('change', updatePreview);
 
@@ -258,10 +261,10 @@ function rebuildItemsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.name}</td>
-      <td style="text-align: center; color: var(--color-text-tertiary); font-family: monospace; font-size: 12px;">${item.hsnSacCode || '-'}</td>
-      <td style="text-align: center;">${item.quantity}</td>
-      <td style="text-align: right;">${formatCurrency(item.price)}</td>
-      <td style="text-align: right; font-weight: 600;">${formatCurrency(item.total)}</td>
+      <td style="text-align: center; color: var(--color-text-tertiary); font-family: monospace; font-size: 12px; white-space: nowrap;">${item.hsnSacCode || '-'}</td>
+      <td style="text-align: center; white-space: nowrap;">${item.quantity}</td>
+      <td style="text-align: right; white-space: nowrap;">${formatCurrency(item.price)}</td>
+      <td style="text-align: right; font-weight: 600; white-space: nowrap;">${formatCurrency(item.total)}</td>
       <td style="text-align: center;"><button type="button" onclick="removeItem(${index})" class="btn btn-sm btn-danger" style="padding: 2px 7px;">&times;</button></td>
     `;
     tbody.appendChild(tr);
@@ -280,11 +283,28 @@ function calculateTotals() {
   const gstAmount = afterDiscount * (gstPercent / 100);
   
   const grandTotal = afterDiscount + gstAmount;
+  const advancePaid = Number(document.getElementById('advance-paid')?.value) || 0;
+  const balanceDue = Math.max(0, grandTotal - advancePaid);
 
   if(document.getElementById('subtotal-display')) document.getElementById('subtotal-display').textContent = formatCurrency(subtotal);
   if(document.getElementById('discount-display')) document.getElementById('discount-display').textContent = formatCurrency(discountAmount);
   if(document.getElementById('gst-display')) document.getElementById('gst-display').textContent = formatCurrency(gstAmount);
   if(document.getElementById('grand-total-display')) document.getElementById('grand-total-display').textContent = formatCurrency(grandTotal);
+
+  const advanceRow = document.getElementById('advance-display-row');
+  const advanceDisplay = document.getElementById('advance-display');
+  const balanceDisplay = document.getElementById('balance-due-display');
+
+  if (advanceRow && advanceDisplay && balanceDisplay) {
+    if (advancePaid > 0) {
+      advanceRow.style.display = 'flex';
+      advanceDisplay.textContent = '-' + formatCurrency(advancePaid);
+      balanceDisplay.textContent = formatCurrency(balanceDue);
+    } else {
+      advanceRow.style.display = 'none';
+      balanceDisplay.textContent = formatCurrency(grandTotal);
+    }
+  }
 }
 
 function updatePreview() {
@@ -329,6 +349,7 @@ function updatePreview() {
   const gstPercent = Number(document.getElementById('gst-rate')?.value) || 0;
   const gstAmount = afterDiscount * (gstPercent / 100);
   const grandTotal = afterDiscount + gstAmount;
+  const advancePaid = Number(document.getElementById('advance-paid')?.value) || 0;
 
   const customBizName = document.getElementById('inv-biz-name')?.value;
   const activeBizName = customBizName || bizSettings.businessName || localStorage.getItem('businessName') || 'My Business';
@@ -355,7 +376,9 @@ function updatePreview() {
     subtotal: subtotal,
     discountAmount: discountAmount,
     gstAmount: gstAmount,
-    grandTotal: grandTotal
+    grandTotal: grandTotal,
+    amountPaid: advancePaid,
+    advancePaid: advancePaid
   });
 }
 
@@ -393,6 +416,7 @@ async function saveInvoice(isDraft, isAutoSave = false) {
     dueDate: document.getElementById('due-date')?.value,
     discountPercent: Number(document.getElementById('discount')?.value) || 0,
     gstPercent: Number(document.getElementById('gst-rate')?.value) || 0,
+    amountPaid: Number(document.getElementById('advance-paid')?.value) || 0,
     template: document.getElementById('template-selector')?.value || 'modern',
     notes: document.getElementById('notes')?.value || '',
     isDraft: isDraft,
@@ -432,7 +456,7 @@ async function loadInvoiceForEditing(id) {
     const data = await apiRequest('GET', `/api/invoices/${id}`);
     editingInvoiceId = id;
     
-    document.title = 'Edit Invoice';
+    document.title = 'Edit Invoice | InvoiceMate';
     const genBtn = document.getElementById('generate-btn');
     if (genBtn) genBtn.textContent = 'Update Invoice';
 
@@ -452,6 +476,7 @@ async function loadInvoiceForEditing(id) {
     if (document.getElementById('due-date')) document.getElementById('due-date').value = data.dueDate ? data.dueDate.substring(0,10) : '';
     if (document.getElementById('discount')) document.getElementById('discount').value = data.discountPercent || 0;
     if (document.getElementById('gst-rate')) document.getElementById('gst-rate').value = data.gstPercent || 0;
+    if (document.getElementById('advance-paid')) document.getElementById('advance-paid').value = data.amountPaid || 0;
     if (document.getElementById('template-selector')) document.getElementById('template-selector').value = data.template || 'modern';
     
     items = (data.items || []).map(i => ({

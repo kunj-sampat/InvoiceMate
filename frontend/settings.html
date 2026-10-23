@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - InvoiceMate</title>
+    <title>Settings | InvoiceMate</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
@@ -298,6 +298,28 @@
                         
                         <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
                             <button id="save-appearance-btn" class="btn btn-primary">Save Appearance</button>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone Card: Delete Account -->
+                    <div class="card" style="border: 1.5px solid #fecaca; background: #fff5f5; margin-top: 24px;">
+                        <div class="card-header" style="border-bottom: 1px solid #fee2e2; padding-bottom: 14px; margin-bottom: 16px;">
+                            <h3 style="color: #dc2626; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                Danger Zone
+                            </h3>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 14.5px; color: #991b1b; font-weight: 700;">Delete Account &amp; Workspace Data</h4>
+                                <p style="margin: 0; font-size: 13px; color: #7f1d1d; max-width: 520px; line-height: 1.5;">
+                                    Permanently wipe your account, invoices, customer records, products, expenses, and settings from our database. This action cannot be reversed.
+                                </p>
+                            </div>
+                            <button id="delete-account-btn" type="button" class="btn btn-danger" style="background: #dc2626; border-color: #dc2626; padding: 10px 22px; font-weight: 700; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                Delete Account
+                            </button>
                         </div>
                     </div>
                     

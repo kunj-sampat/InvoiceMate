@@ -21,7 +21,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const saveBtn = document.getElementById('save-customer-btn');
   if (saveBtn) saveBtn.addEventListener('click', saveCustomer);
+
+  const closeBtn = document.getElementById('close-customer-modal');
+  if (closeBtn) closeBtn.addEventListener('click', closeCustomerModal);
+
+  const cancelBtn = document.getElementById('cancel-customer-btn');
+  if (cancelBtn) cancelBtn.addEventListener('click', closeCustomerModal);
+
+  const modal = document.getElementById('customer-modal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeCustomerModal();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeCustomerModal();
+  });
 });
+
+function closeCustomerModal() {
+  const modal = document.getElementById('customer-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+  }
+  editingCustomerId = null;
+}
+window.closeCustomerModal = closeCustomerModal;
+window.openCustomerModal = openCustomerModal;
 
 async function loadCustomers(search = '') {
   try {

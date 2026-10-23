@@ -25,7 +25,9 @@ public class DashboardService {
     public DashboardResponse getSummary(Long userId) {
         List<Invoice> all = invoiceRepository.findByUserIdOrderByCreatedAtDesc(userId);
         all.forEach(i -> {
-            if (!i.isDraft() && !i.getStatus().equals("PAID") && i.getDueDate().isBefore(LocalDate.now()) && !i.getStatus().equals("OVERDUE")) {
+            if (!i.isDraft() && !i.isEstimate() && !"PAID".equalsIgnoreCase(i.getStatus())
+                    && i.getDueDate() != null && i.getDueDate().isBefore(LocalDate.now())
+                    && !"OVERDUE".equalsIgnoreCase(i.getStatus())) {
                 i.setStatus("OVERDUE");
                 invoiceRepository.save(i);
             }
@@ -36,12 +38,13 @@ public class DashboardService {
         res.setTotalPaid(invoiceRepository.sumAmountPaidByUserId(userId));
         res.setTotalOutstanding(res.getTotalRevenue() - res.getTotalPaid());
         
-        res.setTotalInvoices(invoiceRepository.countByUserId(userId));
-        res.setPaidCount(invoiceRepository.countByUserIdAndStatus(userId, "PAID"));
-        res.setPendingCount(invoiceRepository.countByUserIdAndStatus(userId, "PENDING") + invoiceRepository.countByUserIdAndStatus(userId, "PARTIALLY_PAID"));
-        res.setOverdueCount(invoiceRepository.countByUserIdAndStatus(userId, "OVERDUE"));
+        res.setTotalInvoices(invoiceRepository.countByUserIdAndIsEstimateFalse(userId));
+        res.setPaidCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PAID"));
+        res.setPendingCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PENDING")
+                + invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PARTIALLY_PAID"));
+        res.setOverdueCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "OVERDUE"));
         
-        res.setRecentInvoices(invoiceRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId).stream()
+        res.setRecentInvoices(invoiceRepository.findTop10ByUserIdAndIsEstimateFalseOrderByCreatedAtDesc(userId).stream()
                 .map(i -> invoiceService.getInvoice(userId, i.getId())).collect(Collectors.toList()));
         return res;
     }

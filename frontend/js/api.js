@@ -1,6 +1,14 @@
 // js/api.js
 
-const API_BASE_URL = '';
+// Automatically point to Spring Boot backend if frontend is opened via Live Server (port 5500), file://, or other dev host
+const API_BASE_URL = (() => {
+  if (typeof window === 'undefined') return '';
+  const port = window.location.port;
+  if (window.location.protocol === 'file:' || (port && port !== '8080')) {
+    return 'http://localhost:8080';
+  }
+  return '';
+})();
 
 async function apiRequest(method, url, body = null) {
   const token = localStorage.getItem('token');
@@ -28,17 +36,32 @@ async function apiRequest(method, url, body = null) {
   try {
     const response = await fetch(API_BASE_URL + url, options);
 
-    if (response.status === 401) {
+    // For auth endpoints (login, register, social), don't treat 401/403 as token expiration
+    if (url.includes('/api/auth/')) {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        let msg = errorData.message || errorData.error;
+        if (!msg || msg === 'Invalid credentials') {
+          msg = 'Invalid email or password. If you deleted your account, please click "Create one" below.';
+        }
+        throw new Error(msg);
+      }
+    } else if (response.status === 401 || response.status === 403) {
+      // If unauthorized or forbidden on protected APIs (token missing, invalid, or expired)
       localStorage.removeItem('token');
       localStorage.removeItem('userName');
       localStorage.removeItem('userEmail');
-      window.location.href = 'login.html';
+      const isPublicPage = ['login.html', 'register.html', 'index.html', 'terms.html', 'privacy.html']
+        .some(p => window.location.pathname.endsWith(p));
+      if (!isPublicPage) {
+        window.location.href = 'login.html';
+      }
       return null;
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
     }
 
     const contentType = response.headers.get("content-type");
@@ -49,6 +72,9 @@ async function apiRequest(method, url, body = null) {
     }
   } catch (error) {
     console.error('API Request Error:', error);
+    if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
+      throw new Error('Backend server is unreachable. Please ensure the Spring Boot server is running on port 8080.');
+    }
     throw error;
   }
 }
@@ -56,15 +82,19 @@ async function apiRequest(method, url, body = null) {
 function checkAuth() {
   const token = localStorage.getItem('token');
   if (!token) {
-    window.location.href = 'login.html';
+    const isPublicPage = ['login.html', 'register.html', 'index.html', 'terms.html', 'privacy.html']
+      .some(p => window.location.pathname.endsWith(p));
+    if (!isPublicPage) {
+      window.location.href = 'login.html';
+    }
+    return null;
   }
   return token;
 }
 
 function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('userName');
-  localStorage.removeItem('userEmail');
+  localStorage.clear();
+  sessionStorage.clear();
   window.location.href = 'login.html';
 }
 
@@ -231,12 +261,44 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
     ? doc.items
     : [{ name: 'Sample Service / Product', hsnSacCode: '9983', quantity: 1, price: 0, total: 0 }];
 
-  const subtotalText = doc.subtotalText || formatCurrency(doc.subtotal || 0);
-  const discountText = doc.discountText || formatCurrency(doc.discountAmount || 0);
-  const gstText = doc.gstText || formatCurrency(doc.gstAmount || 0);
-  const grandText = doc.grandText || formatCurrency(doc.grandTotal || 0);
+  const subtotal = Number(doc.subtotal || 0);
+  const discountAmount = Number(doc.discountAmount || 0);
+  const gstAmount = Number(doc.gstAmount || 0);
+  const grandTotal = Number(doc.grandTotal || 0);
+  const amountPaid = Number(doc.amountPaid !== undefined ? doc.amountPaid : (doc.advancePaid || 0));
+  const balanceDue = Math.max(0, grandTotal - amountPaid);
+
+  const subtotalText = doc.subtotalText || formatCurrency(subtotal);
+  const discountText = doc.discountText || formatCurrency(discountAmount);
+  const gstText = doc.gstText || formatCurrency(gstAmount);
+  const grandText = doc.grandText || formatCurrency(grandTotal);
+  const advanceText = formatCurrency(amountPaid);
+  const balanceText = formatCurrency(balanceDue);
   const logoUrl = doc.logoUrl || localStorage.getItem('userLogo') || '';
 
+  // White-label watermark removal check
+  const isPro = localStorage.getItem('invoza_user_tier') === 'PRO';
+  const watermarkHtml = !isPro
+    ? `
+      <div class="inv-watermark-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary, #2563eb);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Powered by <strong>InvoiceMate</strong> &bull; Simple Invoicing &amp; GST &bull; invoicemate.in</span>
+      </div>
+    `
+    : '';
+
+  // Dynamic UPI QR Code Scan-to-Pay (automatically requests balanceDue when advance paid)
+  let upiWidgetHtml = '';
+  const upiId = doc.upiId || localStorage.getItem('userUpiId') || '';
+  if (upiId && typeof InvoiceMateUPI !== 'undefined') {
+    const payableAmount = amountPaid > 0 ? balanceDue : grandTotal;
+    upiWidgetHtml = InvoiceMateUPI.renderWidgetHTML({
+      upiId: upiId,
+      payeeName: bizName,
+      amount: payableAmount,
+      invoiceNumber: docNum
+    });
+  }
 
   // 1. BUSINESS TEMPLATE
   if (tpl === 'business') {
@@ -245,15 +307,15 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
       const hsn = it.hsnSacCode || it.hsnCode || '-';
       return `
         <tr>
-          <td class="col-center" style="font-weight:700;">${String(idx + 1).padStart(2, '0')}</td>
-          <td>
+          <td class="col-num">${String(idx + 1).padStart(2, '0')}</td>
+          <td class="col-desc">
             <strong>${it.name || 'Item'}</strong>
             ${it.description ? `<div style="font-size:12px;color:#64748b;margin-top:2px;">${it.description}</div>` : ''}
           </td>
-          <td class="hsn-code">${hsn}</td>
-          <td class="col-right">${formatCurrency(it.price || 0)}</td>
-          <td class="col-center" style="font-weight:600;">${it.quantity || 1}</td>
-          <td class="col-right" style="font-weight:700;">${formatCurrency(lineTotal || 0)}</td>
+          <td class="col-hsn">${hsn}</td>
+          <td class="col-rate">${formatCurrency(it.price || 0)}</td>
+          <td class="col-qty">${it.quantity || 1}</td>
+          <td class="col-total">${formatCurrency(lineTotal || 0)}</td>
         </tr>
       `;
     }).join('');
@@ -303,11 +365,11 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
             <thead>
               <tr>
                 <th class="col-num">No.</th>
-                <th>Product / Service Description</th>
+                <th class="col-desc">Product / Service Description</th>
                 <th class="col-hsn">HSN / SAC</th>
                 <th class="col-rate">Price</th>
-                <th class="col-qty" style="text-align:center;">Qty</th>
-                <th class="col-amt">Total</th>
+                <th class="col-qty">Qty</th>
+                <th class="col-total">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -320,12 +382,28 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
           <div class="biz-terms-card">
             <h4>Payment Instructions &amp; Notes:</h4>
             <p>${notes}</p>
+            ${upiWidgetHtml}
           </div>
           <div class="biz-totals-card">
             <div class="biz-tot-row"><span>Subtotal:</span><strong>${subtotalText}</strong></div>
-            <div class="biz-tot-row"><span>Discount:</span><strong>${discountText}</strong></div>
-            <div class="biz-tot-row"><span>GST / Tax:</span><strong>${gstText}</strong></div>
-            <div class="biz-tot-row grand"><span>Total Due:</span><span>${grandText}</span></div>
+            ${discountAmount > 0 ? `<div class="biz-tot-row"><span>Discount:</span><strong>${discountText}</strong></div>` : ''}
+            ${gstAmount > 0 ? `<div class="biz-tot-row"><span>GST / Tax:</span><strong>${gstText}</strong></div>` : ''}
+            <div class="biz-tot-row" style="font-weight:700;"><span>Grand Total:</span><strong>${grandText}</strong></div>
+            ${amountPaid > 0 ? `
+              <div class="biz-tot-row" style="color:#059669;background:rgba(16,185,129,0.08);font-weight:700;">
+                <span>Less: Advance Paid:</span>
+                <span>-${advanceText}</span>
+              </div>
+              <div class="biz-tot-row grand">
+                <span>Balance Due:</span>
+                <span>${balanceText}</span>
+              </div>
+            ` : `
+              <div class="biz-tot-row grand">
+                <span>Total Due:</span>
+                <span>${grandText}</span>
+              </div>
+            `}
           </div>
         </div>
       </div>
@@ -334,6 +412,7 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
         <div><span>${bizPhone}</span> &bull; <span>${bizEmail}</span> &bull; <span>${bizAddress}</span></div>
         <strong>Thank You For Your Business</strong>
       </div>
+      ${watermarkHtml}
     `;
     return;
   }
@@ -345,15 +424,15 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
       const hsn = it.hsnSacCode || it.hsnCode || '-';
       return `
         <tr>
-          <td class="col-center">${String(idx + 1).padStart(2, '0')}</td>
-          <td>
+          <td class="col-num">${String(idx + 1).padStart(2, '0')}</td>
+          <td class="col-desc">
             <strong>${it.name || 'Item'}</strong>
             ${it.description ? `<div style="font-size:12px;color:#64748b;margin-top:2px;">${it.description}</div>` : ''}
           </td>
-          <td class="hsn-code">${hsn}</td>
-          <td class="col-right">${formatCurrency(it.price || 0)}</td>
-          <td class="col-center" style="font-weight:600;">${it.quantity || 1}</td>
-          <td class="col-right" style="font-weight:700;">${formatCurrency(lineTotal || 0)}</td>
+          <td class="col-hsn">${hsn}</td>
+          <td class="col-rate">${formatCurrency(it.price || 0)}</td>
+          <td class="col-qty">${it.quantity || 1}</td>
+          <td class="col-total">${formatCurrency(lineTotal || 0)}</td>
         </tr>
       `;
     }).join('');
@@ -389,7 +468,7 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
           <h4>Invoice Summary:</h4>
           <p>Payment Terms: Standard</p>
           <p>Currency: INR (&#8377;)</p>
-          <p>Total Balance: <strong style="color:#2563eb;font-size:15px;">${grandText}</strong></p>
+          <p>Total Balance: <strong style="color:#2563eb;font-size:15px;">${amountPaid > 0 ? balanceText : grandText}</strong></p>
         </div>
       </div>
 
@@ -397,11 +476,11 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
         <thead>
           <tr>
             <th class="col-num">No.</th>
-            <th>Item &amp; Description</th>
+            <th class="col-desc">Item &amp; Description</th>
             <th class="col-hsn">HSN / SAC</th>
-            <th class="col-right">Rate</th>
-            <th class="col-right" style="text-align:center;">Qty</th>
-            <th class="col-right">Total</th>
+            <th class="col-rate">Rate</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-total">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -413,18 +492,35 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
         <div class="mod-notes-card">
           <h4>Payment Instructions &amp; Notes:</h4>
           <p>${notes}</p>
+          ${upiWidgetHtml}
         </div>
         <div class="mod-totals-wrap">
           <div class="mod-tot-line"><span>Subtotal:</span><strong>${subtotalText}</strong></div>
-          <div class="mod-tot-line"><span>Discount:</span><strong>${discountText}</strong></div>
-          <div class="mod-tot-line"><span>GST Amount:</span><strong>${gstText}</strong></div>
-          <div class="mod-tot-line grand"><span>Total Due:</span><span>${grandText}</span></div>
+          ${discountAmount > 0 ? `<div class="mod-tot-line"><span>Discount:</span><strong>${discountText}</strong></div>` : ''}
+          ${gstAmount > 0 ? `<div class="mod-tot-line"><span>GST Amount:</span><strong>${gstText}</strong></div>` : ''}
+          <div class="mod-tot-line" style="font-weight:700;"><span>Grand Total:</span><strong>${grandText}</strong></div>
+          ${amountPaid > 0 ? `
+            <div class="mod-tot-line" style="color:#059669;background:rgba(16,185,129,0.08);font-weight:700;">
+              <span>Less: Advance Paid:</span>
+              <span>-${advanceText}</span>
+            </div>
+            <div class="mod-tot-line grand">
+              <span>Balance Due:</span>
+              <span>${balanceText}</span>
+            </div>
+          ` : `
+            <div class="mod-tot-line grand">
+              <span>Total Due:</span>
+              <span>${grandText}</span>
+            </div>
+          `}
         </div>
       </div>
 
       <div class="mod-footer">
         Thank you for your business! Please remit payment by the due date.
       </div>
+      ${watermarkHtml}
     `;
     return;
   }
@@ -436,12 +532,12 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
       const hsn = it.hsnSacCode || it.hsnCode || '-';
       return `
         <tr>
-          <td style="color:#9ca3af;width:40px;">${String(idx + 1).padStart(2, '0')}</td>
-          <td><strong>${it.name || 'Item'}</strong></td>
-          <td class="hsn-code">${hsn}</td>
-          <td style="text-align:right;">${formatCurrency(it.price || 0)}</td>
-          <td style="text-align:center;">${it.quantity || 1}</td>
-          <td style="text-align:right;font-weight:700;">${formatCurrency(lineTotal || 0)}</td>
+          <td class="col-num">${String(idx + 1).padStart(2, '0')}</td>
+          <td class="col-desc"><strong>${it.name || 'Item'}</strong></td>
+          <td class="col-hsn">${hsn}</td>
+          <td class="col-rate">${formatCurrency(it.price || 0)}</td>
+          <td class="col-qty">${it.quantity || 1}</td>
+          <td class="col-total">${formatCurrency(lineTotal || 0)}</td>
         </tr>
       `;
     }).join('');
@@ -483,12 +579,12 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
       <table class="min-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Description</th>
-            <th style="text-align:center;">HSN / SAC</th>
-            <th style="text-align:right;">Rate</th>
-            <th style="text-align:center;">Qty</th>
-            <th style="text-align:right;">Amount</th>
+            <th class="col-num">#</th>
+            <th class="col-desc">Description</th>
+            <th class="col-hsn">HSN / SAC</th>
+            <th class="col-rate">Rate</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-total">Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -500,14 +596,31 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
         <div class="min-notes">
           <strong style="display:block;color:#111;text-transform:uppercase;letter-spacing:1px;font-size:11px;margin-bottom:6px;">Payment Instructions &amp; Notes</strong>
           ${notes}
+          ${upiWidgetHtml}
         </div>
         <div class="min-totals-table">
           <div class="min-tot-row"><span>Subtotal:</span><span>${subtotalText}</span></div>
-          <div class="min-tot-row"><span>Discount:</span><span>${discountText}</span></div>
-          <div class="min-tot-row"><span>GST:</span><span>${gstText}</span></div>
-          <div class="min-tot-row grand"><span>Total:</span><span>${grandText}</span></div>
+          ${discountAmount > 0 ? `<div class="min-tot-row"><span>Discount:</span><span>${discountText}</span></div>` : ''}
+          ${gstAmount > 0 ? `<div class="min-tot-row"><span>GST:</span><span>${gstText}</span></div>` : ''}
+          <div class="min-tot-row" style="font-weight:600;"><span>Grand Total:</span><span>${grandText}</span></div>
+          ${amountPaid > 0 ? `
+            <div class="min-tot-row" style="color:#059669;font-weight:700;">
+              <span>Less: Advance Paid:</span>
+              <span>-${advanceText}</span>
+            </div>
+            <div class="min-tot-row grand">
+              <span>Balance Due:</span>
+              <span>${balanceText}</span>
+            </div>
+          ` : `
+            <div class="min-tot-row grand">
+              <span>Total:</span>
+              <span>${grandText}</span>
+            </div>
+          `}
         </div>
       </div>
+      ${watermarkHtml}
     `;
     return;
   }
@@ -518,12 +631,12 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
     const hsn = it.hsnSacCode || it.hsnCode || '-';
     return `
       <tr>
-        <td style="text-align:center;">${idx + 1}</td>
-        <td><strong>${it.name || 'Item'}</strong></td>
-        <td class="hsn-code">${hsn}</td>
-        <td style="text-align:right;">${formatCurrency(it.price || 0)}</td>
-        <td style="text-align:center;">${it.quantity || 1}</td>
-        <td style="text-align:right;font-weight:700;">${formatCurrency(lineTotal || 0)}</td>
+        <td class="col-num">${idx + 1}</td>
+        <td class="col-desc"><strong>${it.name || 'Item'}</strong></td>
+        <td class="col-hsn">${hsn}</td>
+        <td class="col-rate">${formatCurrency(it.price || 0)}</td>
+        <td class="col-qty">${it.quantity || 1}</td>
+        <td class="col-total">${formatCurrency(lineTotal || 0)}</td>
       </tr>
     `;
   }).join('');
@@ -560,12 +673,12 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
     <table class="cls-table">
       <thead>
         <tr>
-          <th style="width:45px;text-align:center;">S.No</th>
-          <th>Particulars / Description</th>
-          <th style="width:110px;text-align:center;">HSN / SAC</th>
-          <th style="width:110px;text-align:right;">Rate</th>
-          <th style="width:70px;text-align:center;">Qty</th>
-          <th style="width:120px;text-align:right;">Amount</th>
+          <th class="col-num">S.No</th>
+          <th class="col-desc">Particulars / Description</th>
+          <th class="col-hsn">HSN / SAC</th>
+          <th class="col-rate">Rate</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-total">Amount</th>
         </tr>
       </thead>
       <tbody>
@@ -576,14 +689,31 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
     <div class="cls-bottom-split">
       <div class="cls-notes-box">
         <strong>Payment Instructions &amp; Notes:</strong> ${notes}
+        ${upiWidgetHtml}
       </div>
       <div class="cls-totals-box">
         <div class="cls-tot-line"><span>Subtotal:</span><span>${subtotalText}</span></div>
-        <div class="cls-tot-line"><span>Discount:</span><span>${discountText}</span></div>
-        <div class="cls-tot-line"><span>GST:</span><span>${gstText}</span></div>
-        <div class="cls-tot-line grand"><span>Grand Total:</span><span>${grandText}</span></div>
+        ${discountAmount > 0 ? `<div class="cls-tot-line"><span>Discount:</span><span>${discountText}</span></div>` : ''}
+        ${gstAmount > 0 ? `<div class="cls-tot-line"><span>GST:</span><span>${gstText}</span></div>` : ''}
+        <div class="cls-tot-line" style="font-weight:700;"><span>Grand Total:</span><span>${grandText}</span></div>
+        ${amountPaid > 0 ? `
+          <div class="cls-tot-line" style="color:#059669;background:rgba(16,185,129,0.08);font-weight:700;">
+            <span>Less: Advance Paid:</span>
+            <span>-${advanceText}</span>
+          </div>
+          <div class="cls-tot-line grand">
+            <span>Balance Due:</span>
+            <span>${balanceText}</span>
+          </div>
+        ` : `
+          <div class="cls-tot-line grand">
+            <span>Grand Total:</span>
+            <span>${grandText}</span>
+          </div>
+        `}
       </div>
     </div>
+    ${watermarkHtml}
   `;
 }
 window.renderInvoiceTemplate = renderInvoiceTemplate;

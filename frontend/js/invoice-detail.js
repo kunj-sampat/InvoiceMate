@@ -20,7 +20,7 @@ async function loadInvoice(id) {
     if (!data) return;
     currentInvoice = data;
 
-    document.title = `Invoice #${data.invoiceNumber}`;
+    document.title = `Invoice #${data.invoiceNumber} | InvoiceMate`;
     renderInvoice(data);
     
     // Update summary panel
@@ -98,7 +98,9 @@ function renderInvoice(data) {
     subtotal: subtotal,
     discountAmount: discountAmount,
     gstAmount: gstAmount,
-    grandTotal: grandTotal
+    grandTotal: grandTotal,
+    amountPaid: data.amountPaid || 0,
+    advancePaid: data.amountPaid || 0
   });
 }
 

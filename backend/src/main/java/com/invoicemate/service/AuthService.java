@@ -28,12 +28,14 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -48,10 +50,15 @@ public class AuthService {
         user.setFullName(req.getFullName());
         user.setEmail(req.getEmail());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setSubscriptionTier("FREE");
+        user.setProExpiryDate(null);
         userRepository.save(user);
 
+        // Send Welcome Email asynchronously
+        emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath());
+        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath(), user.getSubscriptionTier(), user.getProExpiryDate());
     }
 
     public AuthResponse login(LoginRequest req) {
@@ -63,7 +70,7 @@ public class AuthService {
         }
         
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath());
+        return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath(), user.getSubscriptionTier(), user.getProExpiryDate());
     }
 
     @Transactional
@@ -109,11 +116,13 @@ public class AuthService {
                 newUser.setEmail(email);
                 newUser.setFullName(name != null && !name.isBlank() ? name : email.split("@")[0]);
                 newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-                return userRepository.save(newUser);
+                User saved = userRepository.save(newUser);
+                emailService.sendWelcomeEmail(saved.getEmail(), saved.getFullName());
+                return saved;
             });
 
             String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-            return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath());
+            return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath(), user.getSubscriptionTier(), user.getProExpiryDate());
 
         } catch (UnauthorizedException | BadRequestException e) {
             throw e;
@@ -177,11 +186,13 @@ public class AuthService {
                 newUser.setEmail(email);
                 newUser.setFullName(name != null && !name.isBlank() ? name : email.split("@")[0]);
                 newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-                return userRepository.save(newUser);
+                User saved = userRepository.save(newUser);
+                emailService.sendWelcomeEmail(saved.getEmail(), saved.getFullName());
+                return saved;
             });
 
             String token = jwtUtil.generateToken(user.getEmail(), user.getId());
-            return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath());
+            return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getBusinessName(), user.getLogoPath(), user.getSubscriptionTier(), user.getProExpiryDate());
 
         } catch (UnauthorizedException | BadRequestException e) {
             throw e;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clients - InvoiceMate</title>
+    <title>Customers | InvoiceMate</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
@@ -168,7 +168,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title" id="customer-modal-title">Add Client</h3>
-                <button class="modal-close" id="close-customer-modal">&times;</button>
+                <button class="modal-close" id="close-customer-modal" onclick="closeCustomerModal()">&times;</button>
             </div>
             <div class="form-group">
                 <label for="modal-cust-name">Client Name *</label>
@@ -191,7 +191,7 @@
                 <input type="text" id="modal-cust-gstin" placeholder="e.g. 27AAAAA0000A1Z5">
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                <button id="cancel-customer-btn" class="btn btn-secondary">Cancel</button>
+                <button id="cancel-customer-btn" class="btn btn-secondary" onclick="closeCustomerModal()">Cancel</button>
                 <button id="save-customer-btn" class="btn btn-primary">Save Client</button>
             </div>
         </div>
