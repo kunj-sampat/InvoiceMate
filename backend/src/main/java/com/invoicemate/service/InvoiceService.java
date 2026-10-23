@@ -86,6 +86,16 @@ public class InvoiceService {
         return InvoiceResponse.fromInvoice(inv, c, items, user);
     }
 
+    /**
+     * Returns raw Invoice entities for a customer, for AI risk analysis.
+     * Automatically marks any overdue invoices.
+     */
+    public List<Invoice> getInvoicesByCustomer(Long userId, Long customerId) {
+        List<Invoice> invoices = invoiceRepository.findByUserIdAndCustomerId(userId, customerId);
+        invoices.forEach(this::updateStatusIfOverdue);
+        return invoices;
+    }
+
     @Transactional
     public InvoiceResponse createInvoice(Long userId, InvoiceRequest req) {
         User user = userRepository.findById(userId).orElseThrow();

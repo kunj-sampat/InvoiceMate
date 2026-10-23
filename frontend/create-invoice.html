@@ -97,8 +97,13 @@
                         <p>Draft professional GST-compliant invoices with live real-time preview.</p>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <button type="button" id="btn-grok-magic-create" class="btn btn-sm" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Use Grok AI to convert raw notes into a filled invoice">
-                            <span>✨ Grok AI Magic Create</span>
+                        <button type="button" id="btn-grok-magic-create" class="btn btn-ai-magic" title="Use AI to auto-fill invoice details from notes">
+                            <span class="ai-sparkle-star">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#818cf8" stroke="#818cf8"/>
+                                </svg>
+                            </span>
+                            <span>AI Magic Create</span>
                         </button>
                         <button id="save-draft-btn" class="btn btn-secondary">Save Draft</button>
                         <button id="generate-btn" class="btn btn-primary">Save &amp; Send</button>
@@ -360,9 +365,14 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
                 <button type="button" id="cancel-grok-magic-btn" class="btn btn-secondary">Cancel</button>
-                <button type="button" id="submit-grok-magic-btn" class="btn" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 8px;">
+                <button type="button" id="submit-grok-magic-btn" class="btn btn-ai-magic" style="border-radius: 10px !important;">
                     <span id="grok-magic-spinner" style="display:none;" class="spinner-sm"></span>
-                    <span id="grok-magic-btn-text">✨ Auto-Fill Invoice</span>
+                    <span class="ai-sparkle-star">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#fef08a" stroke="#facc15"/>
+                        </svg>
+                    </span>
+                    <span id="grok-magic-btn-text">Auto-Fill Invoice with AI</span>
                 </button>
             </div>
         </div>

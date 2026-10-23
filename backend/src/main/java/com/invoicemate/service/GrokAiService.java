@@ -37,8 +37,72 @@ public class GrokAiService {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
+    private volatile String lastError;
+
     public boolean isGrokConfigured() {
         return grokApiKey != null && !grokApiKey.trim().isEmpty() && !grokApiKey.contains("your_");
+    }
+
+    public String getLastError() {
+        return lastError;
+    }
+
+    public String getKeyPrefix() {
+        if (!isGrokConfigured()) return "none";
+        String k = grokApiKey.trim();
+        int idx = k.indexOf('_');
+        if (idx > 0 && idx < 8) return k.substring(0, idx + 1);
+        if (k.startsWith("xai-")) return "xai-";
+        if (k.startsWith("sk-")) return "sk-";
+        return k.length() > 6 ? k.substring(0, 6) + "..." : k;
+    }
+
+    public String getEffectiveModel() {
+        String key = grokApiKey != null ? grokApiKey.trim() : "";
+        if (grokApiUrl.contains("api.x.ai")) {
+            if (key.startsWith("gsk_")) return "llama-3.3-70b-versatile";
+            if (key.startsWith("sk-")) return "gpt-4o-mini";
+        }
+        return grokModel;
+    }
+
+    public String getProviderName() {
+        String key = grokApiKey != null ? grokApiKey.trim() : "";
+        if (grokApiUrl.contains("api.x.ai")) {
+            if (key.startsWith("gsk_")) return "Groq Cloud (Llama 3.3)";
+            if (key.startsWith("sk-")) return "OpenAI";
+            return "xAI (Grok)";
+        }
+        return "Custom (" + grokApiUrl + ")";
+    }
+
+    public Map<String, Object> testConnection() {
+        Map<String, Object> res = new LinkedHashMap<>();
+        if (!isGrokConfigured()) {
+            res.put("success", false);
+            res.put("error", "No API key configured in .env. Please add GROK_API_KEY.");
+            return res;
+        }
+        try {
+            String testReply = callGrok("You are a system health probe.", "Ping. Reply strictly with the word PONG.");
+            if (testReply != null && !testReply.isBlank()) {
+                res.put("success", true);
+                res.put("message", "Live AI verified! Received response: " + testReply.trim());
+                res.put("model", getEffectiveModel());
+                res.put("provider", getProviderName());
+                return res;
+            } else {
+                res.put("success", false);
+                res.put("error", lastError != null ? lastError : "Empty response from AI endpoint");
+                res.put("provider", getProviderName());
+                return res;
+            }
+        } catch (Exception e) {
+            res.put("success", false);
+            res.put("error", e.getMessage());
+            res.put("provider", getProviderName());
+            return res;
+        }
     }
 
     /**
@@ -74,15 +138,25 @@ public class GrokAiService {
                 String aiResult = callGrok(systemPrompt, prompt);
                 if (aiResult != null && !aiResult.isBlank()) {
                     String cleanJson = cleanJsonResponse(aiResult);
-                    return objectMapper.readValue(cleanJson, Map.class);
+                    Map<String, Object> res = objectMapper.readValue(cleanJson, Map.class);
+                    res.put("aiModel", getEffectiveModel());
+                    res.put("isLiveAi", true);
+                    res.put("source", "Live " + getProviderName());
+                    return res;
                 }
             } catch (Exception e) {
-                log.warn("Grok AI API call failed or timed out. Falling back to heuristic smart parser. Error: {}", e.getMessage());
+                log.warn("Grok AI API call failed or timed out: {}", e.getMessage());
             }
         }
 
         // Smart Heuristic Fallback
-        return fallbackParsePrompt(prompt);
+        Map<String, Object> fallback = fallbackParsePrompt(prompt);
+        fallback.put("isLiveAi", false);
+        fallback.put("aiModel", "InvoiceMate Smart Copilot (Offline Heuristic)");
+        if (lastError != null) {
+            fallback.put("apiWarning", lastError);
+        }
+        return fallback;
     }
 
     /**
@@ -229,9 +303,256 @@ public class GrokAiService {
         return fallback;
     }
 
+    /**
+     * Analyzes a customer's invoice payment history and returns a late-payment risk score.
+     */
+    public Map<String, Object> analyzePaymentRisk(String customerName, List<Map<String, Object>> invoiceHistory) {
+        if (isGrokConfigured()) {
+            try {
+                String historyJson = objectMapper.writeValueAsString(invoiceHistory);
+                String systemPrompt = """
+                    You are an expert credit risk analyst specializing in Indian SME invoicing.
+                    Analyze the customer's invoice payment history and return a JSON risk assessment:
+                    {
+                      "riskScore": 72,
+                      "riskLevel": "MEDIUM",
+                      "riskColor": "#f59e0b",
+                      "summary": "One-sentence plain English summary",
+                      "recommendation": "Specific action to take (e.g., ask for advance, send reminder, etc.)",
+                      "insights": [
+                        "Specific insight about payment behavior 1",
+                        "Specific insight about payment behavior 2",
+                        "Specific insight about payment behavior 3"
+                      ],
+                      "avgDaysToPayAfterDue": 5,
+                      "onTimePaymentRate": "67%"
+                    }
+                    riskScore: 0-100 (0=perfect, 100=very high risk).
+                    riskLevel: LOW (<30), MEDIUM (30-70), HIGH (>70).
+                    riskColor: green (#10b981) for LOW, amber (#f59e0b) for MEDIUM, red (#ef4444) for HIGH.
+                    Base your analysis on: overdue count, payment delays, partial payments, unpaid invoices.
+                    """;
+
+                String aiResult = callGrok(systemPrompt,
+                    "Customer: " + customerName + "\nInvoice history (JSON):\n" + historyJson);
+                if (aiResult != null && !aiResult.isBlank()) {
+                    String cleanJson = cleanJsonResponse(aiResult);
+                    Map<String, Object> res = objectMapper.readValue(cleanJson, Map.class);
+                    res.put("customerName", customerName);
+                    res.put("aiModel", grokModel);
+                    return res;
+                }
+            } catch (Exception e) {
+                log.warn("Grok risk analysis failed, using heuristic engine: {}", e.getMessage());
+            }
+        }
+
+        // Smart heuristic fallback
+        return heuristicPaymentRisk(customerName, invoiceHistory);
+    }
+
+    private Map<String, Object> heuristicPaymentRisk(String customerName, List<Map<String, Object>> history) {
+        if (history == null || history.isEmpty()) {
+            Map<String, Object> r = new LinkedHashMap<>();
+            r.put("customerName", customerName);
+            r.put("riskScore", 50);
+            r.put("riskLevel", "MEDIUM");
+            r.put("riskColor", "#f59e0b");
+            r.put("summary", "No invoice history found — risk cannot be determined yet.");
+            r.put("recommendation", "Send a small invoice first to gauge payment reliability before extending large credit.");
+            r.put("insights", List.of(
+                "No prior transactions found with this customer.",
+                "Consider starting with 50% advance payment for new clients.",
+                "Build payment history over 2-3 invoices before extending credit terms."
+            ));
+            r.put("avgDaysToPayAfterDue", 0);
+            r.put("onTimePaymentRate", "N/A");
+            r.put("aiModel", "InvoiceMate Heuristic Engine");
+            return r;
+        }
+
+        int totalInvoices = history.size();
+        int overdueCount = 0, paidLateCount = 0, unpaidCount = 0;
+        double totalBilled = 0, totalPaid = 0;
+        long totalDaysLate = 0;
+
+        for (Map<String, Object> inv : history) {
+            String status = String.valueOf(inv.getOrDefault("status", ""));
+            double billed = getDouble(inv, "grandTotal", 0);
+            double paid = getDouble(inv, "amountPaid", 0);
+            totalBilled += billed;
+            totalPaid += paid;
+
+            if ("OVERDUE".equals(status)) overdueCount++;
+            if ("PENDING".equals(status) || (billed > paid && !"PAID".equals(status))) unpaidCount++;
+
+            Object daysLateObj = inv.get("daysLate");
+            if (daysLateObj != null) {
+                try {
+                    long dl = Long.parseLong(daysLateObj.toString());
+                    if (dl > 0) { paidLateCount++; totalDaysLate += dl; }
+                } catch (Exception ignored) {}
+            }
+        }
+
+        double collectionRate = totalBilled > 0 ? (totalPaid / totalBilled) : 0;
+        double overdueRate = totalInvoices > 0 ? ((double) overdueCount / totalInvoices) : 0;
+        long avgDaysLate = paidLateCount > 0 ? (totalDaysLate / paidLateCount) : 0;
+        int onTimeCount = totalInvoices - paidLateCount - overdueCount;
+        String onTimeRate = totalInvoices > 0 ? (onTimeCount * 100 / totalInvoices) + "%" : "N/A";
+
+        int score = 20;
+        score += (int) (overdueRate * 50);
+        score += (int) (avgDaysLate * 1.5);
+        score += unpaidCount * 5;
+        if (collectionRate < 0.5) score += 20;
+        score = Math.min(score, 100);
+
+        String level, color;
+        if (score < 30) { level = "LOW"; color = "#10b981"; }
+        else if (score < 70) { level = "MEDIUM"; color = "#f59e0b"; }
+        else { level = "HIGH"; color = "#ef4444"; }
+
+        List<String> insights = new ArrayList<>();
+        insights.add(String.format("Payment collection rate: %.0f%% of total billed amount received.", collectionRate * 100));
+        if (overdueCount > 0)
+            insights.add(overdueCount + " overdue invoice(s) found — this client has a pattern of delayed payments.");
+        else
+            insights.add("No currently overdue invoices — good payment discipline observed.");
+        if (avgDaysLate > 0)
+            insights.add(String.format("Average payment delay: %d days after the due date.", avgDaysLate));
+        else
+            insights.add("Payments are generally made on time based on available history.");
+
+        String recommendation;
+        if (score >= 70)
+            recommendation = "Request 50% advance payment upfront before starting work. Add late fee clause to invoice terms.";
+        else if (score >= 30)
+            recommendation = "Send a payment reminder 3 days before the due date. Offer a small discount for early payment.";
+        else
+            recommendation = "Low-risk client. You can comfortably extend standard net-30 payment terms.";
+
+        String summary = String.format("%s has a %s payment risk profile with a score of %d/100 based on %d invoice(s).",
+                customerName, level.toLowerCase(), score, totalInvoices);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("customerName", customerName);
+        result.put("riskScore", score);
+        result.put("riskLevel", level);
+        result.put("riskColor", color);
+        result.put("summary", summary);
+        result.put("recommendation", recommendation);
+        result.put("insights", insights);
+        result.put("avgDaysToPayAfterDue", avgDaysLate);
+        result.put("onTimePaymentRate", onTimeRate);
+        result.put("aiModel", "InvoiceMate Heuristic Engine");
+        return result;
+    }
+
+    /**
+     * Generates AI-crafted professional invoice terms, payment clauses, and thank-you notes.
+     */
+    public Map<String, Object> generateTermsAndNotes(String businessName, String clientType,
+                                                      String serviceType, String paymentTermsDays,
+                                                      boolean includeLateFee) {
+        if (isGrokConfigured()) {
+            try {
+                String systemPrompt = String.format("""
+                    You are a professional business legal and communications expert for Indian SMEs and freelancers.
+                    Generate polished, professional invoice content for:
+                    - Business: %s
+                    - Client Type: %s (e.g. Corporate, Startup, Individual, Government)
+                    - Service Type: %s (e.g. Software Development, Design, Consulting, etc.)
+                    - Payment Terms: Net %s days
+                    - Include Late Fee Clause: %s
+                    
+                    Respond ONLY with valid JSON (no markdown):
+                    {
+                      "paymentTerms": "Concise, professional payment terms clause (2-3 sentences)",
+                      "lateFeeClause": "Late payment interest clause (or empty string if not requested)",
+                      "thankYouNote": "Warm, professional thank-you note for the invoice footer (1-2 sentences)",
+                      "invoiceNotes": "General invoice notes/terms (2-3 bullet points as single string with line breaks)",
+                      "warrantyClause": "Short warranty or liability disclaimer relevant to the service type"
+                    }
+                    Keep language professional yet warm, suitable for Indian business context.
+                    """, businessName, clientType, serviceType, paymentTermsDays, includeLateFee ? "Yes" : "No");
+
+                String aiResult = callGrok(systemPrompt,
+                    "Generate professional invoice terms and notes for " + businessName + ".");
+                if (aiResult != null && !aiResult.isBlank()) {
+                    String cleanJson = cleanJsonResponse(aiResult);
+                    Map<String, Object> res = objectMapper.readValue(cleanJson, Map.class);
+                    res.put("aiModel", grokModel);
+                    return res;
+                }
+            } catch (Exception e) {
+                log.warn("Grok terms generation failed, using built-in templates: {}", e.getMessage());
+            }
+        }
+
+        // Built-in professional template fallback
+        String terms = String.format(
+            "Payment is due within %s days from the date of invoice. Please make payment via UPI, NEFT, or cheque in favour of %s.",
+            paymentTermsDays, businessName);
+
+        String lateFee = includeLateFee
+            ? "Interest at the rate of 18% per annum (1.5% per month) will be charged on all overdue balances after the due date."
+            : "";
+
+        String clientLower = clientType.toLowerCase();
+        String thankYou;
+        if (clientLower.contains("corporate") || clientLower.contains("company"))
+            thankYou = "Thank you for your continued business partnership. We look forward to a long and mutually rewarding relationship with your organization.";
+        else if (clientLower.contains("startup"))
+            thankYou = "Thank you for choosing " + businessName + "! We love working with innovative startups and wish you every success.";
+        else
+            thankYou = "Thank you for your trust and business! We appreciate your support and look forward to serving you again.";
+
+        String invoiceNotes = String.format(
+            "• This is a computer-generated invoice and does not require a physical signature.\n" +
+            "• Goods/services once delivered are non-refundable unless agreed in writing.\n" +
+            "• Please quote the invoice number in all payment references and correspondence with %s.", businessName);
+
+        String serviceTypeLower = serviceType.toLowerCase();
+        String warranty;
+        if (serviceTypeLower.contains("software") || serviceTypeLower.contains("development"))
+            warranty = "A 30-day bug-fix warranty is provided for all deliverables. Feature changes or new requirements beyond the agreed scope are subject to separate billing.";
+        else if (serviceTypeLower.contains("design") || serviceTypeLower.contains("creative"))
+            warranty = "Final design files will be delivered upon receipt of full payment. Revisions beyond the agreed number of rounds will be billed at an hourly rate.";
+        else if (serviceTypeLower.contains("consult"))
+            warranty = "All advice and recommendations are provided based on information available at the time of engagement. " + businessName + " is not liable for outcomes resulting from client implementation decisions.";
+        else
+            warranty = "Services are provided as described in the scope of work. Any additional requirements will be quoted separately.";
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("paymentTerms", terms);
+        result.put("lateFeeClause", lateFee);
+        result.put("thankYouNote", thankYou);
+        result.put("invoiceNotes", invoiceNotes);
+        result.put("warrantyClause", warranty);
+        result.put("aiModel", "InvoiceMate Smart Templates");
+        return result;
+    }
+
     private String callGrok(String systemPrompt, String userPrompt) throws Exception {
+        if (!isGrokConfigured()) {
+            return null;
+        }
+
+        String effectiveUrl = grokApiUrl;
+        String effectiveModel = getEffectiveModel();
+        String key = grokApiKey.trim();
+
+        if (grokApiUrl.contains("api.x.ai")) {
+            if (key.startsWith("gsk_")) {
+                effectiveUrl = "https://api.groq.com/openai/v1/chat/completions";
+            } else if (key.startsWith("sk-")) {
+                effectiveUrl = "https://api.openai.com/v1/chat/completions";
+            }
+        }
+
         Map<String, Object> reqBody = new LinkedHashMap<>();
-        reqBody.put("model", grokModel);
+        reqBody.put("model", effectiveModel);
         reqBody.put("temperature", 0.2);
 
         List<Map<String, String>> messages = new ArrayList<>();
@@ -242,9 +563,9 @@ public class GrokAiService {
         String json = objectMapper.writeValueAsString(reqBody);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(grokApiUrl))
+                .uri(URI.create(effectiveUrl))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + grokApiKey.trim())
+                .header("Authorization", "Bearer " + key)
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(15))
                 .build();
@@ -255,10 +576,12 @@ public class GrokAiService {
             JsonNode root = objectMapper.readTree(response.body());
             JsonNode choices = root.get("choices");
             if (choices != null && choices.isArray() && choices.size() > 0) {
+                this.lastError = null;
                 return choices.get(0).get("message").get("content").asText();
             }
         } else {
-            log.warn("Grok API returned HTTP status {}: {}", response.statusCode(), response.body());
+            this.lastError = "HTTP " + response.statusCode() + ": " + response.body();
+            log.warn("AI API returned HTTP status {}: {}", response.statusCode(), response.body());
         }
         return null;
     }

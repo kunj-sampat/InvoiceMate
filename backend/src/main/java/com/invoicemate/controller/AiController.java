@@ -38,11 +38,18 @@ public class AiController {
 
     @GetMapping("/status")
     public Map<String, Object> getAiStatus() {
-        return Map.of(
-            "configured", grokAiService.isGrokConfigured(),
-            "model", "grok-2-latest",
-            "provider", "xAI (Grok)"
-        );
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("configured", grokAiService.isGrokConfigured());
+        status.put("keyPrefix", grokAiService.getKeyPrefix());
+        status.put("model", grokAiService.getEffectiveModel());
+        status.put("provider", grokAiService.getProviderName());
+        status.put("lastError", grokAiService.getLastError());
+        return status;
+    }
+
+    @PostMapping("/test")
+    public Map<String, Object> testAiConnection() {
+        return grokAiService.testConnection();
     }
 
     @PostMapping("/parse-invoice")
@@ -87,6 +94,64 @@ public class AiController {
         metrics.put("totalExpenses", totalExpenses != null ? totalExpenses : 0.0);
 
         return grokAiService.generateBusinessInsights(metrics);
+    }
+
+    /**
+     * POST /api/ai/payment-risk
+     * Body: { "customerId": 5, "customerName": "Acme Corp" }
+     * Fetches all invoice history for that customer and runs AI risk analysis.
+     */
+    @PostMapping("/payment-risk")
+    public Map<String, Object> analyzePaymentRisk(@RequestBody Map<String, Object> payload) {
+        Long userId = getUserId();
+        Object customerIdObj = payload.get("customerId");
+        if (customerIdObj == null) {
+            return Map.of("error", "customerId is required");
+        }
+        Long customerId = Long.parseLong(customerIdObj.toString());
+        String customerName = payload.getOrDefault("customerName", "Client").toString();
+
+        java.util.List<com.invoicemate.model.Invoice> rawInvoices =
+            invoiceService.getInvoicesByCustomer(userId, customerId);
+
+        java.util.List<Map<String, Object>> historyList = new java.util.ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+
+        for (com.invoicemate.model.Invoice inv : rawInvoices) {
+            if (inv.isDraft() || inv.isEstimate()) continue;
+            Map<String, Object> entry = new java.util.LinkedHashMap<>();
+            entry.put("invoiceNumber", inv.getInvoiceNumber());
+            entry.put("status", inv.getStatus());
+            entry.put("grandTotal", inv.getGrandTotal());
+            entry.put("amountPaid", inv.getAmountPaid());
+            entry.put("dueDate", inv.getDueDate() != null ? inv.getDueDate().toString() : null);
+            entry.put("invoiceDate", inv.getInvoiceDate() != null ? inv.getInvoiceDate().toString() : null);
+            if (inv.getDueDate() != null && "OVERDUE".equals(inv.getStatus())) {
+                long daysLate = java.time.temporal.ChronoUnit.DAYS.between(inv.getDueDate(), today);
+                entry.put("daysLate", Math.max(0, daysLate));
+            } else {
+                entry.put("daysLate", 0);
+            }
+            historyList.add(entry);
+        }
+
+        return grokAiService.analyzePaymentRisk(customerName, historyList);
+    }
+
+    /**
+     * POST /api/ai/terms-generator
+     * Body: { "businessName": "Acme", "clientType": "Corporate", "serviceType": "Software Development",
+     *         "paymentTermsDays": "30", "includeLateFee": true }
+     */
+    @PostMapping("/terms-generator")
+    public Map<String, Object> generateTermsAndNotes(@RequestBody Map<String, Object> payload) {
+        String businessName = payload.getOrDefault("businessName", "Your Business").toString();
+        String clientType = payload.getOrDefault("clientType", "Individual").toString();
+        String serviceType = payload.getOrDefault("serviceType", "Professional Services").toString();
+        String paymentTermsDays = payload.getOrDefault("paymentTermsDays", "30").toString();
+        boolean includeLateFee = Boolean.parseBoolean(payload.getOrDefault("includeLateFee", "true").toString());
+
+        return grokAiService.generateTermsAndNotes(businessName, clientType, serviceType, paymentTermsDays, includeLateFee);
     }
 
     private String getBaseUrl(HttpServletRequest req) {

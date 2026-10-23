@@ -49,6 +49,47 @@
   transform: translateY(-1px);
 }
 
+/* =============================================
+   AI FEATURE BUTTONS (Clean & Professional)
+   ============================================= */
+.btn-ai-magic {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: var(--radius-sm, 6px) !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.15s ease !important;
+  text-shadow: none !important;
+}
+
+.btn-ai-magic:hover {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.btn-ai-magic:active {
+  transform: translateY(0);
+  background: #0f172a !important;
+}
+
+.btn-ai-magic .ai-sparkle-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  color: #818cf8;
+}
+
 .btn-secondary {
   background: var(--color-bg);
   border: 1.5px solid var(--color-border);

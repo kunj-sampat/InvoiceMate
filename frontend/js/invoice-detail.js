@@ -273,7 +273,10 @@ function setupEventListeners(id) {
         const resp = await apiRequest('POST', '/api/ai/payment-reminders', { invoiceId: id });
         if (resp && !resp.error) {
           grokReminders = resp;
-          if (grokBadge) grokBadge.textContent = resp.source || 'Powered by xAI Grok';
+          if (grokBadge) {
+            grokBadge.textContent = '✨ AI Assistant';
+            grokBadge.style.color = '#818cf8';
+          }
           updateGrokPreview();
         } else {
           if (grokPreview) grokPreview.value = 'Failed to generate reminder. Please try again.';

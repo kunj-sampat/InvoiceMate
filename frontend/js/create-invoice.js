@@ -561,10 +561,10 @@ function setupGrokMagicCopilot() {
           applyGrokParsedData(parsed);
           closeModal();
           if (typeof showToast === 'function') {
-            showToast('✨ Invoice populated successfully using Grok AI!', 'success');
+            showToast('✨ Invoice auto-filled successfully!', 'success');
           }
         } else {
-          if (typeof showToast === 'function') showToast(parsed?.error || 'Grok could not parse details', 'error');
+          if (typeof showToast === 'function') showToast(parsed?.error || 'Could not parse invoice details', 'error');
         }
       } catch (err) {
         console.error('Grok parse error:', err);

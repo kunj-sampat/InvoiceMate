@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools | InvoiceMate</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .ai-hero{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(168,85,247,.08) 50%,rgba(236,72,153,.06));border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:32px 36px;margin-bottom:28px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden}
+        .ai-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(168,85,247,.15),transparent 70%);pointer-events:none}
+        .ai-hero-icon{width:64px;height:64px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;box-shadow:0 8px 24px rgba(99,102,241,.35)}
+        .ai-hero-text h2{margin:0 0 6px;font-size:1.5rem;font-weight:800}
+        .ai-hero-text p{margin:0;color:#64748b;font-size:.95rem}
+        .ai-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:#818cf8;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:8px}
+        .ai-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        @media(max-width:900px){.ai-tools-grid{grid-template-columns:1fr}}
+        .ai-tool-card{background:var(--color-surface,#fff);border:1px solid var(--color-border,#e2e8f0);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .2s}
+        .ai-tool-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.08)}
+        .ai-tool-header{padding:20px 24px 16px;border-bottom:1px solid var(--color-border,#e2e8f0);display:flex;align-items:center;gap:14px}
+        .ai-tool-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .icon-risk{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+        .icon-terms{background:linear-gradient(135deg,#34d399,#10b981)}
+        .ai-tool-title{font-size:1rem;font-weight:800;margin:0 0 2px}
+        .ai-tool-sub{font-size:.8rem;color:#64748b;margin:0}
+        .ai-tool-body{padding:20px 24px;flex:1;display:flex;flex-direction:column;gap:14px}
+        .ai-tool-footer{padding:16px 24px;border-top:1px solid var(--color-border,#e2e8f0)}
+        .risk-gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0 4px}
+        .risk-gauge{position:relative;width:160px;height:88px;margin-bottom:8px}
+        .risk-gauge svg{width:100%;height:100%}
+        .risk-score-text{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center}
+        .risk-score-num{font-size:2rem;font-weight:900;line-height:1}
+        .risk-score-label{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em}
+        .risk-level-pill{display:inline-block;padding:4px 16px;border-radius:999px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+        .risk-summary{font-size:.88rem;color:#334155;line-height:1.6;text-align:center;margin:8px 0}
+        .risk-recommendation{background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.18);border-radius:10px;padding:10px 14px;font-size:.83rem;color:#334155;line-height:1.5}
+        .risk-recommendation strong{color:#4f46e5}
+        .risk-insights{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+        .risk-insight-item{display:flex;gap:8px;align-items:flex-start;font-size:.82rem;color:#475569;line-height:1.5}
+        .risk-insight-item::before{content:'o';color:var(--rc,#f59e0b);font-size:.8rem;flex-shrink:0;margin-top:2px}
+        .risk-meta{display:flex;gap:16px;margin-top:10px}
+        .risk-meta-item{flex:1;text-align:center}
+        .risk-meta-val{font-size:1.2rem;font-weight:800;color:#1e293b}
+        .risk-meta-lbl{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+        .terms-section{display:flex;flex-direction:column;gap:12px}
+        .terms-block{border:1px solid var(--color-border,#e2e8f0);border-radius:12px;overflow:hidden}
+        .terms-block-header{background:rgba(0,0,0,.025);padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+        .terms-block-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+        .terms-block-content{padding:12px 14px;font-size:.85rem;color:#334155;line-height:1.7;white-space:pre-line}
+        .copy-btn{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:12px;display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:6px;transition:all .15s}
+        .copy-btn:hover{color:#4f46e5;background:rgba(99,102,241,.08)}
+        .ai-model-tag{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:#94a3b8;margin-top:4px}
+        .ai-result-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:12px;color:#94a3b8;text-align:center}
+        .ai-result-placeholder .ph-icon{font-size:2.5rem;opacity:.3}
+        .ai-result-placeholder p{font-size:.85rem;margin:0;max-width:240px;line-height:1.5}
+        .ai-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:16px}
+        .ai-spinner{width:40px;height:40px;border:3px solid rgba(99,102,241,.2);border-top-color:#6366f1;border-radius:50%;animation:aiSpin .8s linear infinite}
+        @keyframes aiSpin{to{transform:rotate(360deg)}}
+        .ai-loading-text{font-size:.88rem;color:#6366f1;font-weight:600}
+        .ai-loading-sub{font-size:.78rem;color:#94a3b8}
+        .form-group{display:flex;flex-direction:column;gap:5px}
+        .form-group label{font-size:.8rem;font-weight:600;color:#374151}
+        .form-group select,.form-group input{border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-size:.875rem;width:100%;box-sizing:border-box;background:#fff;color:#1e293b;transition:border-color .15s}
+        .form-group select:focus,.form-group input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+        .toggle-wrap{display:flex;align-items:center;gap:10px;font-size:.875rem;cursor:pointer}
+        .toggle-wrap input[type=checkbox]{width:16px;height:16px;accent-color:#6366f1;cursor:pointer}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .15s;border:1px solid transparent;width:100%;justify-content:center}
+        .btn-ai-risk{background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:#fff}
+        .btn-ai-risk:hover{opacity:.9;transform:translateY(-1px)}
+        .btn-ai-terms{background:linear-gradient(135deg,#10b981,#059669);border:none;color:#fff}
+        .btn-ai-terms:hover{opacity:.9;transform:translateY(-1px)}
+    </style>
+</head>
+<body class="invoza-theme">
+<div class="invoza-app-window">
+    <aside class="invoza-sidebar">
+        <a href="dashboard.html" class="invoza-brand">
+            <span class="invoza-brand-wordmark"><span class="brand-invoice">Invoice</span><span class="brand-mate">Mate</span><span class="brand-dot">.</span></span>
+        </a>
+        <div class="invoza-search-box">
+            <span class="invoza-search-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <input type="text" placeholder="Search..." id="sidebar-search-input">
+            <span class="invoza-search-kbd">/</span>
+        </div>
+        <div class="invoza-nav-group">
+            <div class="invoza-nav-header">Main Menu</div>
+            <ul class="invoza-nav-list">
+                <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span>Dashboard</span></a></li>
+                <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span><span>Invoices</span></a></li>
+                <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span><span>Estimates</span></a></li>
+                <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></span><span>Payments</span></a></li>
+                <li class="invoza-nav-item"><a href="expenses.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path></svg></span><span>Expenses</span></a></li>
+                <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></span><span>Customer Statements</span></a></li>
+            </ul>
+        </div>
+        <div class="invoza-nav-group">
+            <div class="invoza-nav-header">Sales &amp; Customers</div>
+            <ul class="invoza-nav-list">
+                <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></span><span>Product Catalog</span></a></li>
+                <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span><span>Recurring Invoices</span></a></li>
+                <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Clients</span></a></li>
+            </ul>
+        </div>
+        <div class="invoza-nav-group">
+            <div class="invoza-nav-header">Insights &amp; System</div>
+            <ul class="invoza-nav-list">
+                <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>GST &amp; Reports</span></a></li>
+                <li class="invoza-nav-item active"><a href="ai-tools.html"><span class="invoza-nav-icon">&#10024;</span><span>AI Tools</span></a></li>
+                <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span>Settings</span></a></li>
+            </ul>
+        </div>
+        <div class="invoza-sidebar-footer">
+            <a href="settings.html" class="invoza-user-pill">
+                <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                <div class="invoza-user-meta"><span class="name" id="sidebar-user-name">Loading...</span><span class="sub">View Profile</span></div>
+            </a>
+            <button id="logout-link" class="invoza-btn-signout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Sign Out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="invoza-main-area">
+        <header class="invoza-top-header">
+            <div class="invoza-breadcrumb"><span>Intelligence</span> &rsaquo; <span class="current">AI Tools</span></div>
+            <div class="invoza-header-tools">
+                <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px;height:36px;">U</div>
+            </div>
+        </header>
+
+        <div class="invoza-page-content">
+            <div class="ai-hero">
+                <div class="ai-hero-icon">&#10024;</div>
+                <div class="ai-hero-text">
+                    <h2>AI-Powered Business Intelligence</h2>
+                    <p>Leverage Grok AI to score client payment risk and auto-generate professional invoice terms &mdash; get paid faster and protect your business.</p>
+                    <div id="ai-status-badge" class="ai-badge"><span id="ai-status-dot">&#11044;</span> <span id="ai-status-label">Checking AI status...</span></div>
+                </div>
+            </div>
+
+            <div class="ai-tools-grid">
+                <!-- Tool 1: Risk Scorer -->
+                <div class="ai-tool-card">
+                    <div class="ai-tool-header">
+                        <div class="ai-tool-icon icon-risk">&#128202;</div>
+                        <div>
+                            <div class="ai-tool-title">Late Payment Risk Scorer</div>
+                            <div class="ai-tool-sub">AI scores your client's payment reliability from 0-100</div>
+                        </div>
+                    </div>
+                    <div class="ai-tool-body">
+                        <div class="form-group">
+                            <label for="risk-customer-select">Select Client *</label>
+                            <select id="risk-customer-select"><option value="">-- Choose a client --</option></select>
+                        </div>
+                        <div id="risk-placeholder" class="ai-result-placeholder">
+                            <div class="ph-icon">&#128202;</div>
+                            <p>Select a client above to run AI payment risk analysis on their invoice history.</p>
+                        </div>
+                        <div class="ai-loading" id="risk-loading" style="display:none;">
+                            <div class="ai-spinner"></div>
+                            <div class="ai-loading-text">Analyzing payment history...</div>
+                            <div class="ai-loading-sub">Grok AI is reviewing invoice patterns</div>
+                        </div>
+                        <div id="risk-output" style="display:none;flex-direction:column;gap:12px;"></div>
+                    </div>
+                    <div class="ai-tool-footer">
+                        <button type="button" id="btn-run-risk" class="btn btn-ai-risk" onclick="runRiskAnalysis()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            Run Risk Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tool 2: Terms Generator -->
+                <div class="ai-tool-card">
+                    <div class="ai-tool-header">
+                        <div class="ai-tool-icon icon-terms">&#9997;</div>
+                        <div>
+                            <div class="ai-tool-title">AI Terms &amp; Notes Generator</div>
+                            <div class="ai-tool-sub">Generate professional payment terms, clauses &amp; thank-you notes</div>
+                        </div>
+                    </div>
+                    <div class="ai-tool-body">
+                        <div class="form-group">
+                            <label for="terms-client-type">Client Type</label>
+                            <select id="terms-client-type">
+                                <option value="Individual">Individual / Freelancer</option>
+                                <option value="Startup">Startup</option>
+                                <option value="Corporate">Corporate / MNC</option>
+                                <option value="SME">SME / Small Business</option>
+                                <option value="Government">Government / PSU</option>
+                                <option value="NGO">NGO / Non-Profit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="terms-service-type">Service / Work Type</label>
+                            <select id="terms-service-type">
+                                <option value="Software Development">Software Development</option>
+                                <option value="Web Design">Web Design</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="Digital Marketing">Digital Marketing</option>
+                                <option value="Consulting">Consulting / Advisory</option>
+                                <option value="Content Writing">Content Writing</option>
+                                <option value="Legal Services">Legal Services</option>
+                                <option value="Accounting / CA Services">Accounting / CA Services</option>
+                                <option value="Product / Goods Supply">Product / Goods Supply</option>
+                                <option value="Professional Services">Professional Services (General)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="terms-payment-days">Payment Terms</label>
+                            <select id="terms-payment-days">
+                                <option value="7">Net 7 - 1 Week</option>
+                                <option value="14">Net 14 - 2 Weeks</option>
+                                <option value="30" selected>Net 30 - 1 Month</option>
+                                <option value="45">Net 45</option>
+                                <option value="60">Net 60 - 2 Months</option>
+                                <option value="0">Due on Receipt</option>
+                            </select>
+                        </div>
+                        <label class="toggle-wrap">
+                            <input type="checkbox" id="terms-late-fee" checked>
+                            Include late payment fee / interest clause
+                        </label>
+                        <div id="terms-placeholder" class="ai-result-placeholder">
+                            <div class="ph-icon">&#9997;</div>
+                            <p>Fill in the fields above and click Generate to get professional invoice terms.</p>
+                        </div>
+                        <div class="ai-loading" id="terms-loading" style="display:none;">
+                            <div class="ai-spinner"></div>
+                            <div class="ai-loading-text">Crafting your terms...</div>
+                            <div class="ai-loading-sub">Grok AI is writing professional clauses</div>
+                        </div>
+                        <div id="terms-output" style="display:none;"></div>
+                    </div>
+                    <div class="ai-tool-footer">
+                        <button type="button" id="btn-gen-terms" class="btn btn-ai-terms" onclick="runTermsGenerator()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            Generate Terms &amp; Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="js/api.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/layout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+  checkAiStatus();
+  loadCustomers();
+});
+
+async function checkAiStatus() {
+  try {
+    var res = await apiRequest('GET', '/api/ai/status');
+    var badge = document.getElementById('ai-status-badge');
+    var dot = document.getElementById('ai-status-dot');
+    var lbl = document.getElementById('ai-status-label');
+    if (res && res.configured) {
+      dot.style.color = '#10b981'; lbl.textContent = 'Grok AI Connected - ' + res.model;
+      badge.style.background = 'rgba(16,185,129,0.1)'; badge.style.borderColor = 'rgba(16,185,129,0.25)'; badge.style.color = '#059669';
+    } else {
+      dot.style.color = '#059669'; lbl.textContent = 'Smart AI Copilot Active (Demo Mode)';
+      badge.style.background = 'rgba(16,185,129,0.08)'; badge.style.borderColor = 'rgba(16,185,129,0.2)'; badge.style.color = '#059669';
+    }
+  } catch(e) { console.warn('AI status check failed:', e); }
+}
+
+async function loadCustomers() {
+  try {
+    var customers = await apiRequest('GET', '/api/customers') || [];
+    var sel = document.getElementById('risk-customer-select');
+    customers.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.dataset.name = c.name;
+      opt.textContent = c.name + (c.email ? ' (' + c.email + ')' : '');
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.error('Load customers failed:', e); }
+}
+
+async function runRiskAnalysis() {
+  var sel = document.getElementById('risk-customer-select');
+  var customerId = sel.value;
+  if (!customerId) { showToast('Please select a client first', 'warning'); return; }
+  var customerName = sel.options[sel.selectedIndex].dataset.name;
+  setRiskState('loading');
+  var btn = document.getElementById('btn-run-risk');
+  btn.disabled = true; btn.textContent = 'Analyzing...';
+  try {
+    var res = await apiRequest('POST', '/api/ai/payment-risk', { customerId: parseInt(customerId), customerName: customerName });
+    renderRiskResult(res); setRiskState('result');
+  } catch(e) {
+    showToast(e.message || 'Risk analysis failed', 'error'); setRiskState('placeholder');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run Risk Analysis';
+  }
+}
+
+function setRiskState(state) {
+  document.getElementById('risk-placeholder').style.display = state === 'placeholder' ? 'flex' : 'none';
+  document.getElementById('risk-loading').style.display     = state === 'loading'     ? 'flex' : 'none';
+  document.getElementById('risk-output').style.display      = state === 'result'      ? 'flex' : 'none';
+}
+
+function renderRiskResult(d) {
+  var score = d.riskScore || 0, color = d.riskColor || '#f59e0b', level = d.riskLevel || 'MEDIUM';
+  var circum = Math.PI * 70, offset = circum - (score / 100) * circum;
+  var levelBg = level === 'LOW' ? 'rgba(16,185,129,0.12)' : level === 'HIGH' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)';
+  var insights = (d.insights || []).map(function(ins) { return '<div class="risk-insight-item" style="--rc:' + color + '">' + ins + '</div>'; }).join('');
+  var out = document.getElementById('risk-output');
+  out.style.flexDirection = 'column'; out.style.gap = '12px';
+  out.innerHTML =
+    '<div class="risk-gauge-wrap"><div class="risk-gauge"><svg viewBox="0 0 160 88" fill="none">' +
+    '<path d="M10 80 A70 70 0 0 1 150 80" stroke="#f1f5f9" stroke-width="16" stroke-linecap="round"/>' +
+    '<path d="M10 80 A70 70 0 0 1 150 80" stroke="' + color + '" stroke-width="16" stroke-linecap="round" stroke-dasharray="' + circum + '" stroke-dashoffset="' + offset + '" style="transition:stroke-dashoffset 1s ease;"/>' +
+    '</svg><div class="risk-score-text"><div class="risk-score-num" style="color:' + color + '">' + score + '</div><div class="risk-score-label">/100 Risk Score</div></div></div>' +
+    '<span class="risk-level-pill" style="background:' + levelBg + ';color:' + color + ';">' + level + ' RISK</span></div>' +
+    '<div class="risk-summary">' + (d.summary || '') + '</div>' +
+    '<div class="risk-meta"><div class="risk-meta-item"><div class="risk-meta-val">' + (d.onTimePaymentRate || 'N/A') + '</div><div class="risk-meta-lbl">On-Time Rate</div></div>' +
+    '<div class="risk-meta-item"><div class="risk-meta-val">' + (d.avgDaysToPayAfterDue || 0) + 'd</div><div class="risk-meta-lbl">Avg Days Late</div></div></div>' +
+    '<div class="risk-recommendation"><strong>Recommendation:</strong> ' + (d.recommendation || '') + '</div>' +
+    '<div class="risk-insights">' + insights + '</div>' +
+    '<div class="ai-model-tag">&#10024; Powered by ' + (d.aiModel || 'AI') + '</div>';
+}
+
+async function runTermsGenerator() {
+  var businessName = localStorage.getItem('businessName') || await getBusinessName() || 'Your Business';
+  var payload = {
+    businessName: businessName,
+    clientType: document.getElementById('terms-client-type').value,
+    serviceType: document.getElementById('terms-service-type').value,
+    paymentTermsDays: document.getElementById('terms-payment-days').value,
+    includeLateFee: document.getElementById('terms-late-fee').checked
+  };
+  document.getElementById('terms-placeholder').style.display = 'none';
+  document.getElementById('terms-loading').style.display = 'flex';
+  document.getElementById('terms-output').style.display = 'none';
+  var btn = document.getElementById('btn-gen-terms'); btn.disabled = true;
+  try {
+    var res = await apiRequest('POST', '/api/ai/terms-generator', payload);
+    renderTermsResult(res);
+  } catch(e) {
+    showToast(e.message || 'Terms generation failed', 'error');
+    document.getElementById('terms-placeholder').style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Generate Terms &amp; Notes';
+    document.getElementById('terms-loading').style.display = 'none';
+  }
+}
+
+function renderTermsResult(d) {
+  var out = document.getElementById('terms-output'); out.style.display = 'block';
+  var html = '<div class="terms-section">' + tBlock('Payment Terms', d.paymentTerms);
+  if (d.lateFeeClause) html += tBlock('Late Fee Clause', d.lateFeeClause);
+  html += tBlock('Invoice Notes', d.invoiceNotes) + tBlock('Warranty / Disclaimer', d.warrantyClause) + tBlock('Thank-You Note (Footer)', d.thankYouNote);
+  html += '<div class="ai-model-tag">&#10024; Powered by ' + (d.aiModel || 'AI') + '</div></div>';
+  out.innerHTML = html;
+}
+
+function tBlock(label, text) {
+  var id = 'tb-' + Math.random().toString(36).substr(2, 6);
+  return '<div class="terms-block"><div class="terms-block-header"><span class="terms-block-label">' + label + '</span>' +
+    '<button class="copy-btn" onclick="copyTerm(\'' + id + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy</button></div>' +
+    '<div class="terms-block-content" id="' + id + '">' + (text || '&mdash;') + '</div></div>';
+}
+
+function copyTerm(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(function() { showToast('Copied to clipboard!', 'success'); });
+}
+
+async function getBusinessName() {
+  try {
+    var s = await apiRequest('GET', '/api/settings');
+    if (s && s.businessName) { localStorage.setItem('businessName', s.businessName); return s.businessName; }
+  } catch(e) {}
+  return null;
+}
+</script>
+</body>
+</html>
