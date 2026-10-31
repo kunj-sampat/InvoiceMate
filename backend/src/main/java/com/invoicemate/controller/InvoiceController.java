@@ -44,10 +44,7 @@ public class InvoiceController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
-        if (isEstimate != null) {
-            return invoiceService.getInvoicesByType(getUserId(), search, status, isEstimate);
-        }
-        return invoiceService.getInvoices(getUserId(), status, search, from, to);
+        return invoiceService.getInvoices(getUserId(), status, search, from, to, isEstimate != null ? isEstimate : false);
     }
 
     @PostMapping

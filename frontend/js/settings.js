@@ -303,7 +303,7 @@ window.saveAppearanceSettings = saveAppearanceSettings;
 window.uploadLogo = uploadLogo;
 window.removeLogo = removeLogo;
 window.deleteAccount = deleteAccount;
-window.updatePassword = updatePassword;
+
 window.exportData = exportData;
 
 async function updatePassword() {

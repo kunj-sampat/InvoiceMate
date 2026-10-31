@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
         .cat-tag-prod { background: #e0f2fe; color: #0284c7; }
         .cat-tag-serv { background: #f3e8ff; color: #7c3aed; }
         .stock-pill-ok { background: #d1fae5; color: #059669; }
         .stock-pill-low { background: #fef3c7; color: #d97706; }
         .stock-pill-out { background: #fee2e2; color: #dc2626; }
+        .label-format-btn.active { background: #205646 !important; color: #fff !important; border-color: #205646 !important; }
     </style>
 </head>
 <body class="invoza-theme">
@@ -49,9 +51,16 @@
             </div>
 
             <div class="invoza-nav-group">
-                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <div class="invoza-nav-header">Stocks &amp; Inventory</div>
                 <ul class="invoza-nav-list">
                     <li class="invoza-nav-item active"><a href="products.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item"><a href="stocks.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span><span>Low Stock Radar</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
                     <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span><span>Recurring Invoices</span></a></li>
                     <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Clients</span></a></li>
                 </ul>
@@ -107,7 +116,19 @@
                         <h1>Product &amp; Service Catalog</h1>
                         <p>Manage inventory stock levels, HSN/SAC statutory codes, and unit rates.</p>
                     </div>
-                    <button id="add-product-btn" class="btn btn-primary">+ Add Item</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button id="export-products-csv-btn" class="btn btn-secondary" title="Export catalog items to CSV">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Export CSV</span>
+                        </button>
+                        <button id="batch-barcode-btn" class="btn btn-secondary" title="Print shelf labels and barcodes in batch">
+                            🏷️ Batch Labels
+                        </button>
+                        <a href="stocks.html" class="btn btn-secondary" style="border-color: #f59e0b; color: #b45309; background: rgba(245, 158, 11, 0.08);" title="Open Low Stock Radar">
+                            ⚠️ Stock Radar
+                        </a>
+                        <button id="add-product-btn" class="btn btn-primary">+ Add Item</button>
+                    </div>
                 </div>
 
                 <!-- Inventory Summary Cards -->
@@ -279,11 +300,53 @@
         </div>
     </div>
 
+    
+        <!-- Barcode Shelf Label Modal -->
+    <div id="barcode-modal" class="modal-overlay" style="display: none;">
+        <div class="modal" style="max-width: 500px; width: 95%;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">🏷️ Product Barcode</h3>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 2px;" id="barcode-modal-prod-title">Product Name</p>
+                </div>
+                <button class="modal-close" id="close-barcode-modal" onclick="closeBarcodeModal()">&times;</button>
+            </div>
+
+            <!-- Preview Box -->
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 20px 14px; display: flex; justify-content: center; align-items: center; min-height: 180px; margin-bottom: 16px;">
+                <div id="barcode-preview-box">
+                    <!-- Injected by barcode.js -->
+                </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 16px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="barcode-print-qty">Number of Copies</label>
+                    <input type="number" id="barcode-print-qty" value="1" min="1" max="100">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>SKU Barcode</label>
+                    <div id="barcode-modal-sku" style="height: 38px; display: flex; align-items: center; font-family: monospace; font-weight: 700; color: #1e293b;">-</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" id="cancel-barcode-btn" onclick="closeBarcodeModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printCurrentLabels()" style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    <span>Print Label(s)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container" class="toast-container"></div>
 
     <script src="js/api.js"></script>
     <script src="js/toast.js"></script>
     <script src="js/layout.js"></script>
+    <script src="js/upi-qr.js"></script>
+    <script src="js/barcode.js"></script>
     <script src="js/products.js"></script>
 </body>
 </html>

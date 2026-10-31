@@ -13,11 +13,47 @@ document.addEventListener('DOMContentLoaded', () => {
         loadInvoices();
       }, 300);
     });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        clearTimeout(debounceTimer);
+        loadInvoices();
+      }
+    });
+  }
+
+  const statusFilter = document.getElementById('status-filter');
+  if (statusFilter) {
+    statusFilter.addEventListener('change', loadInvoices);
+  }
+
+  const dateFrom = document.getElementById('date-from');
+  if (dateFrom) {
+    dateFrom.addEventListener('change', loadInvoices);
+  }
+
+  const dateTo = document.getElementById('date-to');
+  if (dateTo) {
+    dateTo.addEventListener('change', loadInvoices);
   }
 
   const applyFiltersBtn = document.getElementById('apply-filters');
   if (applyFiltersBtn) {
-    applyFiltersBtn.addEventListener('click', loadInvoices);
+    applyFiltersBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadInvoices();
+    });
+  }
+
+  const resetFiltersBtn = document.getElementById('reset-filters');
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (searchInput) searchInput.value = '';
+      if (statusFilter) statusFilter.value = '';
+      if (dateFrom) dateFrom.value = '';
+      if (dateTo) dateTo.value = '';
+      loadInvoices();
+    });
   }
 
   const exportBtn = document.getElementById('export-csv-btn');
@@ -54,27 +90,42 @@ function exportInvoicesToCSV() {
 }
 
 async function loadInvoices() {
-  const search = document.getElementById('invoice-search')?.value || '';
+  const search = document.getElementById('invoice-search')?.value.trim() || '';
   const status = document.getElementById('status-filter')?.value || '';
   const dateFrom = document.getElementById('date-from')?.value || '';
   const dateTo = document.getElementById('date-to')?.value || '';
 
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ isEstimate: 'false' });
   if (search) params.append('search', search);
   if (status) params.append('status', status);
   if (dateFrom) params.append('from', dateFrom);
   if (dateTo) params.append('to', dateTo);
 
+  const tbody = document.getElementById('invoices-body');
+  // Show skeleton rows immediately while loading
+  if (tbody && !search && !status && !dateFrom && !dateTo) {
+    tbody.innerHTML = Array(5).fill(0).map(() => `
+      <tr>
+        <td><span class="skeleton skeleton-text" style="width:70px"></span></td>
+        <td><span class="skeleton skeleton-text" style="width:110px"></span></td>
+        <td><span class="skeleton skeleton-text" style="width:70px"></span></td>
+        <td><span class="skeleton skeleton-text" style="width:70px"></span></td>
+        <td><span class="skeleton skeleton-text" style="width:60px;float:right"></span></td>
+        <td style="text-align:center"><span class="skeleton skeleton-text" style="width:60px;margin:0 auto;display:block"></span></td>
+        <td></td>
+      </tr>
+    `).join('');
+  }
+
   try {
     const data = await apiRequest('GET', `/api/invoices?${params.toString()}`);
     currentLoadedInvoices = data || [];
-    const tbody = document.getElementById('invoices-body');
     if (!tbody) return;
 
     tbody.innerHTML = '';
     
     if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center">No invoices found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:32px;color:#94a3b8;">No invoices found.</td></tr>';
       return;
     }
 
@@ -85,8 +136,8 @@ async function loadInvoices() {
         <td>${inv.customerName || 'N/A'}</td>
         <td>${formatDate(inv.invoiceDate)}</td>
         <td>${formatDate(inv.dueDate)}</td>
-        <td>${formatCurrency(inv.grandTotal)}</td>
-        <td><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
+        <td style="text-align:right">${formatCurrency(inv.grandTotal)}</td>
+        <td style="text-align:center"><span class="badge ${getStatusBadgeClass(inv.status)}">${inv.status}</span></td>
         <td>
           <a href="invoice-detail.html?id=${inv.id}" class="btn btn-sm btn-secondary">View</a>
           <button onclick="copyPublicLink('${inv.shareToken || inv.id}')" class="btn btn-sm btn-secondary" title="Copy client share link">🔗 Link</button>
@@ -99,6 +150,7 @@ async function loadInvoices() {
     });
   } catch (error) {
     if(typeof showToast === 'function') showToast('Failed to load invoices', 'error');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:32px;color:#94a3b8;">Failed to load invoices. Please check your connection.</td></tr>';
   }
 }
 

@@ -103,6 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
       openPremiumModal();
     });
   });
+
+  // -------------------------------------------------------
+  // MOBILE SIDEBAR TOGGLE — Inject hamburger & overlay
+  // -------------------------------------------------------
+  initMobileSidebarToggle();
 });
 
 function renderNotificationsPopover(popover) {
@@ -219,12 +224,20 @@ async function syncUserSubscriptionTier() {
   const userEmail = localStorage.getItem('userEmail') || '';
   if (!token || typeof apiRequest !== 'function') return;
 
+  // If checked within the last 5 minutes, avoid redundant network call on every navigation
+  const lastSync = localStorage.getItem('invoza_tier_last_sync');
+  if (lastSync && (Date.now() - parseInt(lastSync, 10)) < 300000 && localStorage.getItem('invoza_user_tier')) {
+    updatePremiumButtonState();
+    return;
+  }
+
   try {
     const res = await apiRequest('GET', '/api/settings');
     if (res) {
       const tier = (res.subscriptionTier || 'FREE').toUpperCase();
       localStorage.setItem('invoza_user_tier', tier);
       localStorage.setItem('invoza_tier_owner', userEmail);
+      localStorage.setItem('invoza_tier_last_sync', Date.now().toString());
       if (tier === 'PRO') {
         if (res.proExpiryDate) {
           let expStr = res.proExpiryDate;
@@ -1037,4 +1050,78 @@ window.renderLockedFeatureBanner = renderLockedFeatureBanner;
 window.initLockedFeatureBanners = initLockedFeatureBanners;
 window.updatePremiumButtonState = updatePremiumButtonState;
 
+// ==========================================================================
+// MOBILE SIDEBAR TOGGLE
+// Automatically injects a hamburger button and overlay into every page
+// ==========================================================================
+function initMobileSidebarToggle() {
+  const sidebar = document.querySelector('.invoza-sidebar');
+  const topHeader = document.querySelector('.invoza-top-header');
+  if (!sidebar || !topHeader) return;
 
+  // Create overlay
+  let overlay = document.getElementById('invoza-sidebar-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'invoza-sidebar-overlay';
+    overlay.className = 'invoza-sidebar-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  // Create hamburger button
+  let toggleBtn = document.getElementById('invoza-menu-toggle');
+  if (!toggleBtn) {
+    toggleBtn = document.createElement('button');
+    toggleBtn.id = 'invoza-menu-toggle';
+    toggleBtn.className = 'invoza-menu-toggle';
+    toggleBtn.setAttribute('aria-label', 'Open navigation menu');
+    toggleBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    `;
+    // Prepend to top header (before breadcrumb)
+    topHeader.insertBefore(toggleBtn, topHeader.firstChild);
+  }
+
+  const openSidebar = () => {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeSidebar = () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close when a nav link is clicked on mobile
+  sidebar.querySelectorAll('.invoza-nav-item a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  // Close on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+}
+
+window.initMobileSidebarToggle = initMobileSidebarToggle;

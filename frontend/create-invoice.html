@@ -9,9 +9,20 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/invoices.css">
     <link rel="stylesheet" href="css/invoice-templates.css">
     <link rel="stylesheet" href="css/print.css">
+    <style>
+        @keyframes laserSweep {
+            0% { transform: translateY(-55px); opacity: 0.85; }
+            50% { transform: translateY(55px); opacity: 1; }
+            100% { transform: translateY(-55px); opacity: 0.85; }
+        }
+        #scanner-laser {
+            animation: laserSweep 2s infinite ease-in-out;
+        }
+    </style>
 </head>
 <body class="invoza-theme">
 
@@ -97,14 +108,6 @@
                         <p>Draft professional GST-compliant invoices with live real-time preview.</p>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <button type="button" id="btn-grok-magic-create" class="btn btn-ai-magic" title="Use AI to auto-fill invoice details from notes">
-                            <span class="ai-sparkle-star">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#818cf8" stroke="#818cf8"/>
-                                </svg>
-                            </span>
-                            <span>AI Magic Create</span>
-                        </button>
                         <button id="save-draft-btn" class="btn btn-secondary">Save Draft</button>
                         <button id="generate-btn" class="btn btn-primary">Save &amp; Send</button>
                     </div>
@@ -125,8 +128,11 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="inv-number">Invoice Number</label>
-                                    <input type="text" id="inv-number" readonly>
+                                    <label for="inv-number" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Invoice Number</span>
+                                        <span style="font-size: 11px; font-weight: 600; color: #10b981; background: rgba(16,185,129,0.12); padding: 2px 8px; border-radius: 999px;">Editable</span>
+                                    </label>
+                                    <input type="text" id="inv-number" placeholder="e.g. INV-1001">
                                 </div>
                                 <div class="form-group">
                                     <label for="template-selector">Template Style</label>
@@ -201,7 +207,7 @@
                                             <th style="width: 60px; text-align: center; white-space: nowrap;">Qty</th>
                                             <th style="width: 120px; text-align: right; white-space: nowrap;">Price (&#8377;)</th>
                                             <th style="width: 130px; text-align: right; white-space: nowrap;">Total</th>
-                                            <th style="width: 40px;"></th>
+                                            <th style="width: 120px; text-align: center;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="items-body">
@@ -210,34 +216,94 @@
                                 </table>
                             </div>
                             
-                            <!-- Catalog Quick Selector & Add Item -->
-                            <div style="background-color: #f8fafc; padding: 18px; border-radius: 14px; border: 1px solid #e2e8f0;">
-                                <div class="form-row">
-                                    <div class="form-group" style="flex: 2;">
-                                        <label for="product-select">Product / Service Catalog</label>
-                                        <select id="product-select">
-                                            <option value="">Select from catalog...</option>
-                                            <option value="manual">Manual Entry</option>
-                                        </select>
+                            <!-- Invoza Smart Item Builder Card -->
+                            <div class="invoza-item-builder-card">
+                                <div class="builder-header">
+                                    <div class="builder-header-left">
+                                        <div class="builder-header-icon-wrap">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        </div>
+                                        <span class="builder-header-title">Add Line Item</span>
                                     </div>
-                                    <div class="form-group" style="flex: 2;">
-                                        <label for="item-name">Description *</label>
-                                        <input type="text" id="item-name" placeholder="Item name or service">
-                                    </div>
-                                    <div class="form-group" style="flex: 1.2;">
-                                        <label for="item-hsn">HSN / SAC</label>
-                                        <input type="text" id="item-hsn" placeholder="e.g. 9983">
-                                    </div>
-                                    <div class="form-group" style="flex: 1;">
-                                        <label for="item-qty">Qty</label>
-                                        <input type="number" id="item-qty" value="1" min="1">
-                                    </div>
-                                    <div class="form-group" style="flex: 1.3;">
-                                        <label for="item-price">Price (&#8377;) *</label>
-                                        <input type="number" id="item-price" min="0" step="0.01" placeholder="0.00">
+                                    
+                                    <!-- Barcode Scanner Trigger Button -->
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-open-barcode-scanner" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; border-radius: 8px; font-weight: 600; font-size: 13px; padding: 0 14px; border: 1.5px solid #205646; color: #205646; background: rgba(32, 86, 70, 0.06); cursor: pointer;" title="Scan barcode with camera or barcode scanner gun">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
+                                        <span>⚡ Scan Barcode</span>
+                                    </button>
+                                    
+                                    <!-- Custom Invoza Catalog Dropdown -->
+                                    <div class="invoza-catalog-picker-wrap">
+                                        <div class="invoza-catalog-dropdown" id="catalog-dropdown-root">
+                                            <button type="button" class="invoza-catalog-btn" id="catalog-picker-trigger" title="Select product from saved catalog">
+                                                <span class="catalog-btn-icon">📦</span>
+                                                <span class="catalog-btn-text" id="catalog-btn-label">Fill from Product Catalog</span>
+                                                <span class="catalog-btn-price" id="catalog-btn-price" style="display: none;"></span>
+                                                <svg class="catalog-btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+                                            </button>
+                                            
+                                            <div class="invoza-catalog-popover" id="catalog-popover">
+                                                <div class="catalog-search-box">
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                                    <input type="text" id="catalog-search-input" placeholder="Search catalog items...">
+                                                </div>
+                                                <div class="catalog-options-scroller" id="catalog-options-container">
+                                                    <div class="catalog-opt-item manual active" data-id="manual">
+                                                        <div class="opt-left">
+                                                            <span class="opt-icon">✏️</span>
+                                                            <div>
+                                                                <div class="opt-name">Manual Entry</div>
+                                                                <div class="opt-sub" style="font-size: 11px; color: #64748b;">Type custom description &amp; rate</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="catalog-divider">SAVED PRODUCTS &amp; SERVICES</div>
+                                                    <div id="catalog-product-list">
+                                                        <!-- Injected by JS -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Hidden native select for binding compatibility -->
+                                            <select id="product-select" style="display: none;">
+                                                <option value="">Select from catalog...</option>
+                                                <option value="manual">Manual Entry</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <button type="button" id="add-item-btn" class="btn btn-secondary">+ Add Line Item</button>
+
+                                <!-- Item Form Inputs Grid -->
+                                <div class="builder-fields-grid">
+                                    <div class="form-group field-desc" style="margin-bottom: 0;">
+                                        <label for="item-name">Description / Service Name *</label>
+                                        <input type="text" id="item-name" placeholder="e.g. Website Development, Water Bottle, Consulting">
+                                    </div>
+                                    <div class="form-group field-hsn" style="margin-bottom: 0;">
+                                        <label for="item-hsn">HSN / SAC</label>
+                                        <input type="text" id="item-hsn" placeholder="e.g. 998311">
+                                    </div>
+                                </div>
+
+                                <div class="builder-fields-grid-bottom" style="margin-top: 14px;">
+                                    <div class="form-group field-qty" style="margin-bottom: 0;">
+                                        <label for="item-qty">Qty</label>
+                                        <input type="number" id="item-qty" value="1" min="1" step="1">
+                                    </div>
+                                    <div class="form-group field-price" style="margin-bottom: 0;">
+                                        <label for="item-price">Unit Price (&#8377;) *</label>
+                                        <input type="number" id="item-price" min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                    <div class="builder-subtotal-chip" id="builder-subtotal-preview">
+                                        <span class="subtotal-label">Subtotal:</span>
+                                        <span class="subtotal-val" id="builder-live-item-total">&#8377;0.00</span>
+                                    </div>
+                                    <button type="button" id="cancel-edit-item-btn" class="btn btn-secondary" style="display: none; padding: 0 16px; border-radius: 8px; font-weight: 500; height: 38px; align-items: center;" title="Cancel item editing">Cancel</button>
+                                    <button type="button" id="add-item-btn" class="btn-invoza-add-item">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        <span>Add Line Item</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -325,55 +391,62 @@
         </main>
     </div>
 
-    <!-- Grok AI Magic Create Modal -->
-    <div id="grok-magic-modal" class="modal-overlay">
-        <div class="modal" style="max-width: 620px;">
+    
+    <!-- Barcode Scanner Modal for Invoice -->
+    <div id="barcode-scanner-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 500px;">
             <div class="modal-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1.3rem;">✨</span>
-                    <div>
-                        <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">Grok AI Magic Invoice Copilot</h3>
-                        <div style="font-size: 0.78rem; color: #94a3b8;">Paste any raw message, WhatsApp chat, or bullet points to auto-fill</div>
-                    </div>
+                <div>
+                    <h3 class="modal-title" style="display:flex; align-items:center; gap:8px;">
+                        <span>📷</span> Barcode Scanner
+                    </h3>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Scan with camera or point a barcode gun to add items immediately.</p>
                 </div>
-                <button class="modal-close" id="close-grok-magic-modal">&times;</button>
+                <button class="modal-close" id="close-barcode-scanner-modal">&times;</button>
             </div>
 
-            <div class="form-group" style="margin: 16px 0 10px;">
-                <label for="grok-prompt-input" style="font-size: 0.85rem; color: #94a3b8; display: flex; justify-content: space-between;">
-                    <span>Describe your bill or paste client notes:</span>
-                    <span style="color: #38bdf8; font-weight: 600;">Powered by xAI Grok</span>
+            <!-- Camera Viewport with Laser Animation -->
+            <div style="position: relative; width: 100%; height: 240px; background: #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+                <video id="barcode-video-stream" playsinline autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                
+                <!-- Target Overlay Frame -->
+                <div style="position: absolute; width: 220px; height: 130px; border: 2px solid rgba(255,255,255,0.75); border-radius: 10px; box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45); pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                    <div id="scanner-laser" style="width: 100%; height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+                </div>
+
+                <div id="scanner-camera-fallback" style="display: none; position: absolute; text-align: center; color: #cbd5e1; padding: 20px;">
+                    <div style="font-size: 30px; margin-bottom: 6px;">📷</div>
+                    <div style="font-size: 13px; font-weight: 600;">Camera view inactive</div>
+                    <div style="font-size: 11.5px; color: #94a3b8; margin-top: 4px;">Point barcode gun or type SKU below</div>
+                </div>
+            </div>
+
+            <!-- Hardware Barcode Gun & Quick SKU Input -->
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label for="barcode-scanner-input" style="font-weight: 700; display:flex; justify-content:space-between;">
+                    <span>Barcode Gun / SKU Input</span>
+                    <span style="font-size: 11px; color: #059669; font-weight: 600;">⚡ Ready for Scanner</span>
                 </label>
-                <textarea id="grok-prompt-input" rows="5" style="width: 100%; border-radius: 10px; padding: 12px; font-family: inherit; font-size: 0.9rem; line-height: 1.5; background: rgba(255,255,255,0.04); color: #f8fafc; border: 1px solid rgba(255,255,255,0.12);" placeholder="e.g. Billed Sharma Tech for 3 landing pages at ₹12,000 each, plus brand logo identity at ₹8,000. Give 10% discount and 18% GST. Due in 15 days."></textarea>
-            </div>
-
-            <!-- Quick sample chips -->
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Try an example:</div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" class="grok-sample-chip" data-sample="Billed Acme Corp for 40 hours of fullstack web development at 2500 per hour, plus cloud setup at 15000. Apply 18% GST and 10% discount. Due in 15 days." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
-                        💻 Web Development
-                    </button>
-                    <button type="button" class="grok-sample-chip" data-sample="Invoice to Creative Pulse: 3 video editing deliverables at 6000 each, and 1 YouTube thumbnail pack at 3500. GST 18%. Due in 7 days." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
-                        🎬 Video &amp; Design
-                    </button>
-                    <button type="button" class="grok-sample-chip" data-sample="Billed Nexa Logistics for monthly marketing retainer at 35000. Zero discount. 18% GST. Due on next Friday." style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;">
-                        🚀 Monthly Retainer
-                    </button>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="barcode-scanner-input" placeholder="Point scanner or type SKU (e.g. PRD-001)..." style="flex: 1; height: 42px; font-family: monospace; font-size: 14px; font-weight: 700;">
+                    <button type="button" class="btn btn-primary" id="btn-submit-scanned-barcode" style="padding: 0 16px;">Add Item</button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="button" id="cancel-grok-magic-btn" class="btn btn-secondary">Cancel</button>
-                <button type="button" id="submit-grok-magic-btn" class="btn btn-ai-magic" style="border-radius: 10px !important;">
-                    <span id="grok-magic-spinner" style="display:none;" class="spinner-sm"></span>
-                    <span class="ai-sparkle-star">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#fef08a" stroke="#facc15"/>
-                        </svg>
-                    </span>
-                    <span id="grok-magic-btn-text">Auto-Fill Invoice with AI</span>
-                </button>
+            <!-- Last Scanned Feedback Chip -->
+            <div id="scanner-feedback-box" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+                <div style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase;">Added to Invoice:</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                    <span id="scanner-feedback-name" style="font-weight: 700; color: #065f46;">-</span>
+                    <span id="scanner-feedback-price" style="font-weight: 800; color: #047857;">-</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                <div style="font-size: 12.5px; color: #64748b;">
+                    Items in invoice: <strong id="scanner-invoice-item-count" style="color: #0f172a;">0</strong>
+                </div>
+                <button type="button" class="btn btn-secondary" id="btn-done-scanning">Done Scanning</button>
             </div>
         </div>
     </div>

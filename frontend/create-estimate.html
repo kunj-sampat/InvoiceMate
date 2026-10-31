@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/invoices.css">
     <link rel="stylesheet" href="css/invoice-templates.css">
     <link rel="stylesheet" href="css/print.css">
@@ -117,8 +118,11 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Estimate Number</label>
-                                    <input type="text" id="estimate-number" placeholder="EST-001" readonly>
+                                    <label style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Estimate Number</span>
+                                        <span style="font-size: 11px; font-weight: 600; color: #10b981; background: rgba(16,185,129,0.12); padding: 2px 8px; border-radius: 999px;">Editable</span>
+                                    </label>
+                                    <input type="text" id="estimate-number" placeholder="e.g. EST-001">
                                 </div>
                                 <div class="form-group">
                                     <label>Template Style</label>

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,45 +37,61 @@ public class InvoiceService {
     }
 
     public List<InvoiceResponse> getInvoices(Long userId, String status, String search, LocalDate from, LocalDate to) {
-        List<Invoice> invoices;
-        if (search != null && !search.isEmpty()) {
-            invoices = invoiceRepository.searchInvoices(userId, search);
-        } else if (status != null) {
-            invoices = invoiceRepository.findByUserIdAndStatus(userId, status);
-        } else if (from != null && to != null) {
-            invoices = invoiceRepository.findByUserIdAndInvoiceDateBetween(userId, from, to);
-        } else {
-            invoices = invoiceRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return getInvoices(userId, status, search, from, to, false);
+    }
+
+    public List<InvoiceResponse> getInvoices(Long userId, String status, String search, LocalDate from, LocalDate to, Boolean isEstimate) {
+        List<Invoice> invoices = invoiceRepository.findByUserIdOrderByCreatedAtDesc(userId);
+
+        // Filter by isEstimate (default to false if isEstimate is null or false)
+        if (isEstimate != null) {
+            boolean target = isEstimate;
+            invoices.removeIf(i -> i.isEstimate() != target);
+        }
+
+        // Filter by status (handles PENDING, Pending, PARTIALLY_PAID, Partially Paid, etc.)
+        if (status != null && !status.trim().isEmpty()) {
+            String norm = status.trim().toUpperCase().replace(" ", "_");
+            invoices.removeIf(i -> {
+                String s = i.getStatus() != null ? i.getStatus().trim().toUpperCase().replace(" ", "_") : "";
+                return !s.equals(norm);
+            });
+        }
+
+        // Filter date from
+        if (from != null) {
+            invoices.removeIf(i -> i.getInvoiceDate() == null || i.getInvoiceDate().isBefore(from));
+        }
+
+        // Filter date to
+        if (to != null) {
+            invoices.removeIf(i -> i.getInvoiceDate() == null || i.getInvoiceDate().isAfter(to));
+        }
+
+        Map<Long, Customer> customerMap = customerRepository.findByUserId(userId).stream()
+                .filter(c -> c.getId() != null)
+                .collect(Collectors.toMap(Customer::getId, c -> c, (a, b) -> a));
+
+        // Filter search query across invoiceNumber and customerName
+        if (search != null && !search.trim().isEmpty()) {
+            String q = search.trim().toLowerCase();
+            invoices.removeIf(i -> {
+                boolean matchNum = i.getInvoiceNumber() != null && i.getInvoiceNumber().toLowerCase().contains(q);
+                Customer c = i.getCustomerId() != null ? customerMap.get(i.getCustomerId()) : null;
+                boolean matchCust = c != null && c.getName() != null && c.getName().toLowerCase().contains(q);
+                return !matchNum && !matchCust;
+            });
         }
 
         return invoices.stream().map(inv -> {
             updateStatusIfOverdue(inv);
-            Customer c = customerRepository.findById(inv.getCustomerId()).orElse(null);
+            Customer c = inv.getCustomerId() != null ? customerMap.get(inv.getCustomerId()) : null;
             return InvoiceResponse.fromInvoice(inv, c, null);
         }).collect(Collectors.toList());
     }
 
     public List<InvoiceResponse> getInvoicesByType(Long userId, String search, String status, boolean isEstimate) {
-        List<Invoice> invoices;
-        if (search != null && !search.isEmpty()) {
-            invoices = invoiceRepository.searchInvoices(userId, search);
-        } else {
-            invoices = invoiceRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        }
-
-        // Filter by isEstimate type
-        invoices.removeIf(i -> i.isEstimate() != isEstimate);
-
-        // Filter by status
-        if (status != null && !status.isEmpty()) {
-            invoices.removeIf(i -> !status.equalsIgnoreCase(i.getStatus()));
-        }
-
-        return invoices.stream().map(inv -> {
-            updateStatusIfOverdue(inv);
-            Customer c = customerRepository.findById(inv.getCustomerId()).orElse(null);
-            return InvoiceResponse.fromInvoice(inv, c, null);
-        }).collect(Collectors.toList());
+        return getInvoices(userId, status, search, null, null, isEstimate);
     }
 
     public InvoiceResponse getInvoice(Long userId, Long invoiceId) {
@@ -121,17 +138,20 @@ public class InvoiceService {
             user.setUpiId(req.getUpiId().trim());
         }
 
-        // Generate number based on document type
-        if (req.isEstimate()) {
+        // Generate number based on document type or custom input
+        if (req.getInvoiceNumber() != null && !req.getInvoiceNumber().trim().isEmpty()) {
+            inv.setInvoiceNumber(req.getInvoiceNumber().trim());
+        } else if (req.isEstimate()) {
             int nextEst = user.getNextEstimateNumber();
             inv.setInvoiceNumber("EST-" + String.format("%03d", nextEst));
             user.setNextEstimateNumber(nextEst + 1);
+            userRepository.save(user);
         } else {
             String invoiceNumber = user.getInvoicePrefix() + String.format("%04d", user.getNextInvoiceNumber());
             inv.setInvoiceNumber(invoiceNumber);
             user.setNextInvoiceNumber(user.getNextInvoiceNumber() + 1);
+            userRepository.save(user);
         }
-        userRepository.save(user);
 
         calculateTotals(inv, req.getItems());
         inv.setStatus(computeStatus(inv));
@@ -156,6 +176,9 @@ public class InvoiceService {
         inv.setNotes(req.getNotes());
         inv.setDraft(req.isDraft());
         inv.setAmountPaid(req.getAmountPaid());
+        if (req.getInvoiceNumber() != null && !req.getInvoiceNumber().trim().isEmpty()) {
+            inv.setInvoiceNumber(req.getInvoiceNumber().trim());
+        }
         
         if ((req.getBusinessName() != null && !req.getBusinessName().isBlank()) || 
             (req.getUpiId() != null && !req.getUpiId().isBlank())) {

@@ -1,46 +1,303 @@
-@media (max-width: 1024px) {
-  .content-area {
-    padding: 24px;
+/* ==========================================================================
+   INVOICEMATE � FULLY RESPONSIVE STYLESHEET
+   Covers all .invoza-* classes and layouts across all screen sizes.
+   Breakpoints: 1280px, 1024px, 768px (tablet), 480px (mobile)
+   ========================================================================== */
+
+/* ---- Page-level Performance Optimizations ---- */
+@media (prefers-reduced-motion: reduce) {
+  .invoza-app-window {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ---- Hamburger Menu Button (Hidden on desktop) ---- */
+.invoza-menu-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.invoza-menu-toggle:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.invoza-menu-toggle svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Overlay behind open sidebar on mobile */
+.invoza-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  z-index: 400;
+  backdrop-filter: blur(2px);
+}
+
+.invoza-sidebar-overlay.active {
+  display: block;
+}
+
+/* ---- Large Monitors ---- */
+@media (max-width: 1280px) {
+  body.invoza-theme {
+    padding: 12px;
   }
 
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .invoza-app-window {
+    border-radius: 20px;
+  }
+
+  .invoza-page-content {
+    padding: 0 24px 28px 24px;
+  }
+
+  .invoza-stats-grid {
+    gap: 14px;
+  }
+}
+
+/* ---- Tablet/Small Laptop ---- */
+@media (max-width: 1024px) {
+  body.invoza-theme {
+    padding: 8px;
+  }
+
+  .invoza-app-window {
+    border-radius: 18px;
+    min-height: calc(100vh - 16px);
+  }
+
+  .invoza-sidebar {
+    width: 220px;
+    padding: 20px 14px 16px 14px;
+  }
+
+  .invoza-main-area {
+    max-height: calc(100vh - 16px);
+  }
+
+  .invoza-page-content {
+    padding: 0 20px 24px 20px;
+  }
+
+  .invoza-top-header {
+    padding: 16px 20px 12px 20px;
+  }
+
+  .invoza-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  .invoza-tab-nav {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .create-invoice-layout,
   .invoice-detail-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   #invoice-preview-container {
-    position: static;
+    position: static !important;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-bar {
+    flex-wrap: wrap;
+  }
+
+  .filter-bar .form-group {
+    min-width: 130px;
+    flex: 1 1 130px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
+/* ---- Mobile: 768px ---- */
 @media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
+  body.invoza-theme {
+    padding: 0;
+    background: #f0fdf4;
   }
 
-  .sidebar.open {
+  .invoza-app-window {
+    border-radius: 0;
+    min-height: 100vh;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Sidebar: slide-in drawer */
+  .invoza-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 500;
+    width: 270px;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border-right: 1px solid #e2e8f0;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+    overflow-y: auto;
+    padding: 24px 16px 20px 16px;
+  }
+
+  .invoza-sidebar.open {
     transform: translateX(0);
   }
 
-  .main-wrapper {
-    margin-left: 0;
+  .invoza-main-area {
+    width: 100%;
+    max-height: 100vh;
   }
 
-  .top-header {
-    left: 0;
-    padding: 0 16px;
+  .invoza-menu-toggle {
+    display: inline-flex;
   }
 
-  #sidebar-toggle {
-    display: block;
+  .invoza-top-header {
+    padding: 14px 16px 10px 16px;
+    gap: 8px;
   }
 
-  .dashboard-row {
+  .invoza-breadcrumb {
+    font-size: 12.5px;
+  }
+
+  .invoza-header-tools {
+    gap: 6px;
+  }
+
+  .invoza-btn-premium .premium-sparkle {
+    display: none;
+  }
+
+  .invoza-btn-premium {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .invoza-welcome-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 0 16px 16px 16px;
+  }
+
+  .invoza-toolbar-actions {
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .invoza-date-pill,
+  #btn-export-csv {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .invoza-welcome-title {
+    font-size: 20px !important;
+  }
+
+  .invoza-page-content {
+    padding: 0 16px 24px 16px;
+  }
+
+  .invoza-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .invoza-stat-card {
+    padding: 14px !important;
+  }
+
+  .invoza-stat-value {
+    font-size: 18px !important;
+  }
+
+  .invoza-card,
+  .card {
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .invoza-card-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .invoza-page-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .invoza-page-header .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .filter-bar .form-group {
+    width: 100%;
+    flex: none;
+    min-width: unset;
+  }
+
+  .filter-bar button {
+    width: 100%;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  td, th {
+    padding: 10px 12px;
+    font-size: 12px;
   }
 
   .form-row {
@@ -48,41 +305,152 @@
     gap: 0;
   }
 
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+  .form-row > * {
+    width: 100%;
+    flex: none;
   }
 
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  td .btn {
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  .invoza-qa-btn {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .invoza-chart-wrap {
+    height: 150px !important;
   }
 
   .inv-meta {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
   }
 
-  .inv-details table {
+  .invoza-tab-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .invoza-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .modal {
+    width: 96% !important;
+    border-radius: 16px !important;
+  }
+}
+
+/* ---- Small Mobile: 480px ---- */
+@media (max-width: 480px) {
+  .invoza-stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+  }
+
+  .invoza-stat-value {
+    font-size: 16px !important;
+  }
+
+  .invoza-stat-label {
+    font-size: 11px !important;
+  }
+
+  .invoza-chart-wrap {
+    height: 120px !important;
+  }
+
+  .invoza-welcome-title {
+    font-size: 18px !important;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-card {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+}
+
+
+/* Item Builder Responsiveness */
+@media (max-width: 768px) {
+  .builder-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .invoza-catalog-picker-wrap {
+    width: 100%;
+  }
+
+  .invoza-catalog-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .invoza-catalog-popover {
+    width: 100%;
+    right: 0;
+    left: 0;
+  }
+
+  .builder-fields-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .builder-fields-grid-bottom {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px;
+  }
+
+  .builder-subtotal-chip {
+    grid-column: span 2;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .btn-invoza-add-item {
+    grid-column: span 2;
     width: 100%;
   }
 }
 
-@media (max-width: 480px) {
-  .content-area {
-    padding: 16px;
+/* ---- Print Optimizations ---- */
+@media print {
+  .invoza-sidebar,
+  .invoza-top-header,
+  .invoza-menu-toggle,
+  .invoza-sidebar-overlay,
+  .invoza-btn-premium,
+  .filter-bar,
+  #toast-container {
+    display: none !important;
   }
 
-  .summary-grid {
-    grid-template-columns: 1fr;
+  .invoza-app-window {
+    box-shadow: none;
+    border: none;
+    background: white;
   }
 
-  .chart-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .btn {
-    width: 100%;
+  .invoza-main-area {
+    max-height: none;
+    overflow: visible;
   }
 }

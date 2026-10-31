@@ -31,18 +31,19 @@ body.invoza-theme.dark {
 .invoza-app-window {
   max-width: 1540px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 26px;
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow: 
-    0 25px 60px -15px rgba(15, 23, 42, 0.12),
+    0 20px 50px -12px rgba(15, 23, 42, 0.10),
     0 0 0 1px rgba(226, 232, 240, 0.6);
   display: flex;
   min-height: calc(100vh - 32px);
   overflow: hidden;
   position: relative;
+  contain: layout;
 }
 
 body.invoza-theme.dark .invoza-app-window {

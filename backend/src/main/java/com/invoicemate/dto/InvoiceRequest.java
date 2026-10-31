@@ -17,6 +17,7 @@ public class InvoiceRequest {
     private String businessName;
     private String upiId;
     private double amountPaid;
+    private String invoiceNumber;
 
     public InvoiceRequest() {}
 
@@ -46,4 +47,6 @@ public class InvoiceRequest {
     public void setUpiId(String upiId) { this.upiId = upiId; }
     public double getAmountPaid() { return amountPaid; }
     public void setAmountPaid(double amountPaid) { this.amountPaid = amountPaid; }
+    public String getInvoiceNumber() { return invoiceNumber; }
+    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 }

@@ -23,24 +23,106 @@ public class GrokAiService {
 
     private static final Logger log = LoggerFactory.getLogger(GrokAiService.class);
 
-    @Value("${grok.api.key:${GROK_API_KEY:${XAI_API_KEY:}}}")
+    @Value("${ai.gemini.api.key:${GEMINI_API_KEY:}}")
+    private String geminiApiKey;
+
+    @Value("${ai.gemini.model:${GEMINI_MODEL:gemini-1.5-flash}}")
+    private String geminiModel;
+
+    @Value("${grok.api.key:${GROK_API_KEY:${GROQ_API_KEY:${XAI_API_KEY:}}}}")
     private String grokApiKey;
 
-    @Value("${grok.api.url:${GROK_API_URL:https://api.x.ai/v1/chat/completions}}")
+    @Value("${grok.api.url:${GROK_API_URL:https://api.groq.com/openai/v1/chat/completions}}")
     private String grokApiUrl;
 
-    @Value("${grok.model:${GROK_MODEL:grok-2-latest}}")
+    @Value("${grok.model:${GROK_MODEL:${GROQ_MODEL:openai/gpt-oss-120b}}}")
     private String grokModel;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
+            .connectTimeout(Duration.ofSeconds(15))
             .build();
 
     private volatile String lastError;
 
+    public enum AiProvider {
+        GEMINI,
+        GROQ,
+        OPENAI,
+        XAI,
+        CUSTOM
+    }
+
+    private String getEnvOrFile(String keyName, String injectedVal) {
+        if (injectedVal != null && !injectedVal.trim().isEmpty() && !injectedVal.contains("your_")) {
+            return injectedVal.trim();
+        }
+        String sys = System.getProperty(keyName);
+        if (sys != null && !sys.trim().isEmpty()) return sys.trim();
+        String env = System.getenv(keyName);
+        if (env != null && !env.trim().isEmpty()) return env.trim();
+
+        String[] possiblePaths = {".env", "../.env", "../../.env"};
+        for (String path : possiblePaths) {
+            java.io.File f = new java.io.File(path);
+            if (f.exists() && f.isFile()) {
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(f))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        if (line.startsWith(keyName + "=")) {
+                            String val = line.substring(keyName.length() + 1).trim();
+                            if ((val.startsWith("\"") && val.endsWith("\"")) || (val.startsWith("'") && val.endsWith("'"))) {
+                                if (val.length() >= 2) val = val.substring(1, val.length() - 1);
+                            }
+                            return val;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return "";
+    }
+
+    public String getActiveApiKey() {
+        String groqKey = getEnvOrFile("GROK_API_KEY", grokApiKey);
+        if (groqKey.isEmpty()) {
+            groqKey = getEnvOrFile("GROQ_API_KEY", null);
+        }
+        if (!groqKey.isEmpty()) return groqKey;
+
+        String gemKey = getEnvOrFile("GEMINI_API_KEY", geminiApiKey);
+        if (!gemKey.isEmpty()) return gemKey;
+
+        return "";
+    }
+
+    public boolean isAiConfigured() {
+        return !getActiveApiKey().isEmpty();
+    }
+
     public boolean isGrokConfigured() {
-        return grokApiKey != null && !grokApiKey.trim().isEmpty() && !grokApiKey.contains("your_");
+        return isAiConfigured();
+    }
+
+    public AiProvider getProvider() {
+        String key = getActiveApiKey();
+        if (key.startsWith("gsk_")) return AiProvider.GROQ;
+        if (key.startsWith("AIza") || key.startsWith("AQ.")) return AiProvider.GEMINI;
+        if (key.startsWith("xai-")) return AiProvider.XAI;
+        if (key.startsWith("sk-")) return AiProvider.OPENAI;
+
+        String m = getEffectiveModel().toLowerCase();
+        if (m.contains("llama") || m.contains("mixtral") || m.contains("qwen") || m.contains("gpt-oss")) return AiProvider.GROQ;
+        if (m.contains("gemini")) return AiProvider.GEMINI;
+        if (m.contains("grok")) return AiProvider.XAI;
+        if (m.contains("gpt")) return AiProvider.OPENAI;
+
+        if (grokApiUrl != null && !grokApiUrl.contains("api.x.ai") && !grokApiUrl.isBlank() && !grokApiUrl.contains("googleapis")) {
+            return AiProvider.CUSTOM;
+        }
+
+        return AiProvider.GROQ;
     }
 
     public String getLastError() {
@@ -48,46 +130,67 @@ public class GrokAiService {
     }
 
     public String getKeyPrefix() {
-        if (!isGrokConfigured()) return "none";
-        String k = grokApiKey.trim();
+        String k = getActiveApiKey();
+        if (k.isEmpty()) return "none";
+        if (k.startsWith("AIza") || k.startsWith("AQ.")) {
+            return k.length() > 8 ? k.substring(0, 8) + "..." : k;
+        }
+        if (k.startsWith("xai-")) return "xai-";
+        if (k.startsWith("gsk_")) return "gsk_";
+        if (k.startsWith("sk-")) return "sk-";
         int idx = k.indexOf('_');
         if (idx > 0 && idx < 8) return k.substring(0, idx + 1);
-        if (k.startsWith("xai-")) return "xai-";
-        if (k.startsWith("sk-")) return "sk-";
         return k.length() > 6 ? k.substring(0, 6) + "..." : k;
     }
 
     public String getEffectiveModel() {
-        String key = grokApiKey != null ? grokApiKey.trim() : "";
-        if (grokApiUrl.contains("api.x.ai")) {
-            if (key.startsWith("gsk_")) return "llama-3.3-70b-versatile";
-            if (key.startsWith("sk-")) return "gpt-4o-mini";
+        if (!isAiConfigured()) return "Offline";
+        AiProvider provider = getProvider();
+        switch (provider) {
+            case GEMINI:
+                String gm = getEnvOrFile("GEMINI_MODEL", geminiModel);
+                return (!gm.isBlank()) ? gm : "gemini-1.5-flash";
+            case GROQ:
+                String gqm = getEnvOrFile("GROK_MODEL", grokModel);
+                if (gqm.isBlank() || gqm.contains("gemini")) {
+                    gqm = getEnvOrFile("GROQ_MODEL", null);
+                }
+                return (!gqm.isBlank() && !gqm.contains("gemini")) ? gqm : "openai/gpt-oss-120b";
+            case OPENAI:
+                return "gpt-4o-mini";
+            case XAI:
+                String xm = getEnvOrFile("GROK_MODEL", grokModel);
+                return (!xm.isBlank() && !xm.contains("gemini")) ? xm : "grok-2-latest";
+            default:
+                return "openai/gpt-oss-120b";
         }
-        return grokModel;
     }
 
     public String getProviderName() {
-        String key = grokApiKey != null ? grokApiKey.trim() : "";
-        if (grokApiUrl.contains("api.x.ai")) {
-            if (key.startsWith("gsk_")) return "Groq Cloud (Llama 3.3)";
-            if (key.startsWith("sk-")) return "OpenAI";
-            return "xAI (Grok)";
+        if (!isAiConfigured()) return "None";
+        AiProvider provider = getProvider();
+        switch (provider) {
+            case GEMINI: return "Google Gemini";
+            case GROQ: return "Groq Cloud (" + getEffectiveModel() + ")";
+            case OPENAI: return "OpenAI";
+            case XAI: return "xAI (Grok)";
+            default: return "Custom (" + grokApiUrl + ")";
         }
-        return "Custom (" + grokApiUrl + ")";
     }
 
     public Map<String, Object> testConnection() {
         Map<String, Object> res = new LinkedHashMap<>();
-        if (!isGrokConfigured()) {
+        if (!isAiConfigured()) {
             res.put("success", false);
-            res.put("error", "No API key configured in .env. Please add GROK_API_KEY.");
+            res.put("error", "No AI API key configured in .env. Please add GEMINI_API_KEY (Free at https://aistudio.google.com/app/apikey).");
+            res.put("provider", "None");
             return res;
         }
         try {
-            String testReply = callGrok("You are a system health probe.", "Ping. Reply strictly with the word PONG.");
+            String testReply = callAi("You are a system health probe.", "Ping. Reply strictly with the word PONG.");
             if (testReply != null && !testReply.isBlank()) {
                 res.put("success", true);
-                res.put("message", "Live AI verified! Received response: " + testReply.trim());
+                res.put("message", "Live AI verified! Received response from " + getProviderName() + " (" + getEffectiveModel() + "): " + testReply.trim());
                 res.put("model", getEffectiveModel());
                 res.put("provider", getProviderName());
                 return res;
@@ -534,40 +637,119 @@ public class GrokAiService {
         return result;
     }
 
-    private String callGrok(String systemPrompt, String userPrompt) throws Exception {
-        if (!isGrokConfigured()) {
+    public String callAi(String systemPrompt, String userPrompt) throws Exception {
+        if (!isAiConfigured()) {
             return null;
         }
 
-        String effectiveUrl = grokApiUrl;
+        AiProvider provider = getProvider();
         String effectiveModel = getEffectiveModel();
-        String key = grokApiKey.trim();
 
-        if (grokApiUrl.contains("api.x.ai")) {
-            if (key.startsWith("gsk_")) {
-                effectiveUrl = "https://api.groq.com/openai/v1/chat/completions";
-            } else if (key.startsWith("sk-")) {
-                effectiveUrl = "https://api.openai.com/v1/chat/completions";
-            }
+        if (provider == AiProvider.GEMINI) {
+            String gemKey = getEnvOrFile("GEMINI_API_KEY", geminiApiKey);
+            return callGemini(gemKey, effectiveModel, systemPrompt, userPrompt);
+        } else if (provider == AiProvider.GROQ) {
+            String groqKey = getActiveApiKey();
+            return callOpenAiCompatible("https://api.groq.com/openai/v1/chat/completions", groqKey, effectiveModel, systemPrompt, userPrompt);
+        } else if (provider == AiProvider.OPENAI) {
+            return callOpenAiCompatible("https://api.openai.com/v1/chat/completions", getActiveApiKey(), effectiveModel, systemPrompt, userPrompt);
+        } else if (provider == AiProvider.XAI) {
+            return callOpenAiCompatible("https://api.x.ai/v1/chat/completions", getActiveApiKey(), effectiveModel, systemPrompt, userPrompt);
+        } else {
+            return callOpenAiCompatible(grokApiUrl, getActiveApiKey(), effectiveModel, systemPrompt, userPrompt);
+        }
+    }
+
+    private String callGrok(String systemPrompt, String userPrompt) throws Exception {
+        return callAi(systemPrompt, userPrompt);
+    }
+
+    private String callGemini(String apiKey, String model, String systemPrompt, String userPrompt) throws Exception {
+        String cleanModel = model != null && !model.isBlank() ? model.trim() : "gemini-3.8-flash";
+        if (cleanModel.startsWith("models/")) {
+            cleanModel = cleanModel.substring(7);
         }
 
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + cleanModel + ":generateContent?key=" + apiKey;
+
         Map<String, Object> reqBody = new LinkedHashMap<>();
-        reqBody.put("model", effectiveModel);
+
+        if (systemPrompt != null && !systemPrompt.isBlank()) {
+            reqBody.put("systemInstruction", Map.of(
+                "parts", List.of(Map.of("text", systemPrompt))
+            ));
+        }
+
+        reqBody.put("contents", List.of(
+            Map.of(
+                "role", "user",
+                "parts", List.of(Map.of("text", userPrompt))
+            )
+        ));
+
+        Map<String, Object> genConfig = new LinkedHashMap<>();
+        genConfig.put("temperature", 0.2);
+        reqBody.put("generationConfig", genConfig);
+
+        String json = objectMapper.writeValueAsString(reqBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .timeout(Duration.ofSeconds(20))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            JsonNode root = objectMapper.readTree(response.body());
+            JsonNode candidates = root.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null && content.has("parts")) {
+                    JsonNode parts = content.get("parts");
+                    if (parts.isArray() && parts.size() > 0) {
+                        this.lastError = null;
+                        return parts.get(0).get("text").asText();
+                    }
+                }
+            }
+            this.lastError = "Gemini returned empty response content.";
+        } else {
+            String errDetail = response.body();
+            try {
+                JsonNode errJson = objectMapper.readTree(response.body());
+                if (errJson.has("error") && errJson.get("error").has("message")) {
+                    errDetail = errJson.get("error").get("message").asText();
+                }
+            } catch (Exception ignored) {}
+            this.lastError = "Gemini API HTTP " + response.statusCode() + ": " + errDetail;
+            log.warn("Gemini API call failed (HTTP {}): {}", response.statusCode(), errDetail);
+        }
+        return null;
+    }
+
+    private String callOpenAiCompatible(String url, String apiKey, String model, String systemPrompt, String userPrompt) throws Exception {
+        Map<String, Object> reqBody = new LinkedHashMap<>();
+        reqBody.put("model", model);
         reqBody.put("temperature", 0.2);
 
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content", systemPrompt));
+        if (systemPrompt != null && !systemPrompt.isBlank()) {
+            messages.add(Map.of("role", "system", "content", systemPrompt));
+        }
         messages.add(Map.of("role", "user", "content", userPrompt));
         reqBody.put("messages", messages);
 
         String json = objectMapper.writeValueAsString(reqBody);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(effectiveUrl))
+                .uri(URI.create(url))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + key)
+                .header("Authorization", "Bearer " + apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(json))
-                .timeout(Duration.ofSeconds(15))
+                .timeout(Duration.ofSeconds(20))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -577,25 +759,61 @@ public class GrokAiService {
             JsonNode choices = root.get("choices");
             if (choices != null && choices.isArray() && choices.size() > 0) {
                 this.lastError = null;
+                JsonNode message = choices.get(0).get("message");
+                if (message != null) {
+                    JsonNode contentNode = message.get("content");
+                    if (contentNode != null && !contentNode.isNull() && !contentNode.asText().isBlank()) {
+                        return contentNode.asText();
+                    }
+                    JsonNode reasoningNode = message.get("reasoning");
+                    if (reasoningNode != null && !reasoningNode.isNull() && !reasoningNode.asText().isBlank()) {
+                        return reasoningNode.asText();
+                    }
+                }
                 return choices.get(0).get("message").get("content").asText();
             }
+            this.lastError = "AI returned empty choices array";
         } else {
-            this.lastError = "HTTP " + response.statusCode() + ": " + response.body();
-            log.warn("AI API returned HTTP status {}: {}", response.statusCode(), response.body());
+            String errDetail = response.body();
+            try {
+                JsonNode errJson = objectMapper.readTree(response.body());
+                if (errJson.has("error") && errJson.get("error").has("message")) {
+                    errDetail = errJson.get("error").get("message").asText();
+                }
+            } catch (Exception ignored) {}
+            this.lastError = "AI API HTTP " + response.statusCode() + ": " + errDetail;
+            log.warn("AI API call failed (HTTP {}): {}", response.statusCode(), errDetail);
         }
         return null;
     }
 
     private String cleanJsonResponse(String raw) {
+        if (raw == null) return "{}";
         String clean = raw.trim();
-        if (clean.startsWith("```json")) {
-            clean = clean.substring(7);
-        } else if (clean.startsWith("```")) {
-            clean = clean.substring(3);
+
+        Pattern markdownBlock = Pattern.compile("```(?:json)?\\s*([\\s\\S]*?)\\s*```", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = markdownBlock.matcher(clean);
+        if (matcher.find()) {
+            clean = matcher.group(1).trim();
         }
-        if (clean.endsWith("```")) {
-            clean = clean.substring(0, clean.length() - 3);
+
+        int firstBrace = clean.indexOf('{');
+        int firstBracket = clean.indexOf('[');
+        int start = -1;
+        int end = -1;
+
+        if (firstBrace != -1 && (firstBracket == -1 || firstBrace < firstBracket)) {
+            start = firstBrace;
+            end = clean.lastIndexOf('}');
+        } else if (firstBracket != -1) {
+            start = firstBracket;
+            end = clean.lastIndexOf(']');
         }
+
+        if (start != -1 && end != -1 && end > start) {
+            return clean.substring(start, end + 1).trim();
+        }
+
         return clean.trim();
     }
 

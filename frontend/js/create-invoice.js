@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     // New invoice defaults
     generateDefaultInvoiceInfo();
-    checkAIDraft();
   }
 
   setupEventListeners();
@@ -90,16 +89,178 @@ async function loadProducts() {
     products = await apiRequest('GET', '/api/products') || [];
     const select = document.getElementById('product-select');
     if (select) {
+      select.innerHTML = '<option value="">Select from catalog...</option><option value="manual">Manual Entry</option>';
       products.forEach(p => {
         const option = document.createElement('option');
         option.value = p.id;
-        option.textContent = p.name;
+        option.textContent = p.name + ' - ₹' + Number(p.price || 0).toFixed(2);
         select.appendChild(option);
       });
     }
+    renderCustomCatalogList(products);
   } catch (e) {
     console.error('Failed to load products');
   }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function renderCustomCatalogList(list) {
+  const container = document.getElementById('catalog-product-list');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div style="padding: 14px 12px; font-size: 12.5px; color: #94a3b8; text-align: center;">No saved items in catalog</div>';
+    return;
+  }
+
+  list.forEach(p => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'catalog-opt-item';
+    itemEl.dataset.id = p.id;
+    itemEl.innerHTML = `
+      <div class="opt-left">
+        <span class="opt-icon">📦</span>
+        <div>
+          <div class="opt-name">${escapeHtml(p.name)}</div>
+          ${p.hsnSacCode ? `<div class="opt-hsn">HSN/SAC: ${escapeHtml(p.hsnSacCode)}</div>` : ''}
+        </div>
+      </div>
+      <span class="opt-price">₹${Number(p.price || 0).toFixed(2)}</span>
+    `;
+    itemEl.addEventListener('click', () => {
+      selectCatalogProduct(p);
+    });
+    container.appendChild(itemEl);
+  });
+}
+
+function selectCatalogProduct(p) {
+  const nameEl = document.getElementById('item-name');
+  const priceEl = document.getElementById('item-price');
+  const hsnEl = document.getElementById('item-hsn');
+  const qtyEl = document.getElementById('item-qty');
+  const hiddenSelect = document.getElementById('product-select');
+  const labelEl = document.getElementById('catalog-btn-label');
+  const priceBadge = document.getElementById('catalog-btn-price');
+  const popover = document.getElementById('catalog-popover');
+  const trigger = document.getElementById('catalog-picker-trigger');
+
+  if (p) {
+    if (nameEl) nameEl.value = p.name;
+    if (priceEl) priceEl.value = p.price;
+    if (hsnEl) hsnEl.value = p.hsnSacCode || '';
+    if (qtyEl && (!qtyEl.value || Number(qtyEl.value) <= 0)) qtyEl.value = '1';
+    if (hiddenSelect) hiddenSelect.value = p.id;
+
+    if (labelEl) labelEl.textContent = p.name;
+    if (priceBadge) {
+      priceBadge.textContent = '₹' + Number(p.price || 0).toFixed(2);
+      priceBadge.style.display = 'inline-block';
+    }
+
+    // Auto-apply default GST if product has it
+    if (p.defaultGstPercent !== null && p.defaultGstPercent !== undefined) {
+      const gstEl = document.getElementById('gst-rate');
+      if (gstEl && (!gstEl.value || gstEl.value === '0')) {
+        gstEl.value = p.defaultGstPercent;
+        calculateTotals();
+      }
+    }
+
+    // Flash visual highlight
+    [nameEl, priceEl, hsnEl].forEach(el => {
+      if (el) {
+        el.classList.remove('field-highlight-flash');
+        void el.offsetWidth;
+        el.classList.add('field-highlight-flash');
+      }
+    });
+
+    updateLiveItemSubtotal();
+  } else {
+    // Manual
+    if (hiddenSelect) hiddenSelect.value = 'manual';
+    if (labelEl) labelEl.textContent = 'Manual Entry';
+    if (priceBadge) priceBadge.style.display = 'none';
+  }
+
+  if (popover) popover.classList.remove('show');
+  if (trigger) trigger.classList.remove('active');
+}
+
+function updateLiveItemSubtotal() {
+  const qty = Number(document.getElementById('item-qty')?.value) || 0;
+  const price = Number(document.getElementById('item-price')?.value) || 0;
+  const total = qty * price;
+  const totalEl = document.getElementById('builder-live-item-total');
+  if (totalEl) {
+    totalEl.textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+}
+
+function initCatalogCustomDropdown() {
+  const trigger = document.getElementById('catalog-picker-trigger');
+  const popover = document.getElementById('catalog-popover');
+  const searchInput = document.getElementById('catalog-search-input');
+  const root = document.getElementById('catalog-dropdown-root');
+  const manualOpt = document.querySelector('.catalog-opt-item.manual');
+
+  if (trigger && popover) {
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = popover.classList.contains('show');
+      if (isOpen) {
+        popover.classList.remove('show');
+        trigger.classList.remove('active');
+      } else {
+        popover.classList.add('show');
+        trigger.classList.add('active');
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+          renderCustomCatalogList(products);
+        }
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (root && !root.contains(e.target)) {
+        popover.classList.remove('show');
+        trigger.classList.remove('active');
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        (p.hsnSacCode && p.hsnSacCode.toLowerCase().includes(q))
+      );
+      renderCustomCatalogList(filtered);
+    });
+  }
+
+  if (manualOpt) {
+    manualOpt.addEventListener('click', () => {
+      selectCatalogProduct(null);
+    });
+  }
+
+  // Live item total calculation
+  document.getElementById('item-qty')?.addEventListener('input', updateLiveItemSubtotal);
+  document.getElementById('item-price')?.addEventListener('input', updateLiveItemSubtotal);
 }
 
 async function loadUserSettings() {
@@ -156,6 +317,8 @@ function generateDefaultInvoiceInfo() {
 }
 
 function setupEventListeners() {
+  initCatalogCustomDropdown();
+  setupBarcodeScanner();
   const custSelect = document.getElementById('customer-select');
   if (custSelect) {
     custSelect.addEventListener('change', () => {
@@ -186,6 +349,17 @@ function setupEventListeners() {
   }
 
   document.getElementById('add-item-btn')?.addEventListener('click', addItem);
+  document.getElementById('cancel-edit-item-btn')?.addEventListener('click', cancelItemEdit);
+  
+  // Enter key in builder fields adds/updates item
+  ['item-name', 'item-hsn', 'item-qty', 'item-price'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addItem();
+      }
+    });
+  });
   
   const discountInput = document.getElementById('discount');
   if (discountInput) discountInput.addEventListener('input', () => { calculateTotals(); updatePreview(); triggerAutoSave(); });
@@ -211,34 +385,141 @@ function setupEventListeners() {
   });
 }
 
+let editingItemIndex = -1;
+
+function editItem(index) {
+  if (index < 0 || index >= items.length) return;
+  const item = items[index];
+  editingItemIndex = index;
+
+  const nameInput = document.getElementById('item-name');
+  const qtyInput = document.getElementById('item-qty');
+  const priceInput = document.getElementById('item-price');
+  const hsnInput = document.getElementById('item-hsn');
+  const prodSelect = document.getElementById('product-select');
+  const labelEl = document.getElementById('catalog-btn-label');
+  const priceBadge = document.getElementById('catalog-btn-price');
+  const addBtn = document.getElementById('add-item-btn');
+  const cancelBtn = document.getElementById('cancel-edit-item-btn');
+  const builderTitle = document.querySelector('.builder-header-title');
+
+  if (nameInput) nameInput.value = item.name || '';
+  if (qtyInput) qtyInput.value = item.quantity || 1;
+  if (priceInput) priceInput.value = item.price !== undefined ? item.price : '';
+  if (hsnInput) hsnInput.value = item.hsnSacCode || '';
+
+  if (item.productId && Array.isArray(products)) {
+    const prod = products.find(p => p.id === item.productId);
+    if (prod) {
+      if (prodSelect) prodSelect.value = prod.id;
+      if (labelEl) labelEl.textContent = prod.name;
+      if (priceBadge) {
+        priceBadge.textContent = '₹' + Number(prod.price || 0).toFixed(2);
+        priceBadge.style.display = 'inline-block';
+      }
+    } else {
+      if (prodSelect) prodSelect.value = 'manual';
+      if (labelEl) labelEl.textContent = 'Manual Entry';
+      if (priceBadge) priceBadge.style.display = 'none';
+    }
+  } else {
+    if (prodSelect) prodSelect.value = 'manual';
+    if (labelEl) labelEl.textContent = 'Manual Entry';
+    if (priceBadge) priceBadge.style.display = 'none';
+  }
+
+  if (addBtn) {
+    addBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Update Item</span>
+    `;
+    addBtn.style.background = '#059669';
+  }
+
+  if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+  if (builderTitle) builderTitle.textContent = `Edit Line Item #${index + 1}`;
+
+  updateLiveItemSubtotal();
+  rebuildItemsTable();
+
+  // Smooth scroll and focus
+  const builderCard = document.querySelector('.invoza-item-builder-card');
+  if (builderCard) {
+    builderCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    nameInput?.focus();
+  }
+}
+
+function cancelItemEdit() {
+  resetItemBuilder();
+  rebuildItemsTable();
+}
+
+function resetItemBuilder() {
+  editingItemIndex = -1;
+  const nameInput = document.getElementById('item-name');
+  const qtyInput = document.getElementById('item-qty');
+  const priceInput = document.getElementById('item-price');
+  const hsnInput = document.getElementById('item-hsn');
+  const prodSelect = document.getElementById('product-select');
+  const labelEl = document.getElementById('catalog-btn-label');
+  const priceBadge = document.getElementById('catalog-btn-price');
+  const addBtn = document.getElementById('add-item-btn');
+  const cancelBtn = document.getElementById('cancel-edit-item-btn');
+  const builderTitle = document.querySelector('.builder-header-title');
+  const liveTotal = document.getElementById('builder-live-item-total');
+
+  if (nameInput) nameInput.value = '';
+  if (qtyInput) qtyInput.value = '1';
+  if (priceInput) priceInput.value = '';
+  if (hsnInput) hsnInput.value = '';
+  if (prodSelect) prodSelect.value = '';
+  if (labelEl) labelEl.textContent = 'Fill from Product Catalog';
+  if (priceBadge) priceBadge.style.display = 'none';
+  if (liveTotal) liveTotal.textContent = '₹0.00';
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  if (builderTitle) builderTitle.textContent = 'Add Line Item';
+
+  if (addBtn) {
+    addBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Add Line Item</span>
+    `;
+    addBtn.style.background = '';
+  }
+}
+
 function addItem() {
-  const name = document.getElementById('item-name').value;
+  const name = document.getElementById('item-name').value.trim();
   const qty = Number(document.getElementById('item-qty').value);
   const price = Number(document.getElementById('item-price').value);
-  const hsn = document.getElementById('item-hsn')?.value || '';
+  const hsn = document.getElementById('item-hsn')?.value.trim() || '';
   const prodSelect = document.getElementById('product-select');
   const pId = prodSelect ? prodSelect.value : null;
 
-  if (!name || qty <= 0 || price < 0) {
-    if(typeof showToast === 'function') showToast('Invalid item details', 'error');
+  if (!name || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
+    if (typeof showToast === 'function') showToast('Please enter a valid item name, quantity and rate', 'error');
     return;
   }
 
-  items.push({
+  const itemData = {
     name: name,
     hsnSacCode: hsn,
     quantity: qty,
     price: price,
     total: qty * price,
     productId: pId && pId !== '' && pId !== 'manual' ? Number(pId) : null
-  });
+  };
 
-  document.getElementById('item-name').value = '';
-  document.getElementById('item-qty').value = '1';
-  document.getElementById('item-price').value = '';
-  if (document.getElementById('item-hsn')) document.getElementById('item-hsn').value = '';
-  if (prodSelect) prodSelect.value = '';
+  if (editingItemIndex >= 0 && editingItemIndex < items.length) {
+    items[editingItemIndex] = itemData;
+    if (typeof showToast === 'function') showToast('Line item updated successfully!', 'success');
+  } else {
+    items.push(itemData);
+    if (typeof showToast === 'function') showToast('Line item added!', 'success');
+  }
 
+  resetItemBuilder();
   rebuildItemsTable();
   calculateTotals();
   updatePreview();
@@ -246,6 +527,11 @@ function addItem() {
 }
 
 function removeItem(index) {
+  if (editingItemIndex === index) {
+    resetItemBuilder();
+  } else if (editingItemIndex > index) {
+    editingItemIndex--;
+  }
   items.splice(index, 1);
   rebuildItemsTable();
   calculateTotals();
@@ -258,18 +544,37 @@ function rebuildItemsTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
   items.forEach((item, index) => {
+    const isEditingThis = editingItemIndex === index;
     const tr = document.createElement('tr');
+    if (isEditingThis) {
+      tr.style.backgroundColor = 'rgba(32, 86, 70, 0.08)';
+      tr.style.outline = '1px solid rgba(32, 86, 70, 0.35)';
+    }
     tr.innerHTML = `
-      <td>${item.name}</td>
-      <td style="text-align: center; color: var(--color-text-tertiary); font-family: monospace; font-size: 12px; white-space: nowrap;">${item.hsnSacCode || '-'}</td>
+      <td>
+        <span style="font-weight: 500; color: #1e293b;">${escapeHtml(item.name)}</span>
+        ${isEditingThis ? '<span style="margin-left: 8px; font-size: 11px; padding: 2px 7px; border-radius: 4px; background: #205646; color: #fff; font-weight: 500;">Editing</span>' : ''}
+      </td>
+      <td style="text-align: center; color: var(--color-text-tertiary); font-family: monospace; font-size: 12px; white-space: nowrap;">${escapeHtml(item.hsnSacCode) || '-'}</td>
       <td style="text-align: center; white-space: nowrap;">${item.quantity}</td>
       <td style="text-align: right; white-space: nowrap;">${formatCurrency(item.price)}</td>
       <td style="text-align: right; font-weight: 600; white-space: nowrap;">${formatCurrency(item.total)}</td>
-      <td style="text-align: center;"><button type="button" onclick="removeItem(${index})" class="btn btn-sm btn-danger" style="padding: 2px 7px;">&times;</button></td>
+      <td style="text-align: center; white-space: nowrap;">
+        <button type="button" onclick="editItem(${index})" class="btn btn-sm" style="background: rgba(32, 86, 70, 0.1); color: #205646; border: 1px solid rgba(32, 86, 70, 0.25); padding: 3px 8px; font-size: 12px; margin-right: 4px; border-radius: 6px; cursor: pointer; transition: all 0.15s ease;" title="Edit this line item">
+          ✏️ Edit
+        </button>
+        <button type="button" onclick="removeItem(${index})" class="btn btn-sm btn-danger" style="padding: 3px 7px; border-radius: 6px; cursor: pointer;" title="Delete this line item">
+          &times;
+        </button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
 }
+
+window.editItem = editItem;
+window.cancelItemEdit = cancelItemEdit;
+window.removeItem = removeItem;
 
 function calculateTotals() {
   let subtotal = 0;
@@ -410,6 +715,7 @@ async function saveInvoice(isDraft, isAutoSave = false) {
 
   const payload = {
     customerId: Number(customerId),
+    invoiceNumber: (document.getElementById('inv-number') || document.getElementById('invoice-number'))?.value?.trim() || null,
     businessName: document.getElementById('inv-biz-name')?.value || null,
     upiId: document.getElementById('inv-upi-id')?.value?.trim() || null,
     invoiceDate: (document.getElementById('inv-date') || document.getElementById('invoice-date'))?.value,
@@ -494,154 +800,233 @@ async function loadInvoiceForEditing(id) {
   }
 }
 
+
 // ==========================================
-// GROK AI MAGIC INVOICE COPILOT
+// BARCODE SCANNER LOGIC FOR INVOICE CREATION
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  setupGrokMagicCopilot();
-});
 
-function setupGrokMagicCopilot() {
-  const openBtn = document.getElementById('btn-grok-magic-create');
-  const modal = document.getElementById('grok-magic-modal');
-  const closeBtn = document.getElementById('close-grok-magic-modal');
-  const cancelBtn = document.getElementById('cancel-grok-magic-btn');
-  const submitBtn = document.getElementById('submit-grok-magic-btn');
-  const promptInput = document.getElementById('grok-prompt-input');
-  const spinner = document.getElementById('grok-magic-spinner');
-  const btnText = document.getElementById('grok-magic-btn-text');
+let scannerMediaStream = null;
+let barcodeDetectorInstance = null;
+let scanFrameInterval = null;
 
-  if (!openBtn || !modal) return;
+function setupBarcodeScanner() {
+  document.getElementById('btn-open-barcode-scanner')?.addEventListener('click', openBarcodeScannerModal);
+  document.getElementById('close-barcode-scanner-modal')?.addEventListener('click', closeBarcodeScannerModal);
+  document.getElementById('btn-done-scanning')?.addEventListener('click', closeBarcodeScannerModal);
 
-  const openModal = () => {
-    modal.classList.add('show');
-    if (promptInput) promptInput.focus();
-  };
-
-  const closeModal = () => {
-    modal.classList.remove('show');
-  };
-
-  openBtn.addEventListener('click', openModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('ai') === '1') {
-    setTimeout(openModal, 250);
-  }
-
-  // Sample prompt chips
-  const chips = document.querySelectorAll('.grok-sample-chip');
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      if (promptInput) {
-        promptInput.value = chip.dataset.sample || '';
-        promptInput.focus();
+  const scanInput = document.getElementById('barcode-scanner-input');
+  if (scanInput) {
+    scanInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const code = scanInput.value.trim();
+        if (code) handleScannedBarcode(code);
       }
     });
+  }
+
+  document.getElementById('btn-submit-scanned-barcode')?.addEventListener('click', () => {
+    const code = document.getElementById('barcode-scanner-input')?.value.trim();
+    if (code) handleScannedBarcode(code);
   });
-
-  // Submit Prompt to Grok
-  if (submitBtn) {
-    submitBtn.addEventListener('click', async () => {
-      const text = promptInput?.value?.trim();
-      if (!text) {
-        if (typeof showToast === 'function') showToast('Please enter invoice details or paste client notes', 'error');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      if (spinner) spinner.style.display = 'inline-block';
-      if (btnText) btnText.textContent = 'Grok is Analyzing...';
-
-      try {
-        const parsed = await apiRequest('POST', '/api/ai/parse-invoice', { prompt: text });
-        if (parsed && !parsed.error) {
-          applyGrokParsedData(parsed);
-          closeModal();
-          if (typeof showToast === 'function') {
-            showToast('✨ Invoice auto-filled successfully!', 'success');
-          }
-        } else {
-          if (typeof showToast === 'function') showToast(parsed?.error || 'Could not parse invoice details', 'error');
-        }
-      } catch (err) {
-        console.error('Grok parse error:', err);
-        if (typeof showToast === 'function') showToast('Grok service temporarily unavailable', 'error');
-      } finally {
-        submitBtn.disabled = false;
-        if (spinner) spinner.style.display = 'none';
-        if (btnText) btnText.textContent = '✨ Auto-Fill Invoice';
-      }
-    });
-  }
 }
 
-function applyGrokParsedData(data) {
-  // 1. Customer Selection / Match
-  if (data.customerName) {
-    const custSelect = document.getElementById('customer-select');
-    if (custSelect) {
-      let matched = false;
-      const lower = data.customerName.toLowerCase();
-      for (let i = 0; i < custSelect.options.length; i++) {
-        const optText = custSelect.options[i].text.toLowerCase();
-        if (optText.includes(lower) || lower.includes(optText)) {
-          custSelect.selectedIndex = i;
-          matched = true;
-          break;
-        }
-      }
-      if (!matched && custSelect.options.length > 1) {
-        // Fallback to first customer or prompt
-        custSelect.selectedIndex = 1;
+function openBarcodeScannerModal() {
+  const modal = document.getElementById('barcode-scanner-modal');
+  if (!modal) return;
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+
+  const countEl = document.getElementById('scanner-invoice-item-count');
+  if (countEl) countEl.textContent = items.length;
+
+  const scanInput = document.getElementById('barcode-scanner-input');
+  if (scanInput) {
+    scanInput.value = '';
+    setTimeout(() => scanInput.focus(), 150);
+  }
+
+  startCameraScanner();
+}
+
+function closeBarcodeScannerModal() {
+  const modal = document.getElementById('barcode-scanner-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
+  stopCameraScanner();
+}
+
+async function startCameraScanner() {
+  const videoEl = document.getElementById('barcode-video-stream');
+  const fallbackEl = document.getElementById('scanner-camera-fallback');
+
+  if (fallbackEl) fallbackEl.style.display = 'none';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (fallbackEl) fallbackEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    scannerMediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+    });
+
+    if (videoEl) {
+      videoEl.srcObject = scannerMediaStream;
+      videoEl.play();
+    }
+
+    // Initialize BarcodeDetector if available
+    if ('BarcodeDetector' in window) {
+      try {
+        barcodeDetectorInstance = new BarcodeDetector({ formats: ['code_128', 'code_39', 'ean_13', 'qr_code', 'upc_a'] });
+      } catch(e) {
+        barcodeDetectorInstance = null;
       }
     }
-  }
 
-  // 2. Due Date Calculation
-  if (data.dueDays && data.dueDays > 0) {
-    const invDateVal = (document.getElementById('inv-date') || document.getElementById('invoice-date'))?.value;
-    const base = invDateVal ? new Date(invDateVal) : new Date();
-    base.setDate(base.getDate() + Number(data.dueDays));
-    const dueEl = document.getElementById('due-date');
-    if (dueEl) dueEl.value = base.toISOString().split('T')[0];
-  }
-
-  // 3. Discount & GST Rate
-  if (data.discountPercent !== undefined && document.getElementById('discount')) {
-    document.getElementById('discount').value = Number(data.discountPercent);
-  }
-  if (data.gstPercent !== undefined && document.getElementById('gst-rate')) {
-    document.getElementById('gst-rate').value = Number(data.gstPercent);
-  }
-
-  // 4. Notes
-  if (data.notes && document.getElementById('notes')) {
-    document.getElementById('notes').value = data.notes;
-  }
-
-  // 5. Line items
-  if (Array.isArray(data.items) && data.items.length > 0) {
-    items = data.items.map(i => {
-      const q = Number(i.quantity) || 1;
-      const p = Number(i.price) || 0;
-      return {
-        name: i.name || 'Service Item',
-        hsnSacCode: i.hsnSacCode || '998311',
-        quantity: q,
-        price: p,
-        total: q * p,
-        productId: null
-      };
-    });
-    rebuildItemsTable();
-  }
-
-  calculateTotals();
-  if (typeof updateLivePreview === 'function') {
-    updateLivePreview();
+    if (barcodeDetectorInstance && videoEl) {
+      scanFrameInterval = setInterval(async () => {
+        if (!videoEl.videoWidth) return;
+        try {
+          const detected = await barcodeDetectorInstance.detect(videoEl);
+          if (detected && detected.length > 0) {
+            const rawVal = detected[0].rawValue;
+            if (rawVal) {
+              handleScannedBarcode(rawVal);
+            }
+          }
+        } catch(err) {
+          // Frame drop or detection skip
+        }
+      }, 350);
+    }
+  } catch (err) {
+    console.warn('Camera access error:', err);
+    if (fallbackEl) fallbackEl.style.display = 'block';
   }
 }
 
+function stopCameraScanner() {
+  if (scanFrameInterval) {
+    clearInterval(scanFrameInterval);
+    scanFrameInterval = null;
+  }
+  if (scannerMediaStream) {
+    scannerMediaStream.getTracks().forEach(track => track.stop());
+    scannerMediaStream = null;
+  }
+  const videoEl = document.getElementById('barcode-video-stream');
+  if (videoEl) videoEl.srcObject = null;
+}
+
+function playCheckoutBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 1760; // 1760 Hz crisp POS checkout tone
+    gain.gain.value = 0.15;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
+  } catch(e) {}
+}
+
+let lastScannedCode = '';
+let lastScannedTime = 0;
+
+function handleScannedBarcode(rawCode) {
+  const code = String(rawCode || '').trim();
+  if (!code) return;
+
+  // Prevent duplicate accidental double-triggering within 1.2s for camera frames
+  const now = Date.now();
+  if (code === lastScannedCode && (now - lastScannedTime < 1200)) {
+    return;
+  }
+  lastScannedCode = code;
+  lastScannedTime = now;
+
+  const cleanCode = code.toLowerCase();
+
+  // Search product in catalog
+  const matched = (Array.isArray(products) ? products : []).find(p => {
+    const sku = (p.sku || '').toLowerCase();
+    const idStr = String(p.id);
+    const name = (p.name || '').toLowerCase();
+    return sku === cleanCode || idStr === cleanCode || name === cleanCode;
+  });
+
+  if (!matched) {
+    if (typeof showToast === 'function') {
+      showToast(`No product found matching barcode: "${code}"`, 'warning');
+    }
+    return;
+  }
+
+  // Play audio confirmation
+  playCheckoutBeep();
+
+  // Check if item is already added to invoice
+  const existingIdx = items.findIndex(i => {
+    return (i.productId && i.productId === matched.id) || 
+           (matched.sku && i.name.toLowerCase() === matched.name.toLowerCase());
+  });
+
+  if (existingIdx !== -1) {
+    // Increment quantity
+    items[existingIdx].quantity += 1;
+    items[existingIdx].total = items[existingIdx].quantity * items[existingIdx].price;
+    if (typeof showToast === 'function') {
+      showToast(`+1 Added: ${matched.name} (Qty: ${items[existingIdx].quantity})`, 'success');
+    }
+    editItem(existingIdx); // Populates builder so user can adjust
+  } else {
+    // Add new line item
+    const newItem = {
+      name: matched.name,
+      hsnSacCode: matched.hsnSacCode || '',
+      quantity: 1,
+      price: Number(matched.price || 0),
+      total: Number(matched.price || 0),
+      productId: matched.id
+    };
+    items.push(newItem);
+    if (typeof showToast === 'function') {
+      showToast(`✓ Added to Invoice: ${matched.name} (₹${matched.price})`, 'success');
+    }
+    editItem(items.length - 1); // Populates builder so user can adjust
+  }
+
+  // Update modal feedback chip
+  const fbBox = document.getElementById('scanner-feedback-box');
+  const fbName = document.getElementById('scanner-feedback-name');
+  const fbPrice = document.getElementById('scanner-feedback-price');
+  if (fbBox && fbName && fbPrice) {
+    fbBox.style.display = 'block';
+    fbName.textContent = matched.name;
+    fbPrice.textContent = '₹' + Number(matched.price || 0).toFixed(2);
+  }
+
+  const countEl = document.getElementById('scanner-invoice-item-count');
+  if (countEl) countEl.textContent = items.length;
+
+  // Rebuild items table, calculate totals, update preview, trigger auto-save
+  rebuildItemsTable();
+  calculateTotals();
+  updatePreview();
+  triggerAutoSave();
+
+  // Reset and autofocus input
+  const scanInput = document.getElementById('barcode-scanner-input');
+  if (scanInput) {
+    scanInput.value = '';
+    scanInput.focus();
+  }
+}

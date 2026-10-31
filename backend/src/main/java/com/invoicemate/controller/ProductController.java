@@ -36,6 +36,11 @@ public class ProductController {
         return productService.getProduct(getUserId(), id);
     }
 
+    @PostMapping("/bulk")
+    public List<Product> bulkCreateProducts(@RequestBody List<ProductRequest> requests) {
+        return productService.bulkUpsertProducts(getUserId(), requests);
+    }
+
     @PostMapping
     public Product createProduct(@RequestBody ProductRequest req) {
         return productService.createProduct(getUserId(), req);

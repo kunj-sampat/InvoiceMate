@@ -10,12 +10,109 @@ const API_BASE_URL = (() => {
   return '';
 })();
 
+// ==========================================================================
+// SMART API CACHE — Prevents redundant re-fetches on page navigation
+// In-memory (fast) + sessionStorage (survives page reload within session)
+// ==========================================================================
+const _apiCache = {
+  store: new Map(), // { key: { data, expiresAt } }
+
+  // TTL in ms per URL pattern
+  getTtl(url) {
+    if (url.includes('/api/dashboard')) return 60000;      // 60s
+    if (url.includes('/api/settings'))  return 300000;     // 5min
+    if (url.includes('/api/invoices')) {
+      if (url.includes('search=') || url.includes('status=') || url.includes('from=') || url.includes('to=')) {
+        return 0; // Never cache search / filtered queries
+      }
+      return 60000; // 60s for base listing
+    }
+    if (url.includes('/api/customers')) return 60000;      // 60s
+    if (url.includes('/api/products'))  return 60000;      // 60s
+    if (url.includes('/api/expenses'))  return 60000;      // 60s
+    if (url.includes('/api/estimates')) return 60000;      // 60s
+    if (url.includes('/api/payments'))  return 60000;      // 60s
+    if (url.includes('/api/reports'))   return 120000;     // 2min
+    return 0; // No cache for everything else
+  },
+
+  getKey(url) {
+    const token = localStorage.getItem('token') || '';
+    return 'apicache_' + token.slice(-8) + '_' + url;
+  },
+
+  get(url) {
+    const key = this.getKey(url);
+    // Check in-memory first (fastest)
+    if (this.store.has(key)) {
+      const entry = this.store.get(key);
+      if (Date.now() < entry.expiresAt) return entry.data;
+      this.store.delete(key);
+    }
+    // Fallback to sessionStorage
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (raw) {
+        const entry = JSON.parse(raw);
+        if (Date.now() < entry.expiresAt) {
+          this.store.set(key, entry); // Promote back to memory
+          return entry.data;
+        }
+        sessionStorage.removeItem(key);
+      }
+    } catch(e) { /* sessionStorage unavailable */ }
+    return null;
+  },
+
+  set(url, data) {
+    const ttl = this.getTtl(url);
+    if (ttl <= 0) return;
+    const key = this.getKey(url);
+    const entry = { data, expiresAt: Date.now() + ttl };
+    this.store.set(key, entry);
+    try { sessionStorage.setItem(key, JSON.stringify(entry)); } catch(e) { /* quota exceeded */ }
+  },
+
+  // Invalidate all cache entries (call on mutations)
+  invalidateAll() {
+    this.store.clear();
+    try {
+      const keys = Object.keys(sessionStorage).filter(k => k.startsWith('apicache_'));
+      keys.forEach(k => sessionStorage.removeItem(k));
+    } catch(e) {}
+  },
+
+  // Invalidate cache entries matching a URL pattern
+  invalidatePattern(pattern) {
+    const token = localStorage.getItem('token') || '';
+    const prefix = 'apicache_' + token.slice(-8) + '_';
+    for (const [key] of this.store) {
+      if (key.includes(pattern)) this.store.delete(key);
+    }
+    try {
+      const keys = Object.keys(sessionStorage).filter(k => k.startsWith(prefix) && k.includes(pattern));
+      keys.forEach(k => sessionStorage.removeItem(k));
+    } catch(e) {}
+  }
+};
+
+window._apiCache = _apiCache;
+window.apiCacheInvalidate = () => _apiCache.invalidateAll();
+window.apiCacheInvalidatePattern = (pattern) => _apiCache.invalidatePattern(pattern);
+
 async function apiRequest(method, url, body = null) {
   const token = localStorage.getItem('token');
   const headers = {};
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // ---- CACHE: Return cached data immediately for GET requests ----
+  const isGet = method === 'GET' || method === 'get';
+  if (isGet && !body) {
+    const cached = _apiCache.get(url);
+    if (cached !== null) return cached;
   }
 
   const options = {
@@ -26,7 +123,6 @@ async function apiRequest(method, url, body = null) {
   if (body) {
     if (body instanceof FormData) {
       options.body = body;
-      // Let browser set Content-Type for FormData
     } else {
       headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(body);
@@ -48,6 +144,7 @@ async function apiRequest(method, url, body = null) {
       }
     } else if (response.status === 401 || response.status === 403) {
       // If unauthorized or forbidden on protected APIs (token missing, invalid, or expired)
+      _apiCache.invalidateAll();
       localStorage.removeItem('token');
       localStorage.removeItem('userName');
       localStorage.removeItem('userEmail');
@@ -64,12 +161,30 @@ async function apiRequest(method, url, body = null) {
       throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
     }
 
+    let result;
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
-      return await response.json();
+      result = await response.json();
     } else {
-      return await response.text();
+      result = await response.text();
     }
+
+    // Cache successful GET responses
+    if (isGet && result !== null && result !== undefined) {
+      _apiCache.set(url, result);
+    }
+
+    // Invalidate relevant cache entries on mutations
+    if (!isGet) {
+      // Determine which cache keys to invalidate based on endpoint
+      const mutatedBase = url.split('?')[0].split('/').slice(0, 4).join('/');
+      _apiCache.invalidatePattern(mutatedBase);
+      // Always clear dashboard cache on any mutation
+      _apiCache.invalidatePattern('/api/dashboard');
+      _apiCache.invalidatePattern('/api/invoices');
+    }
+
+    return result;
   } catch (error) {
     console.error('API Request Error:', error);
     if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {

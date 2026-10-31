@@ -60,3 +60,68 @@ small {
   background-color: var(--color-primary-light);
   color: var(--color-primary);
 }
+
+/* =================================================
+   SKELETON LOADING — Shimmer effect for fast UX
+   ================================================= */
+@keyframes skeleton-shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 1200px 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 6px;
+  min-height: 12px;
+}
+
+.skeleton-text {
+  height: 14px;
+  border-radius: 4px;
+}
+
+.skeleton-value {
+  height: 28px;
+  border-radius: 6px;
+  width: 70%;
+}
+
+/* =================================================
+   PAGE TRANSITIONS — Smooth fade-in on load
+   ================================================= */
+.invoza-main-area {
+  animation: pageLoad 0.18s ease-out;
+}
+
+@keyframes pageLoad {
+  from { opacity: 0.6; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =================================================
+   UTILITY CLASSES
+   ================================================= */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+
+/* =================================================
+   PERFORMANCE: Reduce paint area for fixed headers
+   ================================================= */
+.invoza-top-header {
+  will-change: auto;
+  contain: layout style;
+}

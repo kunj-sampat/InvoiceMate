@@ -53,8 +53,30 @@ async function loadDashboardData() {
     return;
   }
 
+  // Show skeleton loading state on stat values immediately
+  ['total-revenue', 'total-paid', 'total-outstanding', 'total-overdue', 'chart-rev-big'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = '<span class="skeleton skeleton-value" style="display:inline-block;width:90px;height:22px;vertical-align:middle;"></span>';
+    }
+  });
+
   try {
-    const data = await apiRequest('GET', '/api/dashboard/summary');
+    const [data, profitData, fetchedInvoices] = await Promise.all([
+      apiRequest('GET', '/api/dashboard/summary').catch(e => {
+        console.warn('Dashboard summary error', e);
+        return null;
+      }),
+      apiRequest('GET', '/api/expenses/profit-summary').catch(e => {
+        console.warn('Expense profit summary error', e);
+        return null;
+      }),
+      apiRequest('GET', '/api/invoices').catch(e => {
+        console.warn('Invoices list error', e);
+        return null;
+      })
+    ]);
+
     if (!data) return;
 
     const totalRev = data.totalRevenue || 0;
@@ -97,18 +119,13 @@ async function loadDashboardData() {
     }
 
     // Fetch Profit Summary (Collected - Expenses)
-    try {
-      const profitData = await apiRequest('GET', '/api/expenses/profit-summary');
-      if (profitData) {
-        if (document.getElementById('health-expenses-text')) {
-          document.getElementById('health-expenses-text').textContent = formatCurrency(profitData.totalExpenses || 0);
-        }
-        if (document.getElementById('health-net-profit')) {
-          document.getElementById('health-net-profit').textContent = formatCurrency(profitData.netProfit || 0);
-        }
+    if (profitData) {
+      if (document.getElementById('health-expenses-text')) {
+        document.getElementById('health-expenses-text').textContent = formatCurrency(profitData.totalExpenses || 0);
       }
-    } catch (e) {
-      console.warn('Could not load expense profit data', e);
+      if (document.getElementById('health-net-profit')) {
+        document.getElementById('health-net-profit').textContent = formatCurrency(profitData.netProfit || 0);
+      }
     }
 
     // Overdue Alert Notice
@@ -126,13 +143,10 @@ async function loadDashboardData() {
       renderInvozaStatGraphics({ paidRate: paidRate || 0 });
     }
 
-    // 4. Fetch All Invoices for Real Cash Flow & Receivables Pipeline Breakdown
-    let allInvoices = [];
-    try {
-      allInvoices = await apiRequest('GET', '/api/invoices') || [];
-    } catch (e) {
-      allInvoices = data.recentInvoices || [];
-    }
+    // 4. Render Cash Flow & Receivables Pipeline Breakdown
+    const allInvoices = (Array.isArray(fetchedInvoices) && fetchedInvoices.length > 0)
+        ? fetchedInvoices
+        : (data.recentInvoices || []);
 
     renderCashFlowAndPipeline(allInvoices, totalRev, totalPaid);
 

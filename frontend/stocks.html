@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low Stock Radar &amp; Reorders | InvoiceMate</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        .radar-card-critical {
+            background: linear-gradient(135deg, rgba(254, 242, 242, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-left: 5px solid #ef4444;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .radar-card-critical:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.12);
+        }
+        .radar-card-warning {
+            background: linear-gradient(135deg, rgba(254, 243, 199, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-left: 5px solid #f59e0b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .radar-card-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.12);
+        }
+        .radar-card-healthy {
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-left: 5px solid #10b981;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .radar-card-healthy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.12);
+        }
+
+        .stock-progress-track {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .stock-progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+        .stock-progress-fill.danger { background: #ef4444; }
+        .stock-progress-fill.warning { background: #f59e0b; }
+        .stock-progress-fill.success { background: #10b981; }
+
+        .radar-filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .radar-tab-btn {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .radar-tab-btn:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+        .radar-tab-btn.active {
+            background: #205646;
+            color: #fff;
+            border-color: #205646;
+        }
+        .radar-tab-badge {
+            background: rgba(0,0,0,0.08);
+            padding: 1px 6px;
+            border-radius: 999px;
+            font-size: 11px;
+        }
+        .radar-tab-btn.active .radar-tab-badge {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="invoza-theme">
+
+    <div class="invoza-app-window">
+        <!-- Sidebar Navigation -->
+        <aside class="invoza-sidebar">
+            <a href="dashboard.html" class="invoza-brand">
+                <span class="invoza-brand-wordmark">
+                    <span class="brand-invoice">Invoice</span><span class="brand-mate">Mate</span><span class="brand-dot">.</span>
+                </span>
+            </a>
+
+            <div class="invoza-search-box">
+                <span class="invoza-search-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
+                <input type="text" placeholder="Search..." id="sidebar-search-input">
+                <span class="invoza-search-kbd">/</span>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Main Menu</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="dashboard.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span>Dashboard</span></a></li>
+                    <li class="invoza-nav-item"><a href="invoices.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span><span>Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="estimates.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg></span><span>Estimates</span></a></li>
+                    <li class="invoza-nav-item"><a href="payments.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></span><span>Payments</span></a></li>
+                    <li class="invoza-nav-item"><a href="expenses.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path><line x1="8" y1="9" x2="16" y2="9"></line><line x1="8" y1="13" x2="14" y2="13"></line></svg></span><span>Expenses</span></a></li>
+                    <li class="invoza-nav-item"><a href="customer-statement.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></span><span>Customer Statements</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Stocks &amp; Inventory</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="products.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span><span>Product Catalog</span></a></li>
+                    <li class="invoza-nav-item active"><a href="stocks.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span><span>Low Stock Radar</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Sales &amp; Customers</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="recurring.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></span><span>Recurring Invoices</span></a></li>
+                    <li class="invoza-nav-item"><a href="customers.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Clients</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-nav-group">
+                <div class="invoza-nav-header">Insights &amp; System</div>
+                <ul class="invoza-nav-list">
+                    <li class="invoza-nav-item"><a href="reports.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>GST &amp; Reports</span></a></li>
+                    <li class="invoza-nav-item"><a href="settings.html"><span class="invoza-nav-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span>Settings</span></a></li>
+                </ul>
+            </div>
+
+            <div class="invoza-sidebar-footer">
+                <a href="settings.html" class="invoza-user-pill">
+                    <div class="invoza-user-avatar" id="sidebar-user-avatar">U</div>
+                    <div class="invoza-user-meta">
+                        <span class="name" id="sidebar-user-name">Loading...</span>
+                        <span class="sub">View Profile</span>
+                    </div>
+                </a>
+                <button id="logout-link" class="invoza-btn-signout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="invoza-main-area">
+            <header class="invoza-top-header">
+                <div class="invoza-breadcrumb">
+                    <span>Dashboard</span> &rsaquo; <span>Stocks</span> &rsaquo; <span class="current">Low Stock Radar</span>
+                </div>
+                <div class="invoza-header-tools">
+                    <a href="products.html" class="btn btn-secondary btn-sm" style="display:flex;align-items:center;gap:6px;">
+                        <span>📦 View Full Catalog</span>
+                    </a>
+                    <a href="settings.html" class="invoza-circle-btn" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </a>
+                    <div class="invoza-user-avatar" id="header-user-avatar" style="width:36px; height:36px;">U</div>
+                </div>
+            </header>
+
+            <div class="invoza-page-content">
+                <!-- Page Title -->
+                <div class="invoza-page-header">
+                    <div>
+                        <h1>Low Stock Radar &amp; Reorders</h1>
+                        <p>Live inventory depletion monitor with automated reorder calculations and 1-click vendor restock dispatch.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="export-radar-btn" class="btn btn-secondary">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Export Radar CSV</span>
+                        </button>
+                        <a href="products.html" class="btn btn-primary">+ Add New Item</a>
+                    </div>
+                </div>
+
+                <!-- Priority Radar Cards -->
+                <div class="summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 24px;">
+                    <div class="summary-card radar-card-critical" id="card-filter-critical" title="Click to filter Out of Stock items">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="label" style="color: #dc2626; font-weight: 700; display:flex; align-items:center; gap:6px;">
+                                <span>🚨</span> Critical: Out of Stock
+                            </div>
+                            <span class="badge badge-danger" id="radar-count-critical-badge">0 Items</span>
+                        </div>
+                        <div class="value" id="radar-count-critical" style="color: #b91c1c; margin: 10px 0 4px 0;">0</div>
+                        <div style="font-size: 12px; color: #7f1d1d;" id="radar-sub-critical">Immediate restock required</div>
+                    </div>
+
+                    <div class="summary-card radar-card-warning" id="card-filter-warning" title="Click to filter Low Stock items">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="label" style="color: #b45309; font-weight: 700; display:flex; align-items:center; gap:6px;">
+                                <span>⚠️</span> Reorder Soon (Below Threshold)
+                            </div>
+                            <span class="badge badge-warning" id="radar-count-warning-badge">0 Items</span>
+                        </div>
+                        <div class="value" id="radar-count-warning" style="color: #d97706; margin: 10px 0 4px 0;">0</div>
+                        <div style="font-size: 12px; color: #92400e;" id="radar-sub-warning">Stock nearing threshold</div>
+                    </div>
+
+                    <div class="summary-card radar-card-healthy" id="card-filter-healthy" title="Click to filter Healthy items">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="label" style="color: #047857; font-weight: 700; display:flex; align-items:center; gap:6px;">
+                                <span>🛡️</span> Healthy Stock
+                            </div>
+                            <span class="badge badge-success" id="radar-count-healthy-badge">0 Items</span>
+                        </div>
+                        <div class="value" id="radar-count-healthy" style="color: #059669; margin: 10px 0 4px 0;">0</div>
+                        <div style="font-size: 12px; color: #065f46;" id="radar-sub-healthy">Stock levels sufficient</div>
+                    </div>
+                </div>
+
+                <!-- Radar Filter Tabs & Search Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                    <div class="radar-filter-tabs">
+                        <button class="radar-tab-btn active" data-tab="ATTENTION">
+                            <span>⚡ Attention Needed</span>
+                            <span class="radar-tab-badge" id="tab-count-attention">0</span>
+                        </button>
+                        <button class="radar-tab-btn" data-tab="OUT_OF_STOCK">
+                            <span>🔴 Out of Stock</span>
+                            <span class="radar-tab-badge" id="tab-count-critical">0</span>
+                        </button>
+                        <button class="radar-tab-btn" data-tab="LOW_STOCK">
+                            <span>🟡 Low Stock</span>
+                            <span class="radar-tab-badge" id="tab-count-warning">0</span>
+                        </button>
+                        <button class="radar-tab-btn" data-tab="HEALTHY">
+                            <span>🟢 Healthy</span>
+                            <span class="radar-tab-badge" id="tab-count-healthy">0</span>
+                        </button>
+                        <button class="radar-tab-btn" data-tab="ALL">
+                            <span>All Inventory</span>
+                            <span class="radar-tab-badge" id="tab-count-all">0</span>
+                        </button>
+                    </div>
+
+                    <div style="flex: 1; max-width: 320px; min-width: 200px;">
+                        <input type="text" id="radar-search" placeholder="Search by item name or SKU..." style="width: 100%; height: 38px; border-radius: 8px; border: 1px solid var(--color-border); padding: 0 12px; font-size: 13px;">
+                    </div>
+                </div>
+
+                <!-- Radar Table Card -->
+                <div class="invoza-card" style="padding: 0; overflow: hidden;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item &amp; SKU</th>
+                                    <th>HSN / Unit</th>
+                                    <th>Current Level</th>
+                                    <th>Status</th>
+                                    <th>Suggested Reorder</th>
+                                    <th>Est. Restock Cost</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="radar-table-body">
+                                <tr><td colspan="7" style="text-align:center; padding: 40px; color: #94a3b8;">Loading stock radar data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- 1-Click Restock & Vendor PO Modal -->
+    <div id="restock-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 540px;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="restock-modal-title">⚡ 1-Click Restock Order</h3>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Generate a Purchase Order &amp; dispatch via WhatsApp directly to vendor.</p>
+                </div>
+                <button class="modal-close" id="close-restock-modal">&times;</button>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 700; color: #0f172a;" id="modal-restock-prod-name">Product Name</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">SKU: <span id="modal-restock-sku" style="font-family: monospace;">-</span> &bull; Current Stock: <strong id="modal-restock-current-stock" style="color: #dc2626;">0</strong></div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 11px; color: #64748b;">Threshold</span>
+                    <div style="font-weight: 700; color: #0f172a;" id="modal-restock-threshold">5 units</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="restock-qty">Reorder Quantity *</label>
+                    <input type="number" id="restock-qty" min="1" step="1" value="20" required>
+                    <small style="color: #64748b; font-size: 11px;">Recommended to recover safe stock buffer</small>
+                </div>
+                <div class="form-group">
+                    <label for="restock-target-date">Expected Delivery Date</label>
+                    <input type="date" id="restock-target-date">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="restock-vendor-name">Supplier / Vendor Name</label>
+                    <input type="text" id="restock-vendor-name" placeholder="e.g. Apex Wholesalers Ltd">
+                </div>
+                <div class="form-group">
+                    <label for="restock-vendor-phone">Vendor WhatsApp / Mobile</label>
+                    <input type="tel" id="restock-vendor-phone" placeholder="e.g. 9876543210">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="restock-notes">Order Notes / Instructions</label>
+                <textarea id="restock-notes" rows="2" placeholder="Urgent order. Please enclose bill with delivery."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 12px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" id="btn-quick-receive-stock" title="If items already arrived at warehouse, click to add straight to stock">
+                    ✓ Receive Stock Now (+)
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" id="btn-print-po" title="Print formal Purchase Order sheet">
+                        📄 Print PO
+                    </button>
+                    <button type="button" class="btn" id="btn-dispatch-whatsapp" style="background: #25d366; color: #fff; font-weight: 600; display:flex; align-items:center; gap:6px;">
+                        <span>💬 Send WhatsApp PO</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden PO printable container -->
+    <div id="printable-po-container" style="display: none;"></div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/stocks.js"></script>
+</body>
+</html>

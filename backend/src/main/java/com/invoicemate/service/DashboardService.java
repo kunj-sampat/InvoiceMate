@@ -1,51 +1,92 @@
 package com.invoicemate.service;
 
 import com.invoicemate.dto.DashboardResponse;
+import com.invoicemate.dto.InvoiceResponse;
 import com.invoicemate.dto.RevenueDataPoint;
+import com.invoicemate.model.Customer;
 import com.invoicemate.model.Invoice;
+import com.invoicemate.repository.CustomerRepository;
 import com.invoicemate.repository.InvoiceRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
 
     private final InvoiceRepository invoiceRepository;
-    private final InvoiceService invoiceService;
+    private final CustomerRepository customerRepository;
 
-    public DashboardService(InvoiceRepository invoiceRepository, InvoiceService invoiceService) {
+    public DashboardService(InvoiceRepository invoiceRepository, CustomerRepository customerRepository) {
         this.invoiceRepository = invoiceRepository;
-        this.invoiceService = invoiceService;
+        this.customerRepository = customerRepository;
     }
 
     public DashboardResponse getSummary(Long userId) {
         List<Invoice> all = invoiceRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        all.forEach(i -> {
+
+        List<Invoice> dirty = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (Invoice i : all) {
             if (!i.isDraft() && !i.isEstimate() && !"PAID".equalsIgnoreCase(i.getStatus())
-                    && i.getDueDate() != null && i.getDueDate().isBefore(LocalDate.now())
+                    && i.getDueDate() != null && i.getDueDate().isBefore(today)
                     && !"OVERDUE".equalsIgnoreCase(i.getStatus())) {
                 i.setStatus("OVERDUE");
-                invoiceRepository.save(i);
+                dirty.add(i);
             }
-        });
+        }
+        if (!dirty.isEmpty()) {
+            invoiceRepository.saveAll(dirty);
+        }
+
+        double totalRevenue = 0;
+        double totalPaid = 0;
+        long totalInvoices = 0;
+        long paidCount = 0;
+        long pendingCount = 0;
+        long overdueCount = 0;
+
+        for (Invoice i : all) {
+            if (!i.isEstimate() && !i.isDraft()) {
+                totalRevenue += i.getGrandTotal();
+                totalPaid += i.getAmountPaid();
+                totalInvoices++;
+
+                String st = i.getStatus() != null ? i.getStatus().toUpperCase() : "";
+                if ("PAID".equals(st)) {
+                    paidCount++;
+                } else if ("OVERDUE".equals(st)) {
+                    overdueCount++;
+                } else if ("PENDING".equals(st) || "PARTIALLY_PAID".equals(st)) {
+                    pendingCount++;
+                }
+            }
+        }
 
         DashboardResponse res = new DashboardResponse();
-        res.setTotalRevenue(invoiceRepository.sumGrandTotalByUserId(userId));
-        res.setTotalPaid(invoiceRepository.sumAmountPaidByUserId(userId));
-        res.setTotalOutstanding(res.getTotalRevenue() - res.getTotalPaid());
-        
-        res.setTotalInvoices(invoiceRepository.countByUserIdAndIsEstimateFalse(userId));
-        res.setPaidCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PAID"));
-        res.setPendingCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PENDING")
-                + invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "PARTIALLY_PAID"));
-        res.setOverdueCount(invoiceRepository.countByUserIdAndStatusAndIsEstimateFalse(userId, "OVERDUE"));
-        
-        res.setRecentInvoices(invoiceRepository.findTop10ByUserIdAndIsEstimateFalseOrderByCreatedAtDesc(userId).stream()
-                .map(i -> invoiceService.getInvoice(userId, i.getId())).collect(Collectors.toList()));
+        res.setTotalRevenue(totalRevenue);
+        res.setTotalPaid(totalPaid);
+        res.setTotalOutstanding(Math.max(0, totalRevenue - totalPaid));
+        res.setTotalInvoices(totalInvoices);
+        res.setPaidCount(paidCount);
+        res.setPendingCount(pendingCount);
+        res.setOverdueCount(overdueCount);
+
+        Map<Long, Customer> customerMap = customerRepository.findByUserId(userId).stream()
+                .filter(c -> c.getId() != null)
+                .collect(Collectors.toMap(Customer::getId, c -> c, (a, b) -> a));
+
+        List<InvoiceResponse> recent = all.stream()
+                .filter(i -> !i.isEstimate())
+                .limit(10)
+                .map(i -> InvoiceResponse.fromInvoice(i, i.getCustomerId() != null ? customerMap.get(i.getCustomerId()) : null, null))
+                .collect(Collectors.toList());
+
+        res.setRecentInvoices(recent);
         return res;
     }
 

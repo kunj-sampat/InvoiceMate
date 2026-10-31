@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @Service
 public class ProductService {
@@ -32,6 +35,33 @@ public class ProductService {
 
     public List<Product> searchProducts(Long userId, String query) {
         return productRepository.findByUserIdAndNameContainingIgnoreCase(userId, query);
+    }
+
+    @Transactional
+    public List<Product> bulkUpsertProducts(Long userId, List<ProductRequest> requests) {
+        List<Product> existing = productRepository.findByUserId(userId);
+        Map<String, Product> skuMap = new HashMap<>();
+        for (Product p : existing) {
+            if (p.getSku() != null && !p.getSku().trim().isEmpty()) {
+                skuMap.put(p.getSku().trim().toLowerCase(), p);
+            }
+        }
+
+        List<Product> toSave = new ArrayList<>();
+        for (ProductRequest req : requests) {
+            if (req.getName() == null || req.getName().trim().isEmpty()) continue;
+            Product p;
+            String reqSku = req.getSku() != null ? req.getSku().trim().toLowerCase() : null;
+            if (reqSku != null && skuMap.containsKey(reqSku)) {
+                p = skuMap.get(reqSku);
+            } else {
+                p = new Product();
+                p.setUserId(userId);
+            }
+            applyFields(p, req);
+            toSave.add(p);
+        }
+        return productRepository.saveAll(toSave);
     }
 
     @Transactional

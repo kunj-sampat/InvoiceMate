@@ -154,6 +154,7 @@ public class ExpenseService {
         // 6. Monthly Breakdown for Last 6 Months (Revenue vs Expenses vs Profit)
         LocalDate today = LocalDate.now();
         List<ProfitSummaryDto.MonthlyPoint> monthlyList = new ArrayList<>();
+        List<com.invoicemate.model.Payment> allPayments = paymentRepository.findByUserId(userId);
 
         for (int i = 5; i >= 0; i--) {
             LocalDate mStart = today.minusMonths(i).withDayOfMonth(1);
@@ -166,15 +167,19 @@ public class ExpenseService {
                     .filter(inv -> inv.getInvoiceDate() != null && !inv.getInvoiceDate().isBefore(mStart) && !inv.getInvoiceDate().isAfter(mEnd))
                     .mapToDouble(Invoice::getGrandTotal).sum();
 
-            // Monthly Collected
-            double mPaymentSum = paymentRepository.sumAmountByUserIdAndPaymentDateBetween(userId, mStart, mEnd);
+            // Monthly Collected (from preloaded payments and invoices)
+            double mPaymentSum = allPayments.stream()
+                    .filter(p -> p.getPaymentDate() != null && !p.getPaymentDate().isBefore(mStart) && !p.getPaymentDate().isAfter(mEnd))
+                    .mapToDouble(com.invoicemate.model.Payment::getAmount).sum();
             double mInvoicePaid = validInvoices.stream()
                     .filter(inv -> inv.getInvoiceDate() != null && !inv.getInvoiceDate().isBefore(mStart) && !inv.getInvoiceDate().isAfter(mEnd))
                     .mapToDouble(Invoice::getAmountPaid).sum();
             double mCollected = Math.max(mPaymentSum, mInvoicePaid);
 
-            // Monthly Expenses
-            double mExpenses = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(userId, mStart, mEnd);
+            // Monthly Expenses (from preloaded expenses list)
+            double mExpenses = expenses.stream()
+                    .filter(e -> e.getExpenseDate() != null && !e.getExpenseDate().isBefore(mStart) && !e.getExpenseDate().isAfter(mEnd))
+                    .mapToDouble(Expense::getAmount).sum();
 
             // Monthly Profit = Collected - Expenses
             double mProfit = mCollected - mExpenses;

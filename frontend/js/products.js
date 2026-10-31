@@ -1,5 +1,15 @@
 // js/products.js — Product & Service Catalog with Inventory Tracking
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 let debounceTimer;
 let editingProductId = null;
 let allProducts = [];
@@ -19,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filter-stock')?.addEventListener('change', renderFilteredProducts);
 
   document.getElementById('add-product-btn')?.addEventListener('click', () => openProductModal(null));
+  setupCsvAndBarcodeListeners();
   document.getElementById('save-product-btn')?.addEventListener('click', saveProduct);
   document.getElementById('cancel-product-btn')?.addEventListener('click', closeProductModal);
   document.getElementById('close-product-modal')?.addEventListener('click', closeProductModal);
@@ -45,6 +56,7 @@ async function loadProducts() {
   try {
     const data = await apiRequest('GET', '/api/products');
     allProducts = Array.isArray(data) ? data : [];
+    window.allProducts = allProducts;
     updateCatalogSummary(allProducts);
     renderFilteredProducts();
   } catch (error) {
@@ -183,9 +195,10 @@ function renderFilteredProducts() {
       <td>${statusBadge}</td>
       <td>${stockValueCell}</td>
       <td>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-sm btn-secondary" onclick="editProduct(${p.id})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+        <div style="display:flex;gap:5px;justify-content:flex-end;white-space:nowrap;">
+          <button class="btn btn-sm btn-secondary" onclick="openBarcodeModalById(${p.id})" title="Print Shelf Label & Barcode" style="padding: 3px 8px; font-size: 11.5px;">🏷️ Barcode</button>
+          <button class="btn btn-sm btn-secondary" onclick="editProduct(${p.id})" title="Edit Details" style="padding: 3px 8px; font-size: 11.5px;">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})" title="Delete" style="padding: 3px 7px; font-size: 11.5px;">&times;</button>
         </div>
       </td>
     `;
@@ -310,3 +323,355 @@ async function deleteProduct(id) {
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.quickAdjustStock = quickAdjustStock;
+
+
+// ==========================================
+// CSV IMPORT & EXPORT + BARCODE EXTENSIONS
+// ==========================================
+
+let parsedCsvItems = [];
+
+function setupCsvAndBarcodeListeners() {
+  document.getElementById('export-products-csv-btn')?.addEventListener('click', exportProductsCSV);
+  document.getElementById('import-products-csv-btn')?.addEventListener('click', openImportModal);
+  document.getElementById('batch-barcode-btn')?.addEventListener('click', batchPrintBarcodes);
+
+  // Barcode modal close
+  document.getElementById('close-barcode-modal')?.addEventListener('click', closeBarcodeModal);
+  document.getElementById('cancel-barcode-btn')?.addEventListener('click', closeBarcodeModal);
+
+  // Import modal close
+  document.getElementById('close-import-modal')?.addEventListener('click', closeImportModal);
+  document.getElementById('cancel-import-btn')?.addEventListener('click', closeImportModal);
+  document.getElementById('download-sample-csv-btn')?.addEventListener('click', downloadSampleProductCSV);
+  document.getElementById('btn-clear-csv')?.addEventListener('click', clearCsvSelection);
+  document.getElementById('confirm-import-btn')?.addEventListener('click', executeCsvImport);
+
+  // Drag & drop zone
+  const dropzone = document.getElementById('csv-dropzone');
+  const fileInput = document.getElementById('csv-file-input');
+
+  if (dropzone && fileInput) {
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleCsvFile(file);
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#205646';
+      dropzone.style.background = '#f0fdf4';
+    });
+
+    ['dragleave', 'dragend'].forEach(evt => {
+      dropzone.addEventListener(evt, () => {
+        dropzone.style.borderColor = '#cbd5e1';
+        dropzone.style.background = '#f8fafc';
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#cbd5e1';
+      dropzone.style.background = '#f8fafc';
+      const file = e.dataTransfer.files[0];
+      if (file) handleCsvFile(file);
+    });
+  }
+}
+
+function closeBarcodeModal() {
+  const modal = document.getElementById('barcode-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
+}
+
+function openBarcodeModalById(idOrProduct) {
+  let p = null;
+  if (typeof idOrProduct === 'object' && idOrProduct !== null) {
+    p = idOrProduct;
+  } else {
+    const list = (typeof allProducts !== 'undefined' && Array.isArray(allProducts) && allProducts.length) ? allProducts : (window.allProducts || []);
+    p = list.find(x => String(x.id) === String(idOrProduct) || x.sku === idOrProduct);
+  }
+  if (!p) {
+    console.warn('Product not found for barcode modal:', idOrProduct);
+    if (typeof showToast === 'function') showToast('Product not found for barcode generation', 'warning');
+    return;
+  }
+  if (typeof window.openBarcodeModal === 'function') {
+    window.openBarcodeModal(p);
+  } else if (typeof openBarcodeModal === 'function') {
+    openBarcodeModal(p);
+  }
+}
+
+function batchPrintBarcodes() {
+  if (!allProducts || allProducts.length === 0) {
+    if (typeof showToast === 'function') showToast('No items in catalog to print', 'warning');
+    return;
+  }
+  const physicalOnly = allProducts.filter(p => (p.category || 'PRODUCT') !== 'SERVICE');
+  if (physicalOnly.length === 0) {
+    if (typeof showToast === 'function') showToast('No physical products with barcodes to print', 'warning');
+    return;
+  }
+  if (typeof executePrintLabels === 'function') {
+    executePrintLabels(physicalOnly, 'shelf');
+  }
+}
+
+function exportProductsCSV() {
+  if (!allProducts || allProducts.length === 0) {
+    if (typeof showToast === 'function') showToast('No catalog items to export', 'warning');
+    return;
+  }
+
+  const headers = ['Name', 'SKU', 'Category', 'Unit', 'HSN/SAC', 'Price', 'StockQuantity', 'LowStockThreshold', 'GST%', 'Description'];
+  const rows = allProducts.map(p => [
+    `"${(p.name || '').replace(/"/g, '""')}"`,
+    `"${p.sku || ''}"`,
+    `"${p.category || 'PRODUCT'}"`,
+    `"${p.unit || 'pcs'}"`,
+    `"${p.hsnSacCode || ''}"`,
+    (p.price || 0).toFixed(2),
+    p.stockQuantity ?? 0,
+    p.lowStockThreshold ?? 5,
+    p.defaultGstPercent ?? 18,
+    `"${(p.description || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `InvoiceMate_ProductCatalog_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  if (typeof showToast === 'function') showToast('Catalog exported successfully!', 'success');
+}
+
+function downloadSampleProductCSV() {
+  const sampleData = [
+    'Name,SKU,Category,Unit,HSN/SAC,Price,StockQuantity,LowStockThreshold,GST%,Description',
+    '"Premium Ball Pen","PEN-101","PRODUCT","pcs","960810",25.00,100,15,18,"Smooth flowing gel ink ball pen"',
+    '"Water Bottle 1L","BOT-202","PRODUCT","pcs","392330",150.00,45,10,18,"BPA-free durable plastic bottle"',
+    '"Website Maintenance","SRV-303","SERVICE","hrs","998311",1200.00,0,0,18,"Monthly web uptime & security audit"'
+  ].join('\n');
+
+  const blob = new Blob([sampleData], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'InvoiceMate_Products_Sample_Template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function openImportModal() {
+  clearCsvSelection();
+  document.getElementById('import-csv-modal')?.classList.add('show');
+}
+
+function closeImportModal() {
+  document.getElementById('import-csv-modal')?.classList.remove('show');
+  clearCsvSelection();
+}
+
+function clearCsvSelection() {
+  parsedCsvItems = [];
+  const fileInput = document.getElementById('csv-file-input');
+  if (fileInput) fileInput.value = '';
+  const previewBox = document.getElementById('csv-preview-container');
+  if (previewBox) previewBox.style.display = 'none';
+  const confirmBtn = document.getElementById('confirm-import-btn');
+  if (confirmBtn) confirmBtn.disabled = true;
+}
+
+function handleCsvFile(file) {
+  if (!file.name.endsWith('.csv')) {
+    if (typeof showToast === 'function') showToast('Please select a valid .csv file', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    parseAndPreviewCSV(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseAndPreviewCSV(text) {
+  const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+  if (lines.length < 2) {
+    if (typeof showToast === 'function') showToast('CSV file is empty or missing data rows', 'error');
+    return;
+  }
+
+  // Parse header
+  const headers = splitCsvRow(lines[0]).map(h => h.trim().toLowerCase());
+  const nameIdx = headers.findIndex(h => h.includes('name'));
+  const skuIdx = headers.findIndex(h => h.includes('sku') || h.includes('code'));
+  const catIdx = headers.findIndex(h => h.includes('cat') || h.includes('type'));
+  const unitIdx = headers.findIndex(h => h.includes('unit'));
+  const hsnIdx = headers.findIndex(h => h.includes('hsn') || h.includes('sac'));
+  const priceIdx = headers.findIndex(h => h.includes('price') || h.includes('rate') || h.includes('mrp'));
+  const stockIdx = headers.findIndex(h => h.includes('stock') || h.includes('qty'));
+  const threshIdx = headers.findIndex(h => h.includes('thresh') || h.includes('alert') || h.includes('min'));
+  const gstIdx = headers.findIndex(h => h.includes('gst'));
+  const descIdx = headers.findIndex(h => h.includes('desc'));
+
+  if (nameIdx === -1 || priceIdx === -1) {
+    if (typeof showToast === 'function') showToast('CSV must include "Name" and "Price" columns', 'error');
+    return;
+  }
+
+  const existingSkus = new Set(allProducts.map(p => (p.sku || '').trim().toLowerCase()));
+  parsedCsvItems = [];
+  let newCount = 0;
+  let updateCount = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCsvRow(lines[i]);
+    if (cols.length === 0 || !cols[nameIdx] || !cols[nameIdx].trim()) continue;
+
+    const name = cols[nameIdx].trim();
+    const price = parseFloat(cols[priceIdx]) || 0;
+    const sku = skuIdx !== -1 && cols[skuIdx] ? cols[skuIdx].trim() : '';
+    const category = catIdx !== -1 && cols[catIdx] ? cols[catIdx].trim().toUpperCase() : 'PRODUCT';
+    const unit = unitIdx !== -1 && cols[unitIdx] ? cols[unitIdx].trim() : (category === 'SERVICE' ? 'hrs' : 'pcs');
+    const hsn = hsnIdx !== -1 && cols[hsnIdx] ? cols[hsnIdx].trim() : '';
+    const stock = stockIdx !== -1 ? (parseInt(cols[stockIdx], 10) || 0) : 10;
+    const threshold = threshIdx !== -1 ? (parseInt(cols[threshIdx], 10) || 5) : 5;
+    const gst = gstIdx !== -1 ? (parseFloat(cols[gstIdx]) || 18) : 18;
+    const desc = descIdx !== -1 && cols[descIdx] ? cols[descIdx].trim() : '';
+
+    const isExisting = sku && existingSkus.has(sku.toLowerCase());
+    if (isExisting) updateCount++; else newCount++;
+
+    parsedCsvItems.push({
+      name,
+      sku: sku || `PRD-${String(allProducts.length + parsedCsvItems.length + 1).padStart(3, '0')}`,
+      category: category === 'SERVICE' ? 'SERVICE' : 'PRODUCT',
+      unit,
+      hsnSacCode: hsn,
+      price,
+      stockQuantity: stock,
+      lowStockThreshold: threshold,
+      defaultGstPercent: gst,
+      description: desc,
+      isExisting
+    });
+  }
+
+  if (parsedCsvItems.length === 0) {
+    if (typeof showToast === 'function') showToast('No valid product rows found in CSV', 'error');
+    return;
+  }
+
+  // Render preview table
+  const tbody = document.getElementById('csv-preview-tbody');
+  if (tbody) {
+    tbody.innerHTML = parsedCsvItems.slice(0, 50).map(item => `
+      <tr>
+        <td style="padding: 6px 10px; font-weight: 600;">${escapeHtml(item.name)}</td>
+        <td style="padding: 6px 10px; font-family: monospace;">${escapeHtml(item.sku)}</td>
+        <td style="padding: 6px 10px;"><span class="badge ${item.category === 'SERVICE' ? 'badge-purple' : 'badge-secondary'}" style="font-size: 10px;">${item.category}</span></td>
+        <td style="padding: 6px 10px; text-align: right; font-weight: 700;">₹${item.price.toFixed(2)}</td>
+        <td style="padding: 6px 10px; text-align: center;">${item.stockQuantity}</td>
+        <td style="padding: 6px 10px; text-align: center;">
+          <span class="badge ${item.isExisting ? 'badge-info' : 'badge-success'}" style="font-size: 10px;">
+            ${item.isExisting ? 'Update' : 'New'}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  const summaryEl = document.getElementById('csv-preview-summary');
+  if (summaryEl) {
+    summaryEl.textContent = `Ready to import ${parsedCsvItems.length} items (${newCount} new, ${updateCount} updates by SKU)`;
+  }
+
+  document.getElementById('csv-preview-container').style.display = 'block';
+  const confirmBtn = document.getElementById('confirm-import-btn');
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = `<span>Import ${parsedCsvItems.length} Items</span>`;
+  }
+}
+
+function splitCsvRow(row) {
+  const result = [];
+  let insideQuote = false;
+  let entry = '';
+  for (let i = 0; i < row.length; i++) {
+    const c = row[i];
+    if (c === '"') {
+      if (insideQuote && row[i + 1] === '"') {
+        entry += '"';
+        i++;
+      } else {
+        insideQuote = !insideQuote;
+      }
+    } else if (c === ',' && !insideQuote) {
+      result.push(entry.trim());
+      entry = '';
+    } else {
+      entry += c;
+    }
+  }
+  result.push(entry.trim());
+  return result;
+}
+
+async function executeCsvImport() {
+  if (!parsedCsvItems || parsedCsvItems.length === 0) return;
+  const btn = document.getElementById('confirm-import-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Importing...</span>';
+  }
+
+  try {
+    const payload = parsedCsvItems.map(p => ({
+      name: p.name,
+      sku: p.sku,
+      category: p.category,
+      unit: p.unit,
+      hsnSacCode: p.hsnSacCode,
+      price: p.price,
+      stockQuantity: p.stockQuantity,
+      lowStockThreshold: p.lowStockThreshold,
+      defaultGstPercent: p.defaultGstPercent,
+      description: p.description,
+      trackInventory: p.category !== 'SERVICE'
+    }));
+
+    await apiRequest('POST', '/api/products/bulk', payload);
+    if (typeof showToast === 'function') {
+      showToast(`Successfully imported ${payload.length} products!`, 'success');
+    }
+    closeImportModal();
+    await loadProducts();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Failed to import items. Please check connection.', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Import Items</span>';
+    }
+  }
+}
+
+window.openBarcodeModalById = openBarcodeModalById;
+window.batchPrintBarcodes = batchPrintBarcodes;
+
+window.closeBarcodeModal = closeBarcodeModal;

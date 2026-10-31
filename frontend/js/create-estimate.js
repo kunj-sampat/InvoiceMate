@@ -209,6 +209,7 @@ async function saveEstimate(isDraft) {
 
   const payload = {
     customerId: parseInt(customerId),
+    invoiceNumber: document.getElementById('estimate-number')?.value?.trim() || null,
     businessName: document.getElementById('est-biz-name')?.value || null,
     invoiceDate: document.getElementById('estimate-date').value,
     dueDate: document.getElementById('valid-until').value,
