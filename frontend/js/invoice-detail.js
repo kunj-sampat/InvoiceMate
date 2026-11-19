@@ -234,7 +234,7 @@ function setupEventListeners(id) {
       const url = `${window.location.origin}/pay.html?token=${encodeURIComponent(token)}`;
       navigator.clipboard.writeText(url).then(() => {
         if (typeof showToast === 'function') {
-          showToast('🔗 Public client link copied to clipboard!', 'success');
+          showToast('Public client link copied to clipboard!', 'success');
         } else {
           alert('Client link: ' + url);
         }
@@ -357,9 +357,29 @@ function setupEventListeners(id) {
   const genReminderBtn = document.getElementById('reminder-btn') || document.getElementById('generate-reminder-btn');
   function generateReminderText() {
     if (!currentInvoice) return '';
-    const remaining = Math.max(0, (currentInvoice.grandTotal || 0) - (currentInvoice.paidAmount || 0));
-    const bizName = currentInvoice.businessName || localStorage.getItem('businessName') || 'InvoiceMate';
-    const text = `Dear ${currentInvoice.customerName || 'Client'},\n\nThis is a friendly reminder that invoice #${currentInvoice.invoiceNumber} for ${formatCurrency(remaining)} was due on ${formatDate(currentInvoice.dueDate)}.\n\nPlease let us know once the payment is initiated. You can also scan the UPI QR code on the invoice to pay directly.\n\nThank you!\n${bizName}`;
+    let text = '';
+    if (typeof buildShareMessage === 'function') {
+      text = buildShareMessage(currentInvoice, 'reminder');
+    } else {
+      const remaining = Math.max(0, (currentInvoice.grandTotal || 0) - (currentInvoice.paidAmount || 0));
+      const bizName = currentInvoice.businessName || localStorage.getItem('businessName') || 'InvoiceMate';
+      const custName = currentInvoice.customerName || 'Valued Client';
+      const num = currentInvoice.invoiceNumber || 'INV';
+      const dueDate = formatDate(currentInvoice.dueDate) || 'Due Date';
+      const amount = formatCurrency(remaining);
+      const token = currentInvoice.shareToken || currentInvoice.id;
+      const link = token ? `${window.location.origin}/pay.html?token=${token}` : '';
+      text = `*PAYMENT REMINDER*\n\n` +
+        `Dear *${custName}*,\n\n` +
+        `This is a courteous reminder that Invoice *#${num}* from *${bizName}* was due on *${dueDate}*.\n\n` +
+        `- *Invoice Number:* #${num}\n` +
+        `- *Due Date:* ${dueDate}\n` +
+        `- *Outstanding Balance:* ${amount}\n\n` +
+        (link ? `View or Pay Invoice Online:\n${link}\n\n` : '') +
+        `Kindly arrange for payment at your earliest convenience. If you have already settled this invoice, please disregard this notice.\n\n` +
+        `Thank you for your prompt attention.\n\n` +
+        `Sincerely,\n*${bizName}*`;
+    }
     const ta = document.getElementById('reminder-text');
     if (ta) ta.value = text;
     return text;
@@ -368,7 +388,7 @@ function setupEventListeners(id) {
   if (genReminderBtn) {
     genReminderBtn.addEventListener('click', () => {
       generateReminderText();
-      if (typeof showToast === 'function') showToast('Friendly reminder generated', 'info');
+      if (typeof showToast === 'function') showToast('Payment reminder generated', 'info');
     });
   }
 

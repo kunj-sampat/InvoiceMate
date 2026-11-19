@@ -834,66 +834,85 @@ function renderInvoiceTemplate(previewEl, templateName, doc) {
 window.renderInvoiceTemplate = renderInvoiceTemplate;
 
 /**
- * 1-Click WhatsApp Invoice & Reminders
- * @param {Object} doc - invoice/estimate object
+ * Generates formatted professional message text for WhatsApp, SMS, or copying
+ * @param {Object} doc - invoice/estimate/statement object
  * @param {string} type - 'invoice' | 'reminder' | 'estimate' | 'statement'
+ * @returns {string} Clean, professional formatted message
  */
-function shareOnWhatsApp(doc, type = 'invoice') {
-  if (!doc) return;
-  
+function buildShareMessage(doc, type = 'invoice') {
+  if (!doc) return '';
+
   const bizName = doc.businessName || doc.bizName || localStorage.getItem('businessName') || 'My Business';
   const custName = doc.customerName || 'Valued Client';
   const num = doc.invoiceNumber || doc.reference || 'INV';
   const date = formatDate(doc.invoiceDate || doc.date || new Date().toISOString().split('T')[0]);
   const dueDate = formatDate(doc.dueDate || doc.validUntil || '');
-  const amount = formatCurrency(doc.grandTotal !== undefined ? doc.grandTotal : (doc.balanceDue || doc.total || 0));
-  const rawPhone = (doc.customerPhone || doc.phone || '').trim();
+  const amount = formatCurrency(doc.grandTotal !== undefined ? doc.grandTotal : (doc.balanceDue !== undefined ? doc.balanceDue : (doc.total || 0)));
 
   const publicLink = (doc.shareToken || doc.id) ? `${window.location.origin}/pay.html?token=${doc.shareToken || doc.id}` : '';
 
-  let msg = '';
   if (type === 'reminder') {
-    msg = `*🔔 PAYMENT REMINDER*\n\n` +
-      `Hello *${custName}*,\n\n` +
-      `This is a gentle reminder that invoice *#${num}* from *${bizName}* was due on *${dueDate}*.\n\n` +
-      `📄 *Invoice No:* #${num}\n` +
-      `💰 *Pending Amount:* ${amount}\n` +
-      `📅 *Due Date:* ${dueDate}\n` +
-      (publicLink ? `\n💳 *Pay or View Bill Online (Zero-Fee UPI/Card):*\n${publicLink}\n\n` : '\n\n') +
-      `Please clear the balance at your earliest convenience or let us know if you need another copy of the invoice.\n\n` +
-      `Thank you!\n*${bizName}*`;
+    return `*PAYMENT REMINDER*\n\n` +
+      `Dear *${custName}*,\n\n` +
+      `This is a courteous reminder that Invoice *#${num}* from *${bizName}*` + (dueDate ? ` was due on *${dueDate}*` : '') + `.\n\n` +
+      `- *Invoice Number:* #${num}\n` +
+      (date ? `- *Invoice Date:* ${date}\n` : '') +
+      (dueDate ? `- *Due Date:* ${dueDate}\n` : '') +
+      `- *Outstanding Balance:* ${amount}\n\n` +
+      (publicLink ? `View or Pay Invoice Online:\n${publicLink}\n\n` : '') +
+      `Kindly arrange for payment at your earliest convenience. If this payment has already been settled, please disregard this notice.\n\n` +
+      `Thank you for your prompt attention.\n\n` +
+      `Sincerely,\n*${bizName}*`;
   } else if (type === 'estimate') {
-    msg = `*📑 NEW ESTIMATE / QUOTATION*\n\n` +
-      `Hello *${custName}*,\n\n` +
-      `Please find attached quotation *#${num}* from *${bizName}*.\n\n` +
-      `📄 *Estimate No:* #${num}\n` +
-      `📅 *Date:* ${date}\n` +
-      `💰 *Total Estimated:* ${amount}\n` +
-      (dueDate ? `⏳ *Valid Until:* ${dueDate}\n` : '') +
-      (publicLink ? `\n🔗 *Review Proposal Online:*\n${publicLink}\n\n` : '\n\n') +
-      `Please review and let us know if you approve this quote to proceed.\n\n` +
-      `Best regards,\n*${bizName}*`;
+    return `*QUOTATION / ESTIMATE*\n\n` +
+      `Dear *${custName}*,\n\n` +
+      `Please find below the quotation details (*#${num}*) from *${bizName}*:\n\n` +
+      `- *Estimate Number:* #${num}\n` +
+      `- *Date:* ${date}\n` +
+      (dueDate ? `- *Valid Until:* ${dueDate}\n` : '') +
+      `- *Estimated Amount:* ${amount}\n\n` +
+      (publicLink ? `Review Proposal Online:\n${publicLink}\n\n` : '') +
+      `Please review the proposal and let us know if you approve to proceed or have any questions.\n\n` +
+      `Sincerely,\n*${bizName}*`;
   } else if (type === 'statement') {
-    msg = `*📊 ACCOUNT STATEMENT*\n\n` +
-      `Hello *${custName}*,\n\n` +
-      `Here is your account statement summary from *${bizName}*:\n\n` +
-      `💰 *Total Invoiced:* ${formatCurrency(doc.totalInvoiced || 0)}\n` +
-      `✅ *Total Paid:* ${formatCurrency(doc.totalPaid || 0)}\n` +
-      `⚠️ *Current Balance Due:* ${amount}\n\n` +
-      `Thank you for your business!\n*${bizName}*`;
+    const periodText = (doc.fromDate && doc.toDate)
+      ? `- *Statement Period:* ${formatDate(doc.fromDate)} to ${formatDate(doc.toDate)}\n`
+      : '';
+    return `*ACCOUNT STATEMENT*\n\n` +
+      `Dear *${custName}*,\n\n` +
+      `Please find below the account statement summary for your records from *${bizName}*:\n\n` +
+      periodText +
+      `- *Total Invoiced:* ${formatCurrency(doc.totalInvoiced || 0)}\n` +
+      `- *Total Paid:* ${formatCurrency(doc.totalPaid || 0)}\n` +
+      `- *Current Balance Due:* ${amount}\n\n` +
+      `If you have any questions or require a detailed statement of accounts, please feel free to reach out.\n\n` +
+      `Thank you for your business.\n\n` +
+      `Sincerely,\n*${bizName}*`;
   } else {
-    // Standard invoice
-    msg = `*📄 TAX INVOICE*\n\n` +
-      `Hello *${custName}*,\n\n` +
-      `Thank you for your business! Here are the details of invoice *#${num}* from *${bizName}*:\n\n` +
-      `📄 *Invoice No:* #${num}\n` +
-      `📅 *Invoice Date:* ${date}\n` +
-      `⏳ *Due Date:* ${dueDate}\n` +
-      `💰 *Total Amount:* ${amount}\n` +
-      (publicLink ? `\n💳 *Pay or View Bill Online (Scan UPI QR / Download PDF):*\n${publicLink}\n\n` : '\n\n') +
-      `Please let us know once the payment is initiated.\n\n` +
-      `Best regards,\n*${bizName}*`;
+    // Standard Tax Invoice
+    return `*TAX INVOICE*\n\n` +
+      `Dear *${custName}*,\n\n` +
+      `Thank you for your business. Please find below the invoice details from *${bizName}*:\n\n` +
+      `- *Invoice Number:* #${num}\n` +
+      `- *Invoice Date:* ${date}\n` +
+      (dueDate ? `- *Due Date:* ${dueDate}\n` : '') +
+      `- *Total Amount Due:* ${amount}\n\n` +
+      (publicLink ? `View or Pay Invoice Online:\n${publicLink}\n\n` : '') +
+      `Please let us know once payment has been initiated. If you have any questions or require an additional copy, please feel free to contact us.\n\n` +
+      `Sincerely,\n*${bizName}*`;
   }
+}
+
+/**
+ * 1-Click WhatsApp Invoice & Reminders
+ * @param {Object} doc - invoice/estimate/statement object
+ * @param {string} type - 'invoice' | 'reminder' | 'estimate' | 'statement'
+ */
+function shareOnWhatsApp(doc, type = 'invoice') {
+  if (!doc) return;
+
+  const msg = buildShareMessage(doc, type);
+  const rawPhone = (doc.customerPhone || doc.phone || '').trim();
 
   let cleanPhone = rawPhone.replace(/\D/g, '');
   if (cleanPhone.length === 10) {
@@ -916,24 +935,25 @@ function promptWhatsAppPhone(messageText) {
     modal.id = 'whatsapp-prompt-modal';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-      <div class="modal" style="max-width:440px;">
+      <div class="modal" style="max-width:500px;">
         <div class="modal-header">
-          <h3 style="display:flex;align-items:center;gap:8px;">
-            <span style="color:#25d366;font-size:20px;">&#128172;</span> Send via WhatsApp
-          </h3>
+          <h3 style="margin:0;font-size:16px;font-weight:600;">Share via WhatsApp</h3>
           <button class="modal-close" onclick="document.getElementById('whatsapp-prompt-modal').classList.remove('active')">&times;</button>
         </div>
-        <div class="form-group">
-          <label>Recipient WhatsApp Number (with country code):</label>
-          <input type="text" id="wa-modal-phone" placeholder="e.g. 919876543210 or 9876543210">
+        <div class="form-group" style="margin-top:16px;">
+          <label style="font-size:13px;font-weight:500;color:#334155;">Recipient WhatsApp Number (with country code):</label>
+          <input type="text" id="wa-modal-phone" placeholder="e.g. 919876543210 or 9876543210" style="margin-top:6px;">
         </div>
-        <div class="form-group">
-          <label>Message Preview:</label>
-          <textarea id="wa-modal-msg" rows="5" style="font-size:12px;font-family:monospace;white-space:pre-wrap;" readonly></textarea>
+        <div class="form-group" style="margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label style="font-size:13px;font-weight:500;color:#334155;margin:0;">Message Preview:</label>
+            <span style="font-size:11px;color:#64748b;">Ready to copy &amp; paste</span>
+          </div>
+          <textarea id="wa-modal-msg" rows="9" style="font-size:12px;font-family:inherit;line-height:1.5;white-space:pre-wrap;resize:vertical;" readonly></textarea>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
-          <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('wa-modal-msg').value); if(typeof showToast==='function') showToast('Message copied to clipboard!','success');">Copy Text</button>
-          <button type="button" class="btn btn-primary" style="background:#25d366;border-color:#25d366;" id="wa-modal-send-btn">Open WhatsApp</button>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+          <button type="button" class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('wa-modal-msg').value); if(typeof showToast==='function') showToast('Message copied to clipboard!','success');">Copy Message</button>
+          <button type="button" class="btn btn-primary" style="background:#25d366;border-color:#25d366;color:#ffffff;" id="wa-modal-send-btn">Open in WhatsApp</button>
         </div>
       </div>
     `;
@@ -957,5 +977,5 @@ function promptWhatsAppPhone(messageText) {
   };
 }
 
+window.buildShareMessage = buildShareMessage;
 window.shareOnWhatsApp = shareOnWhatsApp;
-

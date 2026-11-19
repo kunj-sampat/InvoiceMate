@@ -101,6 +101,9 @@
                         <h1>Payment Collections</h1>
                         <p>Track cashflow deposits, UPI &amp; bank settlement receipts.</p>
                     </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button>
+                    </div>
                 </div>
 
                 <div class="filter-bar">
@@ -141,6 +144,75 @@
                     </div>
                 </div>
 
+            <!-- Add Payment Modal -->
+            <div class="modal-overlay" id="payment-modal-overlay">
+                <div class="modal" style="max-width: 540px; width: 100%;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Record Payment</h3>
+                        <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Fully Paid Banner -->
+                        <div id="fully-paid-banner" style="display:none; background:#dcfce7; border:1px solid #86efac; color:#166534; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-weight:600; font-size:14px; text-align:center;">
+                            This invoice has been settled in full. No further payments can be recorded.
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pm-invoice">Invoice <span style="color:var(--danger)">*</span></label>
+                            <select id="pm-invoice" onchange="onInvoiceSelected()">
+                                <option value="">-- Select an invoice --</option>
+                            </select>
+                        </div>
+
+                        <div id="pm-invoice-summary" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#475569;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span>Invoice Total</span>
+                                <span id="pm-grand-total" style="font-weight:600;">-</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span>Amount Paid</span>
+                                <span id="pm-amount-paid">-</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-weight:700; color:#1e293b; border-top:1px solid #e2e8f0; padding-top:8px; margin-top:4px;">
+                                <span>Balance Due</span>
+                                <span id="pm-balance-due">-</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pm-date">Payment Date <span style="color:var(--danger)">*</span></label>
+                            <input type="date" id="pm-date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pm-amount">Amount (&#8377;) <span style="color:var(--danger)">*</span></label>
+                            <input type="number" id="pm-amount" min="1" step="0.01" placeholder="Enter payment amount">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pm-method">Payment Method <span style="color:var(--danger)">*</span></label>
+                            <select id="pm-method">
+                                <option value="BANK_TRANSFER">Bank Transfer</option>
+                                <option value="UPI">UPI</option>
+                                <option value="CASH">Cash</option>
+                                <option value="CARD">Card</option>
+                                <option value="CHEQUE">Cheque</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pm-notes">Notes <span style="color:#94a3b8; font-weight:400;">(optional)</span></label>
+                            <textarea id="pm-notes" rows="2" placeholder="Reference number, remarks, etc."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:12px; padding:16px 24px; border-top:1px solid #e2e8f0;">
+                        <button class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+                        <button class="btn btn-primary" id="pm-submit-btn" onclick="submitPayment()">Record Payment</button>
+                    </div>
+                </div>
+            </div>
             </div>
         </main>
     </div>

@@ -293,7 +293,7 @@ public class GrokAiService {
                       "firm": "Professional, clear and direct reminder (for 5-15 days overdue)",
                       "urgent": "Urgent, formal final notice (for 15+ days overdue, professional but firm)"
                     }
-                    Include the invoice number, amount, and the exact payment link in all messages.
+                    Include the invoice number, amount, and the exact payment link in all messages. Do not use emojis, icons, or casual slang. Keep language strictly professional, polished, and suitable for formal corporate billing correspondence.
                     """, clientName, businessName, invNumber, amountFormatted, dueDateStr, publicUrl);
 
                 String aiResult = callGrok(systemPrompt, "Generate 3 high-converting WhatsApp/Email payment reminders.");
@@ -312,17 +312,17 @@ public class GrokAiService {
         Map<String, Object> reminders = new LinkedHashMap<>();
         reminders.put("source", "InvoiceMate Smart Engine");
         reminders.put("friendly", String.format(
-            "Hi %s! 👋 Hope you're having a productive week. Just a gentle reminder regarding Invoice #%s for %s, scheduled for %s. You can review and complete the payment directly with zero fees via UPI/Card here: %s\n\nThank you for working with %s!",
-            clientName, invNumber, amountFormatted, dueDateStr, publicUrl, businessName
+            "Dear %s,\n\nThis is a courteous reminder regarding Invoice #%s from %s for %s, due on %s.\n\nYou may review and complete payment online here: %s\n\nThank you for your business.\n\nSincerely,\n%s",
+            clientName, invNumber, businessName, amountFormatted, dueDateStr, publicUrl, businessName
         ));
 
         reminders.put("firm", String.format(
-            "Dear %s,\n\nThis is a friendly reminder that Invoice #%s for %s was due on %s and remains pending. Please take a moment to clear the balance using our instant scan-to-pay link: %s\n\nIf you have already processed the payment, kindly ignore this message. Best regards,\n%s",
+            "Dear %s,\n\nThis is a follow-up reminder that Invoice #%s for %s was due on %s and remains outstanding. Please arrange to clear the balance using our secure payment link: %s\n\nIf you have already processed this payment, please disregard this notice.\n\nSincerely,\n%s",
             clientName, invNumber, amountFormatted, dueDateStr, publicUrl, businessName
         ));
 
         reminders.put("urgent", String.format(
-            "URGENT: Outstanding Balance for Invoice #%s\n\nAttention %s,\nYour payment of %s for Invoice #%s is now significantly overdue (Due: %s). Please settle this balance immediately to keep your account in good standing.\n\nDirect Pay Link: %s\n\nThank you,\n%s Accounts Team",
+            "PAYMENT NOTICE: Outstanding Balance for Invoice #%s\n\nDear %s,\n\nYour payment of %s for Invoice #%s is significantly overdue (Due: %s). We kindly request that you settle this balance promptly:\n\n%s\n\nIf you have questions or require assistance, please contact us immediately.\n\nSincerely,\n%s Accounts Team",
             invNumber, clientName, amountFormatted, invNumber, dueDateStr, publicUrl, businessName
         ));
 

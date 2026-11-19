@@ -7,6 +7,7 @@ public class PaymentResponse {
     private Long id;
     private Long invoiceId;
     private String invoiceNumber;
+    private String customerName;
     private double amount;
     private LocalDate paymentDate;
     private String paymentMethod;
@@ -21,6 +22,8 @@ public class PaymentResponse {
     public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
     public String getInvoiceNumber() { return invoiceNumber; }
     public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
     public LocalDate getPaymentDate() { return paymentDate; }

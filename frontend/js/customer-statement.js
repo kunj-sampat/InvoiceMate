@@ -136,10 +136,37 @@ function shareStatementWhatsApp() {
       customerPhone: currentStatement.customerPhone,
       totalInvoiced: currentStatement.totalInvoiced,
       totalPaid: currentStatement.totalPaid,
-      balanceDue: currentStatement.balanceDue
+      balanceDue: currentStatement.balanceDue,
+      fromDate: currentStatement.fromDate,
+      toDate: currentStatement.toDate
     }, 'statement');
+  }
+}
+
+function copyStatementSummary() {
+  if (!currentStatement) {
+    if (typeof showToast === 'function') showToast('Please generate a statement first', 'warning');
+    return;
+  }
+  const payload = {
+    customerName: currentStatement.customerName,
+    customerPhone: currentStatement.customerPhone,
+    totalInvoiced: currentStatement.totalInvoiced,
+    totalPaid: currentStatement.totalPaid,
+    balanceDue: currentStatement.balanceDue,
+    fromDate: currentStatement.fromDate,
+    toDate: currentStatement.toDate
+  };
+  const text = typeof buildShareMessage === 'function' ? buildShareMessage(payload, 'statement') : '';
+  if (text) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (typeof showToast === 'function') showToast('Statement summary copied to clipboard!', 'success');
+    }).catch(() => {
+      prompt('Copy Statement:', text);
+    });
   }
 }
 
 window.loadStatement = loadStatement;
 window.shareStatementWhatsApp = shareStatementWhatsApp;
+window.copyStatementSummary = copyStatementSummary;

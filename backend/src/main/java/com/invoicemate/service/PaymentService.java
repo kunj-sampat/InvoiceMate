@@ -5,9 +5,11 @@ import com.invoicemate.dto.PaymentResponse;
 import com.invoicemate.exception.BadRequestException;
 import com.invoicemate.exception.ResourceNotFoundException;
 import com.invoicemate.exception.UnauthorizedException;
+import com.invoicemate.model.Customer;
 import com.invoicemate.model.Invoice;
 import com.invoicemate.model.InvoiceActivity;
 import com.invoicemate.model.Payment;
+import com.invoicemate.repository.CustomerRepository;
 import com.invoicemate.repository.InvoiceActivityRepository;
 import com.invoicemate.repository.InvoiceRepository;
 import com.invoicemate.repository.PaymentRepository;
@@ -23,13 +25,16 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final InvoiceRepository invoiceRepository;
+    private final CustomerRepository customerRepository;
     private final InvoiceActivityRepository activityRepository;
     private final InvoiceService invoiceService;
 
     public PaymentService(PaymentRepository paymentRepository, InvoiceRepository invoiceRepository,
+                          CustomerRepository customerRepository,
                           InvoiceActivityRepository activityRepository, InvoiceService invoiceService) {
         this.paymentRepository = paymentRepository;
         this.invoiceRepository = invoiceRepository;
+        this.customerRepository = customerRepository;
         this.activityRepository = activityRepository;
         this.invoiceService = invoiceService;
     }
@@ -53,7 +58,14 @@ public class PaymentService {
             r.setPaymentMethod(p.getPaymentMethod());
             r.setNotes(p.getNotes());
             r.setCreatedAt(p.getCreatedAt());
-            invoiceRepository.findById(p.getInvoiceId()).ifPresent(i -> r.setInvoiceNumber(i.getInvoiceNumber()));
+            invoiceRepository.findById(p.getInvoiceId()).ifPresent(i -> {
+                r.setInvoiceNumber(i.getInvoiceNumber());
+                String cName = i.getCustomerName();
+                if ((cName == null || cName.trim().isEmpty()) && i.getCustomerId() != null) {
+                    cName = customerRepository.findById(i.getCustomerId()).map(Customer::getName).orElse(null);
+                }
+                r.setCustomerName(cName);
+            });
             return r;
         }).collect(Collectors.toList());
     }
@@ -91,6 +103,11 @@ public class PaymentService {
         r.setId(p.getId());
         r.setInvoiceId(p.getInvoiceId());
         r.setInvoiceNumber(inv.getInvoiceNumber());
+        String cName = inv.getCustomerName();
+        if ((cName == null || cName.trim().isEmpty()) && inv.getCustomerId() != null) {
+            cName = customerRepository.findById(inv.getCustomerId()).map(Customer::getName).orElse(null);
+        }
+        r.setCustomerName(cName);
         r.setAmount(p.getAmount());
         r.setPaymentDate(p.getPaymentDate());
         r.setPaymentMethod(p.getPaymentMethod());

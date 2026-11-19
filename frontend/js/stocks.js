@@ -293,22 +293,22 @@ function dispatchWhatsAppRestock() {
   const vendorName = document.getElementById('restock-vendor-name')?.value.trim() || 'Supplier';
   const vendorPhone = document.getElementById('restock-vendor-phone')?.value.replace(/[^0-9]/g, '');
   const notes = document.getElementById('restock-notes')?.value.trim();
-  const bizName = localStorage.getItem('businessName') || 'InvoiceMate Client';
+  const bizName = localStorage.getItem('businessName') || 'InvoiceMate Merchant';
 
   const poNumber = `PO-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const message = `📦 *PURCHASE ORDER: ${poNumber}*
-🏢 *From:* ${bizName}
-👤 *To:* ${vendorName}
-
-*Order Requirements:*
-• *Item:* ${p.name}
-• *SKU / Code:* ${p.sku || '-'}
-• *Quantity Required:* ${qty} ${p.unit || 'pcs'}
-• *Target Delivery:* ${targetDate}
-${notes ? `• *Notes:* ${notes}` : ''}
-
-Please confirm receipt, pricing, and dispatch schedule. Thank you!`;
+  const message = `*PURCHASE ORDER: ${poNumber}*\n\n` +
+    `From: *${bizName}*\n` +
+    `To: *${vendorName}*\n\n` +
+    `*Order Details:*\n` +
+    `- *Item:* ${p.name}\n` +
+    `- *SKU / Code:* ${p.sku || '-'}\n` +
+    `- *Quantity Required:* ${qty} ${p.unit || 'pcs'}\n` +
+    `- *Target Delivery Date:* ${targetDate}\n` +
+    (notes ? `- *Notes:* ${notes}\n` : '') +
+    `\nPlease confirm receipt of this order along with pricing and dispatch schedule.\n\n` +
+    `Thank you.\n\n` +
+    `Sincerely,\n*${bizName}*`;
 
   const encoded = encodeURIComponent(message);
   let url = `https://wa.me/?text=${encoded}`;
@@ -318,7 +318,7 @@ Please confirm receipt, pricing, and dispatch schedule. Thank you!`;
   }
 
   window.open(url, '_blank');
-  if (typeof showToast === 'function') showToast('Dispatched WhatsApp Purchase Order draft!', 'success');
+  if (typeof showToast === 'function') showToast('WhatsApp Purchase Order draft opened', 'success');
 }
 
 function printPurchaseOrder() {
